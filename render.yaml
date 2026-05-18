@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: tcc-saude-facil
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT --chdir backend app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
