@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de TI | Saúde Digital</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="ti.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="ti-dashboard">
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-microchip"></i>
+            <span>TI Console</span>
+        </div>
+        <nav>
+            <a href="#" class="active" onclick="showSection('overview')"><i class="fas fa-chart-line"></i> Overview</a>
+            <a href="#" onclick="showSection('database')"><i class="fas fa-database"></i> Visão do Banco</a>
+            <a href="#" onclick="showSection('infrastructure')"><i class="fas fa-server"></i> Infraestrutura</a>
+            <a href="#" onclick="showSection('tickets')"><i class="fas fa-ticket-alt"></i> Chamados</a>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </nav>
+    </div>
+
+    <main class="content">
+        <header>
+            <div class="header-info">
+                <h1>Painel de TI</h1>
+                <div style="display:flex; align-items:center; gap:10px">
+                    <p id="system-time">Monitorando o sistema...</p>
+                    <span id="backend-status" class="status-badge" style="background:#475569; color:white">Status: Verificando...</span>
+                </div>
+            </div>
+            <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; flex-direction: column; text-align: right;">
+                    <span id="user-name">Carregando...</span>
+                    <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+                </div>
+                <img id="user-avatar" src="assets/default-avatar.png" alt="Avatar">
+            </div>
+        </header>
+
+        <!-- Seção: Overview -->
+        <section id="overview" class="active">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Uptime</span>
+                        <h3 id="stat-uptime">99.9%</h3>
+                        <p class="positive"><i class="fas fa-caret-up"></i> Estável</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon green"><i class="fas fa-bolt"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Uso de CPU</span>
+                        <h3 id="stat-cpu">--%</h3>
+                        <p id="cpu-status">Calculando...</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon orange"><i class="fas fa-memory"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Memória</span>
+                        <h3 id="stat-memory">--%</h3>
+                        <p id="mem-status">Calculando...</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon red"><i class="fas fa-shield-alt"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Segurança</span>
+                        <h3 id="stat-security">0 Alertas</h3>
+                        <p>Firewall Ativo</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-box">
+                    <h3>Performance Global</h3>
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>Uso de Capacidade</h3>
+                    <canvas id="capacityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Terminal do Servidor -->
+            <div class="terminal-container" style="margin-top: 30px; background: #0f172a; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+                <h3 style="color: #38bdf8; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-size: 1.1em; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                    <i class="fas fa-terminal"></i> Terminal Backend (Live System Logs)
+                </h3>
+                <div id="flask-logs" style="height: 320px; overflow-y: auto; color: #a5b4fc; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; padding-right: 10px; word-wrap: break-word;">
+                    Conectando ao sistema...
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Banco de Dados -->
+        <section id="database">
+            <div class="db-controls">
+                <h3>Visão do Banco de Dados</h3>
+                <div class="select-group">
+                    <label for="table-select">Tabela:</label>
+                    <select id="table-select" onchange="loadTableData()">
+                        <option value="">Selecione uma tabela</option>
+                    </select>
+                    <button class="btn-success" id="btn-add-db" onclick="openDbModal()" style="display:none; margin-left:10px">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="db-table">
+                    <thead id="db-thead"></thead>
+                    <tbody id="db-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Seção: Infraestrutura -->
+        <section id="infrastructure">
+            <div class="server-grid" id="server-status-list">
+                <!-- Servidores inseridos via JS -->
+            </div>
+
+            <!-- CONTROLE DE SERVIÇOS (START ALL INTEGRADO) -->
+            <div class="terminal-container" style="margin-top: 30px; background: #1e293b; border-radius: 8px; padding: 25px; border: 1px solid #334155;">
+                <h3 style="color: #f1f5f9; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-tools"></i> Centro de Manutenção de Serviços
+                </h3>
+                <div class="maintenance-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div class="maintenance-card" style="background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155;">
+                        <h4 style="color: #38bdf8; margin-bottom: 10px;">Banco de Dados</h4>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Recria todas as tabelas do sistema (Limpeza Total).</p>
+                        <button class="btn-danger" onclick="executeSystemAction('init-db')" style="width: 100%; padding: 10px; border-radius: 4px; background: #ef4444; color: white; border: none; cursor: pointer;">
+                            <i class="fas fa-undo"></i> Reinicializar Banco
+                        </button>
+                    </div>
+                    <div class="maintenance-card" style="background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155;">
+                        <h4 style="color: #10b981; margin-bottom: 10px;">Usuários & Acessos</h4>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Gera usuários de teste e reseta senhas para "123".</p>
+                        <button class="btn-success" onclick="executeSystemAction('seed-users')" style="width: 100%; padding: 10px; border-radius: 4px; background: #10b981; color: white; border: none; cursor: pointer;">
+                            <i class="fas fa-user-plus"></i> Gerar Massa de Teste
+                        </button>
+                    </div>
+                    <div class="maintenance-card" style="background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155;">
+                        <h4 style="color: #f59e0b; margin-bottom: 10px;">Otimização</h4>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Normaliza CPFs e limpa registros duplicados.</p>
+                        <button class="btn-primary" onclick="executeSystemAction('cleanup-cpfs')" style="width: 100%; padding: 10px; border-radius: 4px; background: #3b82f6; color: white; border: none; cursor: pointer;">
+                            <i class="fas fa-broom"></i> Corrigir Erros de CPF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Chamados -->
+        <section id="tickets">
+            <div class="ticket-header">
+                <h3>Chamados de Suporte</h3>
+                <button class="btn-primary" onclick="openTicketModal()">Novo Chamado</button>
+            </div>
+            <div class="ticket-list" id="ticket-list-body">
+                <!-- Tickets inseridos via JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Alerta Flutuante -->
+    <div id="ti-alert-container"></div>
+
+    <!-- Modal para CRUD do Banco -->
+    <div id="db-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="db-modal-title">Editar Registro</h3>
+                <button class="close-btn" onclick="closeDbModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="db-form">
+                    <div id="db-form-fields"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDbModal()">Cancelar</button>
+                <button class="btn-primary" onclick="saveDbRow()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js?v=20260418-4"></script>
+    <script src="ti.js"></script>
+</body>
+</html>

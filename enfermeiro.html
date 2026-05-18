@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Enfermagem | SUS Digital</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="enfermeiro.css">
+    <link rel="stylesheet" href="responsive.css">
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="enf-navbar">
+        <div class="enf-navbar-brand">
+            <span class="enf-logo"><i class="fi fi-rr-hospital"></i> </span>
+            <div style="display: flex; flex-direction: column;">
+                <h1 class="enf-navbar-title">Painel de Enfermagem</h1>
+                <small id="enf-nome-navbar">Enfermeiro(a)</small>
+                <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+            </div>
+        </div>
+        <div class="enf-navbar-actions">
+            <span id="enf-coren-navbar" class="enf-badge">COREN: ---</span>
+            <button class="enf-btn-logout" onclick="sairPainel()">Sair</button>
+        </div>
+    </nav>
+
+    <div class="enf-container">
+
+        <!-- SIDEBAR -->
+        <aside class="enf-sidebar">
+            <div class="enf-search-box">
+                <h3><i class="fi fi-rr-search"></i>  Buscar Paciente</h3>
+                <div class="enf-search-input-group">
+                    <input type="text" id="enf-busca-cpf" placeholder="CPF do Paciente (000.000.000-00)"
+                        class="cpf-mask">
+                    <button class="enf-btn-buscar" onclick="buscarPacienteEnf()">BUSCAR</button>
+                </div>
+                <small class="enf-tip">Mock: 754.834.390-83 | Ou qualquer CPF cadastrado</small>
+                <button class="enf-btn-secundario" style="margin-top: 15px; width: 100%; background: #0288d1; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s;" onclick="abrirCadastroManual()" onmouseover="this.style.background='#0277bd'" onmouseout="this.style.background='#0288d1'">➕ CADASTRAR NOVO PACIENTE MANUALMENTE</button>
+            </div>
+
+            <!-- FICHA DO PACIENTE (aparece após busca) -->
+            <div id="enf-ficha-paciente" class="enf-ficha" style="display: none;">
+                <div class="enf-ficha-header">
+                    <div class="enf-avatar"><i class="fi fi-rr-user"></i> </div>
+                    <div>
+                        <h3 id="enf-paciente-nome">---</h3>
+                        <small id="enf-paciente-cpf">CPF: ---</small>
+                    </div>
+                </div>
+                <div class="enf-ficha-info">
+                    <div class="enf-info-item"><span>Idade:</span> <strong id="enf-paciente-idade">---</strong></div>
+                    <div class="enf-info-item"><span>SUS:</span> <strong id="enf-paciente-sus">---</strong></div>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO DE CADASTRO RÁPIDO (se CPF não encontrado) -->
+            <div id="enf-novo-paciente" class="enf-ficha" style="display: none; background: #fffde7; border: 1px solid #fbc02d;">
+                <div class="enf-ficha-header" style="background: #fbc02d;">
+                    <div class="enf-avatar">🆕</div>
+                    <div>
+                        <h3 style="margin:0;">Novo Paciente</h3>
+                        <small>Preencha para triar agora</small>
+                    </div>
+                </div>
+                <div class="enf-ficha-info" style="padding: 10px;">
+                    <div class="enf-info-item" style="display:block; margin-bottom:10px;">
+                        <label style="font-size:0.8rem; color:#666;">CPF:</label>
+                        <input type="text" id="enf-novo-cpf" placeholder="000.000.000-00" class="cpf-mask" style="width: 100%; margin-top: 5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                    </div>
+                    <div class="enf-info-item" style="display:block; margin-bottom:10px;">
+                        <label style="font-size:0.8rem; color:#666;">Nome Completo:</label>
+                        <input type="text" id="enf-novo-nome" placeholder="Nome do Paciente" style="width: 100%; margin-top: 5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                    </div>
+                    <div class="enf-info-item" style="display:block; margin-bottom:10px;">
+                        <label style="font-size:0.8rem; color:#666;">Nascimento:</label>
+                        <input type="date" id="enf-novo-nasc" style="width: 100%; margin-top: 5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                    </div>
+                    <div class="enf-info-item" style="display:block; margin-bottom:10px;">
+                        <label style="font-size:0.8rem; color:#666;">Cartão SUS:</label>
+                        <input type="text" id="enf-novo-sus" placeholder="Número do SUS" style="width: 100%; margin-top: 5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+                    </div>
+                    <button class="enf-btn-buscar" style="width: 100%; margin-top: 5px; background: #f9a825;" onclick="prepararTriagemNova()">PROSSEGUIR PARA TRIAGEM</button>
+                </div>
+            </div>
+
+            <!-- ATENDIMENTOS DO DIA -->
+            <div class="enf-atendimentos">
+                <h3><i class="fi fi-rr-clipboard-list"></i>  Atendimentos do Dia</h3>
+                <div id="enf-lista-atendimentos" class="enf-lista">
+                    <p class="enf-empty">Nenhum atendimento registrado hoje.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ÁREA PRINCIPAL -->
+        <main class="enf-main">
+
+            <!-- BOAS-VINDAS E DASHBOARD (antes de buscar paciente) -->
+            <div id="enf-welcome" class="enf-welcome-card" style="text-align: center; margin-bottom: 20px;">
+                <div class="enf-welcome-icon" style="font-size: 3rem;"><i class="fi fi-rr-syringe"></i> </div>
+                <h2>Bem-vindo(a) ao Painel de Enfermagem</h2>
+                <p>Busque um paciente pelo CPF para iniciar a triagem, registrar vacinas ou consultar histórico.</p>
+
+                <!-- CARDS DO DASHBOARD -->
+                <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
+                    <div
+                        style="background: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 5px solid #004b82; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex: 1; min-width: 200px;">
+                        <h4 style="margin: 0; color: #004b82;">Aguardando Triagem</h4>
+                        <div style="font-size: 2.5rem; font-weight: bold; color: #004b82;" id="dash-aguardando-triagem">
+                            0</div>
+                    </div>
+
+                    <div
+                        style="background: #fff3e0; padding: 20px; border-radius: 8px; border-left: 5px solid #e65100; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex: 1; min-width: 200px;">
+                        <h4 style="margin: 0; color: #e65100;">Prescrições Pendentes</h4>
+                        <div style="font-size: 2.5rem; font-weight: bold; color: #e65100;"
+                            id="dash-prescricoes-pendentes">0</div>
+                    </div>
+
+                    <div
+                        style="background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #1b5e20; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex: 1; min-width: 200px;">
+                        <h4 style="margin: 0; color: #1b5e20;">Vacinas do Dia</h4>
+                        <div style="font-size: 2.5rem; font-weight: bold; color: #1b5e20;" id="dash-vacinas-dia">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS (aparece após buscar paciente) -->
+            <div id="enf-tabs-container" style="display: none;">
+                <div class="enf-tabs">
+                    <button class="enf-tab active" onclick="mudarAbaEnf('triagem')" id="tab-triagem"><i class="fi fi-rr-clipboard-list"></i>  Triagem /
+                        Pré-Consulta</button>
+                    <button class="enf-tab" onclick="mudarAbaEnf('prescricoes')" id="tab-prescricoes"><i class="fi fi-rr-medicine"></i> 
+                        Medicação</button>
+                    <button class="enf-tab" onclick="mudarAbaEnf('vacinas')" id="tab-vacinas"><i class="fi fi-rr-syringe"></i>  Vacinas</button>
+                    <button class="enf-tab" onclick="mudarAbaEnf('historico')" id="tab-historico"><i class="fi fi-rr-chart-histogram"></i>  Histórico</button>
+                </div>
+
+                <!-- ABA TRIAGEM -->
+                <div id="aba-triagem" class="enf-aba-content">
+                    <h2><i class="fi fi-rr-clipboard-list"></i>  Pré-Consulta / Triagem</h2>
+                    <p class="enf-subtitle">Registre os sinais vitais e a queixa principal do paciente.</p>
+
+                    <form id="formTriagem" class="enf-form" onsubmit="salvarTriagem(event)">
+                        <div class="enf-form-grid">
+                            <div class="enf-form-group">
+                                <label for="triagem-peso">⚖️ Peso (kg)</label>
+                                <input type="number" id="triagem-peso" placeholder="Ex: 72.5" step="0.1" required>
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="triagem-altura">📏 Altura (cm)</label>
+                                <input type="number" id="triagem-altura" placeholder="Ex: 175" required>
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="triagem-pressao">🩸 Pressão Arterial</label>
+                                <input type="text" id="triagem-pressao" placeholder="Ex: 120/80" required>
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="triagem-fc"><i class="fi fi-rr-heart"></i>  Freq. Cardíaca (bpm)</label>
+                                <input type="number" id="triagem-fc" placeholder="Ex: 78" required>
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="triagem-temp">🌡️ Temperatura (°C)</label>
+                                <input type="number" id="triagem-temp" placeholder="Ex: 36.5" step="0.1" required>
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="triagem-saturacao"><i class="fi fi-rr-lungs"></i>  Saturação O₂ (%)</label>
+                                <input type="number" id="triagem-saturacao" placeholder="Ex: 98" required>
+                            </div>
+                        </div>
+
+                        <div class="enf-form-group full">
+                            <label for="triagem-queixa"><i class="fi fi-rr-messages"></i>  Queixa Principal / Motivo da Consulta</label>
+                            <textarea id="triagem-queixa" rows="4"
+                                placeholder="Descreva o que o paciente está sentindo..." required></textarea>
+                        </div>
+
+                        <div class="enf-form-group full">
+                            <label for="triagem-medico"><i class="fi fi-rr-stethoscope"></i>  Direcionar para o Médico</label>
+                            <select id="triagem-medico" required>
+                                <option value="">Selecione um médico disponível...</option>
+                            </select>
+                        </div>
+
+                        <div class="enf-form-group full">
+                            <label for="triagem-prioridade">🚦 Classificação de Risco</label>
+                            <select id="triagem-prioridade" required>
+                                <option value="verde">🟢 Verde — Não Urgente</option>
+                                <option value="amarelo">🟡 Amarelo — Pouco Urgente</option>
+                                <option value="laranja">🟠 Laranja — Urgente</option>
+                                <option value="vermelho">🔴 Vermelho — Emergência</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="enf-btn-salvar"><i class="fi fi-rr-check-circle"></i>  SALVAR TRIAGEM E ENCAMINHAR</button>
+                    </form>
+                </div>
+
+                <!-- ABA PRESCRIÇÕES / MEDICAÇÃO -->
+                <div id="aba-prescricoes" class="enf-aba-content" style="display: none;">
+                    <h2><i class="fi fi-rr-medicine"></i>  Aplicação de Medicamentos</h2>
+                    <p class="enf-subtitle">Aplicações prescritas pelo Médico aguardando realização.</p>
+
+                    <div id="lista-prescricoes"
+                        style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                        <div class="enf-empty">Buscando prescrições pendentes...</div>
+                    </div>
+                </div>
+
+                <!-- ABA VACINAS -->
+                <div id="aba-vacinas" class="enf-aba-content" style="display: none;">
+                    <h2><i class="fi fi-rr-syringe"></i>  Registrar Vacina</h2>
+                    <p class="enf-subtitle">Selecione a vacina aplicada ao paciente.</p>
+
+                    <form id="formVacina" class="enf-form" onsubmit="registrarVacina(event)">
+                        <div class="enf-form-grid">
+                            <div class="enf-form-group">
+                                <label for="vacina-select">Vacina</label>
+                                <select id="vacina-select" required onchange="preencherDoseVacina()">
+                                    <option value="">Selecione a vacina...</option>
+                                </select>
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="vacina-dose">Dose</label>
+                                <input type="text" id="vacina-dose" placeholder="Ex: 1ª Dose" readonly>
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="vacina-lote">Lote</label>
+                                <input type="text" id="vacina-lote" placeholder="Ex: ABR2026-001">
+                            </div>
+                            <div class="enf-form-group">
+                                <label for="vacina-local">Local de Aplicação</label>
+                                <select id="vacina-local">
+                                    <option value="Braço Esquerdo">Braço Esquerdo</option>
+                                    <option value="Braço Direito">Braço Direito</option>
+                                    <option value="Coxa Esquerda">Coxa Esquerda</option>
+                                    <option value="Coxa Direita">Coxa Direita</option>
+                                    <option value="Oral">Oral</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="enf-btn-salvar"><i class="fi fi-rr-syringe"></i>  REGISTRAR VACINA APLICADA</button>
+                    </form>
+
+                    <!-- Caderneta do Paciente -->
+                    <div class="enf-caderneta">
+                        <h3>📖 Caderneta de Vacinação do Paciente</h3>
+                        <div id="enf-lista-vacinas" class="enf-caderneta-lista">
+                            <p class="enf-empty">Busque um paciente para ver as vacinas.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA HISTORICO -->
+                <div id="aba-historico" class="enf-aba-content" style="display: none;">
+                    <h2><i class="fi fi-rr-chart-histogram"></i>  Histórico do Paciente</h2>
+                    <p class="enf-subtitle">Triagens e vacinas registradas.</p>
+
+                    <div class="enf-historico-section">
+                        <h3><i class="fi fi-rr-clipboard-list"></i>  Triagens Anteriores</h3>
+                        <div id="enf-historico-triagens">
+                            <p class="enf-empty">Nenhuma triagem encontrada.</p>
+                        </div>
+                    </div>
+
+                    <div class="enf-historico-section">
+                        <h3><i class="fi fi-rr-syringe"></i>  Vacinas Aplicadas</h3>
+                        <div id="enf-historico-vacinas">
+                            <p class="enf-empty">Nenhuma vacina registrada.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="api.js?v=20260418-4"></script>
+    <script src="enfermeiro.js"></script>
+</body>
+
+</html>

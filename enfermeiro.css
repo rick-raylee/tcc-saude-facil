@@ -1,0 +1,688 @@
+/* ==========================================================================
+   ENFERMEIRO.CSS — Painel de Enfermagem
+   Paleta: Verde-Teal #00897B / #26a69a / #e0f2f1
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    /* Paleta pedida pelo usuário */
+    background: linear-gradient(135deg, #3E5C6E, #52B29D, #9BCEAA, #D7E3B4, #EFEFD6);
+    background-attachment: fixed;
+    color: #333;
+    min-height: 100vh;
+}
+
+/* ========== NAVBAR ========== */
+.enf-navbar {
+    background: linear-gradient(135deg, #00695c 0%, #00897b 50%, #26a69a 100%);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 105, 92, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.enf-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.enf-logo {
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.enf-navbar-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.enf-navbar small {
+    opacity: 0.85;
+    font-size: 0.85rem;
+}
+
+.enf-navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.enf-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.enf-btn-logout {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.enf-btn-logout:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== LAYOUT CONTAINER ========== */
+.enf-container {
+    display: flex;
+    gap: 25px;
+    padding: 25px;
+    max-width: 1500px;
+    margin: 0 auto;
+    min-height: calc(100vh - 70px);
+}
+
+/* ========== SIDEBAR ========== */
+.enf-sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.enf-search-box {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.enf-search-box h3 {
+    margin-bottom: 15px;
+    color: #00695c;
+    font-size: 1.05rem;
+}
+
+.enf-search-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.enf-search-input-group input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s;
+}
+
+.enf-search-input-group input:focus {
+    border-color: #26a69a;
+    outline: none;
+}
+
+.enf-btn-buscar {
+    background: #00897b;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.8rem;
+}
+
+.enf-btn-buscar:hover {
+    background: #00695c;
+    transform: translateY(-1px);
+}
+
+.enf-tip {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: #888;
+}
+
+/* FICHA DO PACIENTE */
+.enf-ficha {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    border-left: 5px solid #26a69a;
+}
+
+.enf-ficha-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.enf-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #e0f2f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.enf-ficha-header h3 {
+    font-size: 1rem;
+    color: #00695c;
+}
+
+.enf-ficha-header small {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.enf-ficha-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.enf-info-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 5px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.enf-info-item span {
+    color: #888;
+}
+
+/* ATENDIMENTOS */
+.enf-atendimentos {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    flex: 1;
+    overflow-y: auto;
+}
+
+.enf-atendimentos h3 {
+    margin-bottom: 15px;
+    color: #00695c;
+    font-size: 1rem;
+}
+
+.enf-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.enf-atendimento-item {
+    padding: 12px;
+    border-radius: 10px;
+    background: #f5f5f5;
+    font-size: 0.85rem;
+    border-left: 4px solid #26a69a;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.enf-atendimento-item:hover {
+    background: #e0f2f1;
+    transform: translateX(3px);
+}
+
+.enf-atendimento-item .atd-nome {
+    font-weight: 700;
+    color: #00695c;
+}
+
+.enf-atendimento-item .atd-hora {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.enf-atendimento-item .atd-tipo {
+    font-size: 0.75rem;
+    margin-top: 3px;
+    color: #555;
+}
+
+.enf-empty {
+    color: #aaa;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* ========== MAIN AREA ========== */
+.enf-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* WELCOME CARD */
+.enf-welcome-card {
+    background: white;
+    border-radius: 20px;
+    padding: 80px 40px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    border: 2px dashed #b2dfdb;
+}
+
+.enf-welcome-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.enf-welcome-card h2 {
+    color: #00695c;
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+}
+
+.enf-welcome-card p {
+    color: #888;
+    font-size: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ========== TABS ========== */
+.enf-tabs {
+    display: flex;
+    gap: 0;
+    background: white;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.enf-tab {
+    flex: 1;
+    padding: 16px 10px;
+    border: none;
+    background: #f5f5f5;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #777;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: 'Inter', sans-serif;
+    border-bottom: 3px solid transparent;
+}
+
+.enf-tab:hover {
+    background: #e8f5e9;
+    color: #00695c;
+}
+
+.enf-tab.active {
+    background: white;
+    color: #00695c;
+    border-bottom: 3px solid #26a69a;
+}
+
+/* ========== ABA CONTENT ========== */
+.enf-aba-content {
+    background: white;
+    border-radius: 0 0 16px 16px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    min-height: 500px;
+}
+
+.enf-aba-content h2 {
+    color: #00695c;
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+}
+
+.enf-subtitle {
+    color: #999;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+}
+
+/* ========== FORMULÁRIO ========== */
+.enf-form {
+    margin-top: 10px;
+}
+
+.enf-form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.enf-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.enf-form-group.full {
+    grid-column: 1 / -1;
+    margin-bottom: 10px;
+}
+
+.enf-form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.enf-form-group input,
+.enf-form-group select,
+.enf-form-group textarea {
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.3s;
+    background: #fafafa;
+}
+
+.enf-form-group input:focus,
+.enf-form-group select:focus,
+.enf-form-group textarea:focus {
+    border-color: #26a69a;
+    outline: none;
+    background: white;
+}
+
+.enf-form-group textarea {
+    resize: vertical;
+}
+
+.enf-btn-salvar {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #00897b, #26a69a);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(0, 137, 123, 0.3);
+    margin-top: 15px;
+    font-family: 'Inter', sans-serif;
+}
+
+.enf-btn-salvar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 137, 123, 0.4);
+}
+
+/* ========== CADERNETA ========== */
+.enf-caderneta {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 2px solid #e0f2f1;
+}
+
+.enf-caderneta h3 {
+    color: #00695c;
+    margin-bottom: 15px;
+}
+
+.enf-caderneta-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.enf-vacina-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    border-left: 4px solid #26a69a;
+    font-size: 0.85rem;
+}
+
+.enf-vacina-item.aplicada {
+    background: #e8f5e9;
+    border-left-color: #4caf50;
+}
+
+.enf-vacina-nome {
+    font-weight: 700;
+    color: #333;
+}
+
+.enf-vacina-dose {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.enf-vacina-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.enf-vacina-status.pendente {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.enf-vacina-status.aplicada {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.enf-vacina-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-edit-vac, .btn-del-vac {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.btn-edit-vac:hover {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.btn-del-vac:hover {
+    background: #ffebee;
+    border-color: #f44336;
+}
+
+/* ========== HISTORICO ========== */
+.enf-historico-section {
+    margin-bottom: 30px;
+}
+
+.enf-historico-section h3 {
+    color: #00695c;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0f2f1;
+}
+
+.enf-triagem-card {
+    background: #f8fffe;
+    border: 1px solid #e0f2f1;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+    border-left: 4px solid #26a69a;
+}
+
+.enf-triagem-card .triagem-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.enf-triagem-card .triagem-data {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.enf-triagem-card .triagem-medico {
+    font-size: 0.8rem;
+    color: #00695c;
+    font-weight: 600;
+}
+
+.triagem-sinais {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.triagem-sinal {
+    background: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.triagem-sinal .sinal-label {
+    font-size: 0.7rem;
+    color: #999;
+    display: block;
+}
+
+.triagem-sinal .sinal-valor {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.triagem-queixa {
+    background: #fff8e1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #555;
+    border-left: 3px solid #ffc107;
+}
+
+/* Classificação de Risco — cores */
+.risco-verde {
+    border-left-color: #4caf50;
+}
+
+.risco-amarelo {
+    border-left-color: #ffca28;
+}
+
+.risco-laranja {
+    border-left-color: #ff9800;
+}
+
+.risco-vermelho {
+    border-left-color: #f44336;
+}
+
+.risco-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+}
+
+.risco-badge.verde {
+    background: #4caf50;
+}
+
+.risco-badge.amarelo {
+    background: #ffca28;
+    color: #333;
+}
+
+.risco-badge.laranja {
+    background: #ff9800;
+}
+
+.risco-badge.vermelho {
+    background: #f44336;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+    .enf-container {
+        flex-direction: column;
+    }
+
+    .enf-sidebar {
+        width: 100%;
+    }
+
+    .enf-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .triagem-sinais {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .enf-navbar {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .enf-tabs {
+        flex-direction: column;
+    }
+
+    .enf-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .triagem-sinais {
+        grid-template-columns: 1fr;
+    }
+}

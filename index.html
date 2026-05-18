@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Saúde Fácil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css?v=1.4">
+    <link rel="stylesheet" href="home.css?v=2.1">
+    <link rel="stylesheet" href="responsive.css?v=1.3">
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- amCharts 4 -->
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/geodata/brazilLow.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+</head>
+
+<body>
+
+    <!-- NAVBAR ANIMADA -->
+    <header class="navbar" id="navbar">
+        <div class="logo">
+            <a href="index.html">
+                <img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'">
+            </a>
+        </div>
+
+        <!-- MENU HAMBURGER MOBILE -->
+        <input type="checkbox" id="menu-toggle" class="menu-toggle-checkbox">
+        <label for="menu-toggle" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
+        <nav class="nav-links">
+            <a href="agendamento.html">Agendamento</a>
+            <a href="telemedicina.html">Telemedicina</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="mapas.html">Mapas</a>
+            <a href="duvidas.html">Dúvidas</a>
+            <div class="nav-bell-container" id="navBellContainer">
+                <div class="nav-bell-icon" onclick="toggleNotificacoes(event)">
+                    <i class="fi fi-rr-bell"></i> 
+                    <span class="nav-bell-badge" id="nav-notif-count">0</span>
+                </div>
+                <!-- Dropdown de Notificações -->
+                <div class="nav-notif-dropdown glass-card" id="navNotifDropdown">
+                    <div class="nav-notif-header">
+                        <span>Avisos e Campanhas</span>
+                        <button onclick="limparNotificacoes()">Limpar</button>
+                    </div>
+                    <div id="nav-notif-list" class="nav-notif-list">
+                        <p class="nav-notif-empty">Nenhuma nova campanha.</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="nav-auth">
+            <button class="btn-auth btn-login" onclick="abrirModalLogin()">LOGIN</button>
+            <button class="btn-auth btn-cadastro" onclick="abrirModalCadastro()">CADASTRE-SE</button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL (REQUISITO 1 & GRID) -->
+    <div class="container main-layout">
+
+        <!-- ALERTAS GERAIS E CAMPANHAS -->
+        <div id="alertas-container">
+            <div id="home-appointment-alert"></div>
+            <div id="home-campanhas-alert"></div>
+        </div>
+
+        <!-- HERO SECTION DE ELITE (PANORÂMICA 3D) -->
+        <section class="hero-section premium-skyline">
+            <div class="hero-glass-container glass-card">
+                <div class="hero-content">
+                    <div class="hero-badge"><i class="fi fi-rr-stars"></i>  Saúde Digital 2.0</div>
+                    <h1>Explore o Futuro da Saúde com <span>Tecnologia 3D</span></h1>
+                    <p>Uma experiência imersiva e inteligente. Gerencie sua saúde com dados em tempo real, 
+                       agendamentos simplificados e mapeamento dinâmico de precisão.</p>
+                    
+                    <div class="hero-actions">
+                        <button class="btn-premium btn-primary" onclick="abrirModalCadastro()">Começar Agora</button>
+                        <button class="btn-premium btn-outline" onclick="document.querySelector('.noticias-section').scrollIntoView()">Ver Notícias</button>
+                    </div>
+                </div>
+                
+                <div class="hero-visual">
+                    <!-- Dashboard Visual Widget -->
+                    <div class="mini-dashboard glass-card">
+                        <img src="health_campaign_art_branded.png" alt="Campanha Health" class="dash-art-img">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOVO: SEÇÃO DE DESTAQUES EM 3D (NOTÍCIAS) -->
+        <section class="highlights-3d-section" style="margin-top: 30px; text-align: center;">
+            <div class="carousel-3d-container">
+                <div id="carousel3dSpinner" class="carousel-3d-spinner">
+                    <!-- Slides dinâmicos injetados via JS -->
+                </div>
+            </div>
+            <!-- PONTOS DE NAVEGAÇÃO (DOTS) E CONTADOR -->
+            <div id="carousel3dDots" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 25px;"></div>
+        </section>
+
+    <!-- ESTATÍSTICAS - DASHBOARD DE ELITE -->
+    <section class="estatisticas-section glass-card">
+        <h2><i class="fi fi-rr-chart-histogram"></i>  Estatísticas de Saúde no Brasil</h2>
+
+        <div class="estatisticas-layout">
+            <!-- MAPA DE ESTATISTICAS -->
+            <div class="mapa-container-3d">
+                <div id="chartdiv" style="width: 100%; height: 500px;"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card azul">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-syringe"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">16,8 mi</div>
+                        <div class="stat-label">Diabéticos</div>
+                        <div class="stat-detalhe">9% da população adulta</div>
+                    </div>
+                </div>
+
+                <div class="stat-card verde">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-heart"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">38 mi</div>
+                        <div class="stat-label">Hipertensos</div>
+                        <div class="stat-detalhe">Fator de risco para AVC</div>
+                    </div>
+                </div>
+
+                <div class="stat-card laranja">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-bug"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">1,6 mi</div>
+                        <div class="stat-label">Casos Dengue</div>
+                        <div class="stat-detalhe">Dados MS em 2025</div>
+                    </div>
+                </div>
+
+                <div class="stat-card roxo">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-brain"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">12%</div>
+                        <div class="stat-label">Depressão</div>
+                        <div class="stat-detalhe">Cerca de 25mi brasileiros</div>
+                    </div>
+                </div>
+
+                <div class="stat-card vermelho">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-lungs"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">70 mil</div>
+                        <div class="stat-label">Tuberculose</div>
+                        <div class="stat-detalhe">Alta incidência urbana</div>
+                    </div>
+                </div>
+
+                <div class="stat-card teal">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-medicine"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">95%</div>
+                        <div class="stat-label">Vacinação</div>
+                        <div class="stat-detalhe">Meta OMS atingida 2025</div>
+                    </div>
+                </div>
+
+                <div class="stat-card verde">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-apple-whole"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">20%</div>
+                        <div class="stat-label">Obesidade</div>
+                        <div class="stat-detalhe">Dados Brasil 2024</div>
+                    </div>
+                </div>
+
+                <div class="stat-card azul">
+                    <div class="stat-icon-wrapper">
+                        <div class="stat-icon"><i class="fi fi-rr-virus"></i> </div>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-numero">88%</div>
+                        <div class="stat-label">Covid (Rec)</div>
+                        <div class="stat-detalhe">Taxa de cura hospitalar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- NOTÍCIAS DO GOVERNO -->
+        <section class="noticias-section">
+            <h2><i class="fi fi-rr-newspaper"></i>  Notícias de Saúde - Ministério da Saúde</h2>
+
+            <div class="news-slider-wrapper">
+                <div class="news-slider-container" id="newsSliderContainer">
+                    <!-- Slides dinâmicos serão injetados aqui via JS -->
+                </div>
+                <!-- Controles do Slider -->
+                <div class="news-slider-controls">
+                    <button class="news-nav-btn prev" id="newsPrevBtn"
+                        onclick="moverSliderNoticia(-1)">&#10094;</button>
+                    <button class="news-nav-btn next" id="newsNextBtn" onclick="moverSliderNoticia(1)">&#10095;</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CARROSSEL VERTICAL 3D DE DOENÇAS -->
+        <section class="vertical-carousel-section">
+            <h2><i class="fi fi-rr-map"></i>  Mapa Dinâmico de Doenças</h2>
+            <p style="text-align: center; color: #555; margin-bottom: 30px;">Gire o carrossel para descobrir mais sobre
+                as condições comuns e os especialistas recomendados.</p>
+
+            <div class="animation-container">
+                <div class="vertical-main-container">
+                    <div class="vertical-carousel-wrapper">
+                        <div class="vertical-carousel-container">
+                            <button class="vertical-nav-arrow up" id="verticalNextBtnMobile">
+                                <img src="https://cdn-icons-png.flaticon.com/512/271/271228.png"
+                                    style="width:30px; transform:rotate(-90deg);" alt="Up">
+                            </button>
+
+                            <div class="vertical-carousel-track" id="verticalCarouselTrack">
+                                <!-- Cards injetados via JS -->
+                            </div>
+
+                            <button class="vertical-nav-arrow down" id="verticalPrevBtnMobile">
+                                <img src="https://cdn-icons-png.flaticon.com/512/271/271220.png"
+                                    style="width:30px; transform:rotate(-90deg);" alt="Down">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="vertical-controls-section">
+                        <div class="vertical-disease-info">
+                            <div id="diseaseInfoContent" class="vertical-disease-info-content">
+                                <div class="disease-header-badge" id="verticalIconBadge"><i class="fi fi-rr-stethoscope"></i> </div>
+                                <h3 class="vertical-disease-name" id="verticalDiseaseTitle">Nome da Doença</h3>
+
+                                <div class="vertical-info-grid">
+                                    <!-- Bloco Especialista -->
+                                    <div class="info-block">
+                                        <div class="info-icon"><i class="fi fi-rr-user-md"></i> </div>
+                                        <div class="info-text-group">
+                                            <span class="info-label">Especialista Indicado</span>
+                                            <span id="verticalEspecialista" class="info-value">N/A</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bloco Encaminhamento -->
+                                    <div class="info-block">
+                                        <div class="info-icon"><i class="fi fi-rr-document"></i> </div>
+                                        <div class="info-text-group">
+                                            <span class="info-label">Encaminhamento</span>
+                                            <span id="verticalEncaminhamento" class="info-value">N/A</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="vertical-disease-desc" id="verticalDiseaseDesc">
+                                    Carregando informações do portal Saúde Digital...
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="vertical-nav-controls">
+                            <button class="vertical-nav-arrow up" id="verticalNextBtn">
+                                <img src="https://cdn-icons-png.flaticon.com/512/271/271228.png"
+                                    style="width:30px; transform:rotate(-90deg);" alt="Up">
+                            </button>
+                            <button class="vertical-nav-arrow down" id="verticalPrevBtn">
+                                <img src="https://cdn-icons-png.flaticon.com/512/271/271220.png"
+                                    style="width:30px; transform:rotate(-90deg);" alt="Down">
+                            </button>
+                        </div>
+
+                        <div class="vertical-dots" id="verticalDotsContainer">
+                            <!-- Dots injetados via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </section>
+
+</div> <!-- Fim do main-layout container -->
+
+    <!-- MODAL DE NOTÍCIA -->
+    <div id="modalNoticia" class="modal-noticia">
+        <div class="modal-noticia-content">
+            <button class="btn-fechar" onclick="fecharNoticia()">✕</button>
+
+            <div class="modal-navegacao" style="margin-top: 20px; padding-top: 15px;">
+                <button class="btn-nav" onclick="noticiaAnterior()">‹ Anterior</button>
+                <span id="noticiaNumero">1 / 6</span>
+                <button class="btn-nav" onclick="proximaNoticia()">Próxima ›</button>
+            </div>
+
+            <div id="noticiaConteudo" class="noticia-conteudo">
+                <!-- Conteúdo será inserido via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <section class="comentarios-page-section">
+        <div class="comentarios-section">
+            <h2><i class="fi fi-rr-messages"></i>  Comentários do Portal</h2>
+            <p>Deixe sua opinião sobre as notícias e iniciativas de saúde.</p>
+
+            <div id="lista-comentarios-noticia">
+                <!-- Comentários via JS -->
+            </div>
+
+            <div class="form-comentario">
+                <h4>Deixe sua opinião</h4>
+                <input type="text" id="comentario-nome" placeholder="Seu nome" class="comentario-input">
+                <textarea id="comentario-texto" placeholder="O que você achou?" class="comentario-input"></textarea>
+                <button onclick="enviarComentarioPublico()" class="btn-nav">
+                    Enviar Comentário
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         MODAL DE AUTENTICAÇÃO INTEGRADO (3D FLIP & MEDICAL NEON)
+         ========================================================================= -->
+    <div id="modalAuth" class="modal-auth">
+        <div class="modal-auth-flipper" id="modalAuthFlipper">
+
+            <!-- SEÇÃO FRONT: LOGIN -->
+            <div class="login-side-neon" id="loginNeonWrapper">
+                <div class="card-padrao modal-auth-card" id="loginCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+                    <div class="auth-header-neon">
+                        <div class="header-icon-pulsing"><i class="fi fi-rr-hospital"></i> </div>
+                        <h2>Acesso Saúde</h2>
+                        <p>Entre no seu painel inteligente</p>
+                    </div>
+
+                    <form id="formLogin" class="form-auth" onsubmit="finalizarLogin(event)">
+                        <div class="form-group-3d">
+                            <label for="login-cpf"><i class="fi fi-rr-id-badge"></i>  CPF</label>
+                            <input type="text" id="login-cpf" class="cpf-mask input-neon-focus" required
+                                placeholder="000.000.000-00">
+                        </div>
+                        <div class="form-group-3d">
+                            <label for="login-senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                            <input type="password" id="login-senha" class="input-neon-focus" required
+                                placeholder="Sua senha secreta">
+                        </div>
+                        <div class="form-aux">
+                            <a href="#" class="link-fale-conosco" onclick="abrirModalRecuperar()">Esqueci a senha</a>
+                        </div>
+                        <div class="form-footer">
+                            <button type="submit" class="btn-enviar-auth-3d btn-neon-health">ENTRAR NO PORTAL
+                                 </button>
+                        </div>
+                        <div class="auth-switch">
+                            Não tem conta? <a href="#" onclick="flipParaCadastro()">Cadastre-se agora</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SEÇÃO BACK: CADASTRO -->
+            <div class="cadastro-side-neon" id="cadastroNeonWrapper">
+                <div class="card-padrao modal-auth-card cadastro-wide" id="cadastroCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+
+                    <!-- Barra de Progresso 3D -->
+                    <div class="auth-progress-container">
+                        <div class="auth-progress-bar" id="authProgressBar"></div>
+                        <div class="auth-progress-steps">
+                            <div class="step active" data-step="1">1</div>
+                            <div class="step" data-step="2">2</div>
+                            <div class="step" data-step="3">3</div>
+                            <div class="step" data-step="4">4</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-header-neon">
+                        <h2 id="cadastroTitle">Novo Cadastro</h2>
+                        <p id="cadastroSub">Identificação básica no portal</p>
+                    </div>
+
+                    <form id="formCadastro" class="form-auth" onsubmit="finalizarCadastro(event)">
+
+                        <!-- PASSO 1: IDENTIFICAÇÃO -->
+                        <div class="auth-step-content active" id="authStep1">
+                            <div class="form-grid">
+                                <div class="form-group-3d full-width">
+                                    <label for="nome"><i class="fi fi-rr-user"></i>  Nome Completo</label>
+                                    <input type="text" id="nome" class="input-neon-focus" required
+                                        placeholder="Digite seu nome completo">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="cpf"><i class="fi fi-rr-id-badge"></i>  CPF / CNPJ</label>
+                                    <input type="text" id="cpf" class="cpf-mask input-neon-focus" required
+                                        placeholder="000.000.000-00">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="nascimento"><i class="fi fi-rr-calendar"></i>  Nascimento</label>
+                                    <input type="text" id="nascimento" class="date-mask input-neon-focus" required
+                                        placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(2)">PRÓXIMO PASSO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 2: PERFIL E PROFISSÃO -->
+                        <div class="auth-step-content" id="authStep2">
+                            <div class="role-selector-3d">
+                                <p class="role-label">Quero me cadastrar como:</p>
+                                <div class="role-cards-grid">
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="paciente" checked
+                                            onchange="mudarTipoCadastro('paciente')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-user"></i> </div>
+                                            <span>Paciente</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="medico"
+                                            onchange="mudarTipoCadastro('medico')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-stethoscope"></i> </div>
+                                            <span>Médico</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="enfermeiro"
+                                            onchange="mudarTipoCadastro('enfermeiro')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-hospital"></i> </div>
+                                            <span>Enfermeiro</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="admin"
+                                            onchange="mudarTipoCadastro('admin')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-shield"></i> </div>
+                                            <span>Admin</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="ti"
+                                            onchange="mudarTipoCadastro('ti')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-laptop"></i> </div>
+                                            <span>TI</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="campos-medico" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d">
+                                        <label for="crm"><i class="fi fi-rr-stethoscope"></i>  CRM / Registro</label>
+                                        <input type="text" id="crm" class="input-neon-focus" placeholder="Ex: 12345/PR">
+                                    </div>
+                                    <div class="form-group-3d">
+                                        <label for="especialidade"><i class="fi fi-rr-briefcase-medical"></i>  Especialidade</label>
+                                        <select id="especialidade" class="input-neon-focus">
+                                            <option value="">Selecione...</option>
+                                            <option value="Clinica Geral">Clínica Geral</option>
+                                            <option value="Cardiologia">Cardiologia</option>
+                                            <option value="Pediatria">Pediatria</option>
+                                            <option value="Ginecologia">Ginecologia</option>
+                                            <option value="Dermatologia">Dermatologia</option>
+                                            <option value="Oftalmologia">Oftalmologia</option>
+                                            <option value="Otorrinolaringologia">Otorrinolaringologia</option>
+                                            <option value="Ortopedia">Ortopedia</option>
+                                            <option value="Neurologia">Neurologia</option>
+                                            <option value="Psicologia">Psicologia</option>
+                                            <option value="Nutrição">Nutrição</option>
+                                            <option value="Fisioterapia">Fisioterapia</option>
+                                            <option value="Odontologia">Odontologia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(1)">⬅ VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(3)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 3: LOCALIZAÇÃO -->
+                        <div class="auth-step-content" id="authStep3">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="cidade"><i class="fi fi-rr-city"></i>  Cidade</label>
+                                    <select id="cidade" class="input-neon-focus" required>
+                                        <option value="Cascavel">Cascavel</option>
+                                        <option value="Toledo">Toledo</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="bairro"><i class="fi fi-rr-house-chimney"></i>  Bairro</label>
+                                    <input type="text" id="bairro" class="input-neon-focus" required
+                                        placeholder="Ex: Centro">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="sus"><i class="fi fi-rr-credit-card"></i>  Cartão SUS</label>
+                                    <input type="text" id="sus" class="sus-mask input-neon-focus" required
+                                        placeholder="000 0000 0000 0000">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(2)">⬅ VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(4)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 4: CONTATO E SENHA -->
+                        <div class="auth-step-content" id="authStep4">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="telefone"><i class="fi fi-rr-smartphone"></i>  Celular</label>
+                                    <input type="tel" id="telefone" class="tel-mask input-neon-focus" required
+                                        placeholder="(45) 99999-0000">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="email"><i class="fi fi-rr-envelope"></i>  E-mail</label>
+                                    <input type="email" id="email" class="input-neon-focus" required
+                                        placeholder="seu@email.com">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                                    <input type="password" id="senha" class="input-neon-focus" required
+                                        placeholder="Mínimo 6 caracteres">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(3)">⬅ VOLTAR</button>
+                                <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONCLUIR <i class="fi fi-rr-party-horn"></i> </button>
+                            </div>
+                        </div>
+
+                        <div class="auth-switch">
+                            Já tem conta? <a href="#" onclick="flipParaLogin()">Faça login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2FA -->
+    <div id="modal2FA" class="modal-auth">
+        <div class="neon-border-3d">
+            <div class="modal-auth-card glass-auth-deep">
+                <button class="btn-fechar-modal" onclick="fecharModal2FA()">✕</button>
+                <div class="auth-header-neon">
+                    <div class="header-icon-pulsing"><i class="fi fi-rr-shield"></i> </div>
+                    <h2>Verificação</h2>
+                    <p>Insira o código de 6 dígitos enviado ao seu dispositivo.</p>
+                </div>
+                <form id="form2FA" class="form-auth" onsubmit="finalizar2FA(event)">
+                    <div class="form-group-3d">
+                        <input type="text" id="codigo-2fa" maxlength="6" required
+                            style="text-align: center; font-size: 2rem; letter-spacing: 10px; width: 100%; margin: 10px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--health-cyan); color: white; border-radius: 15px;"
+                            placeholder="000000">
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn-enviar-auth-3d btn-neon-health">VALIDAR ACESSO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RECUPERAÇÃO -->
+    <div id="modalRecuperar" class="modal-auth">
+        <div class="neon-border-3d">
+            <div class="modal-auth-card glass-auth-deep">
+                <button class="btn-fechar-modal" onclick="fecharModalRecuperar()">✕</button>
+                <div class="auth-header-neon">
+                    <div class="header-icon-pulsing"><i class="fi fi-rr-key"></i> </div>
+                    <h2>Recuperar Acesso</h2>
+                    <p>Insira seu E-mail ou Telefone para receber uma senha temporária.</p>
+                </div>
+                <form id="formRecuperar" class="form-auth" onsubmit="finalizarRecuperacao(event)">
+                    <div class="form-group-3d">
+                        <label for="recuperar-contato">E-mail ou Celular</label>
+                        <input type="text" id="recuperar-contato" class="input-neon-focus" required placeholder="seuemail@exemplo.com">
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONTINUAR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="modern-footer">
+        <div class="container">
+            <div class="footer-brand">
+                <h3>Portal Saúde Fácil</h3>
+                <p>O portal de saúde mais completo da região. Agendamentos, telemedicina e informações reais para você.</p>
+            </div>
+            <div class="footer-links-col">
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="index.html">Página Inicial</a></li>
+                    <li><a href="agendamento.html">Agendamentos</a></li>
+                    <li><a href="telemedicina.html">Telemedicina</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacidade.html">Política de Privacidade</a></li>
+                    <li><a href="termos.html">Termos de Uso</a></li>
+                    <li><a href="duvidas.html">Dúvidas Frequentes</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Portal Saúde Fácil. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet substituindo amCharts (dependências Leaflet foram inseridas no <head>) -->
+
+
+    <!-- API Helper e Lógica de Autenticação -->
+    <script src="api.js?v=20260419-5001" defer></script>
+    <script src="home.js?v=20260419-5001" defer></script>
+
+
+    <script>
+        // Efeito de scroll na navbar
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
+    </script>
+    <script src="cookie-consent.js" defer></script>
+</body>
+</html>

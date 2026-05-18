@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Saúde Digital | Painel de Telemedicina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="medico.css"> <!-- Reutilizando estilos de cartão médico -->
+    <style>
+        body { background: #0f172a; color: white; }
+        .navbar-tele {
+            background: linear-gradient(135deg, #0288d1, #01579b);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            color: white;
+        }
+        .container-tele {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        .sidebar-tele {
+            width: 320px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .main-tele {
+            flex: 1;
+            padding: 20px;
+            background: #0f172a;
+            position: relative;
+        }
+        .card-paciente-fila {
+            background: #334155;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #38bdf8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .btn-iniciar-chamada {
+            width: 100%;
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #jitsi-container {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+        .empty-dash {
+            text-align: center;
+            padding: 100px 20px;
+            color: #94a3b8;
+        }
+        .btn-config { background: transparent; border: 1px solid #38bdf8; color: #38bdf8; padding: 5px 15px; border-radius: 15px; cursor: pointer; }
+    </style>
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+</head>
+<body>
+
+    <header class="navbar-tele">
+        <div style="display:flex; align-items:center; gap: 15px;">
+            <h1 style="margin:0; font-size: 1.4rem;"><i class="fi fi-rr-laptop"></i>  Portal Telemedicina</h1>
+            <span class="badge" style="background:#22c55e; padding:5px 10px; border-radius:15px; font-size:0.8rem;">Modo Exclusivo</span>
+        </div>
+        <div style="display:flex; align-items:center; gap: 15px;">
+            <div style="text-align: right; display: flex; flex-direction: column;">
+                <div id="nome-medico-tele" style="font-weight:bold;">Dr. Carregando...</div>
+                <small id="crm-medico-tele" style="color:#cbd5e1;">CRM: ...</small>
+                <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+            </div>
+            <button class="btn-config" onclick="editarSalaPadrao()"><i class="fi fi-rr-settings"></i>  Sala Padrão</button>
+            <button onclick="logoutTele()" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">Sair</button>
+        </div>
+    </header>
+
+    <div class="container-tele">
+        
+        <!-- SIDEBAR DE FILA E AGENDAMENTOS ONLINE -->
+        <aside class="sidebar-tele">
+            <h3 style="color:#38bdf8; margin-bottom: 20px;"><i class="fi fi-rr-calendar"></i>  Pacientes de Hoje</h3>
+            
+            <div id="fila-online-lista">
+                <div style="text-align:center; color:#94a3b8;">Carregando agendamentos...</div>
+            </div>
+        </aside>
+
+        <!-- AREA CENTRAL - CHAMADA DE VIDEO -->
+        <main class="main-tele">
+            <!-- TELA INICIAL ANTES DE ABRIR A SALA -->
+            <div id="dash-vazio" class="empty-dash">
+                <div style="font-size: 4rem; margin-bottom:20px;">📹</div>
+                <h2>Nenhuma chamada ativa</h2>
+                <p>Selecione um paciente na fila ao lado e clique em "Iniciar" para abrir a sala virtual privada segura (E2EE).</p>
+                
+                <div style="margin-top:40px; background:#1e293b; padding:20px; border-radius:8px; display:inline-block; text-align:left; border:1px dashed #334155;">
+                    <h4 style="color:#38bdf8; margin-top:0;">Estatísticas do Mês</h4>
+                    <p style="margin:5px 0;">Atendimentos Virtuais: <strong id="stat-atendimentos" style="color:#22c55e;">Carregando...</strong></p>
+                    <p style="margin:5px 0;">Tempo Médio: <strong>14 min</strong></p>
+                </div>
+            </div>
+
+            <!-- CONTAINER PARA O JITSI EXTERNO DO MEDICO -->
+            <div id="jitsi-container"></div>
+            
+            <!-- BOTAO DE ENCERRAMENTO -->
+            <div id="controles-fim" style="display:none; position:absolute; bottom: 30px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:15px; border-radius:10px; display:flex; gap:15px; z-index:999;">
+                <button onclick="encerrarJitsi()" style="background:#ef4444; color:white; border:none; padding:12px 25px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:1.1rem;"><i class="fi fi-rr-cross-circle"></i>  Encerrar Atendimento</button>
+            </div>
+        </main>
+        
+    </div>
+
+    <script src='https://meet.jit.si/external_api.js'></script>
+    <script src="api.js"></script>
+    <script src="painel_tele.js"></script>
+</body>
+</html>

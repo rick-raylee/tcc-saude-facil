@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil | Portal Saúde Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="responsive.css">
+    <script>
+        // Gatekeeper: Redirecionar se não estiver logado
+        if (localStorage.getItem('usuarioLogado') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR ANIMADA -->
+    <header class="navbar" id="navbar">
+        <div class="logo"><a href="index.html"><img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'"></a>
+        </div>
+        <nav class="nav-links">
+            <a href="agendamento.html">Agendamento</a>
+            <a href="telemedicina.html">Telemedicina</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="mapas.html">Mapas</a>
+            <a href="duvidas.html">Dúvidas</a>
+        </nav>
+        <div class="nav-auth">
+            <!-- Será preenchido via JS -->
+        </div>
+    </header>
+
+    <div class="container dashboard-container">
+
+        <!-- CABEÇALHO DO PERFIL -->
+        <section class="profile-header">
+            <div class="profile-avatar-large">
+                <img id="user-avatar-display"
+                    src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' fill='%23ccc'/></svg>"
+                    alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            </div>
+            <div class="profile-info-main">
+                <h1 id="user-name-display">Carregando...</h1>
+                <p class="user-meta">
+                    <span id="user-age-display">-- anos</span> •
+                    <span id="user-sus-display">Cartão SUS: ...</span>
+                </p>
+                <div class="health-tags" id="health-tags-display">
+                    <!-- Tags de doenças serão inseridas aqui -->
+                </div>
+            </div>
+            <div class="profile-actions">
+                <button class="btn-action primary" onclick="window.location.href='agendamento.html'">
+                    <i class="fi fi-rr-calendar"></i>  Novo Agendamento
+                </button>
+                <button class="btn-action outline" style="border-color: #0288d1; color: #0288d1; font-weight: bold;" id="btn-registro-telemedicina" onclick="solicitarRegistroTelemedicina()">
+                    <i class="fi fi-rr-laptop"></i>  Ativar Telemedicina
+                </button>
+                <button class="btn-action outline" onclick="logout()">
+                    🚪 Sair
+                </button>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+
+            <!-- MINHAS CONSULTAS AGENDADAS -->
+            <div id="card-minhas-consultas" class="dashboard-card tele-highlight"
+                style="display: none; border-left: 5px solid #6c5ce7; background: #f8f9fa;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div>
+                        <h3 style="color: #6c5ce7; margin-bottom: 5px;"><i class="fi fi-rr-calendar"></i>  Minhas Consultas Agendadas</h3>
+                        <p style="margin: 0; color: #555;">Confira seus próximos atendimentos.</p>
+                    </div>
+                </div>
+                <div id="lista-minhas-consultas" style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Inserido via JS -->
+                </div>
+            </div>
+
+            <!-- ACESSO RÁPIDO (PRIMEIRO) -->
+            <div class="dashboard-card quick-access">
+                <h3>  Acesso Rápido</h3>
+                <div class="quick-buttons">
+                    <button class="btn-quick" onclick="window.location.href='telemedicina.html'">
+                        <span class="icon"><i class="fi fi-rr-laptop"></i> </span>
+                        <span class="label">Telemedicina</span>
+                    </button>
+                    <button class="btn-quick" onclick="abrirExames()">
+                        <span class="icon">🧪</span>
+                        <span class="label">Resultados de Exames</span>
+                    </button>
+                    <button class="btn-quick" onclick="window.location.href='campanhas.html'">
+                        <span class="icon"><i class="fi fi-rr-syringe"></i> </span>
+                        <span class="label">Minhas Vacinas</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARTEIRINHA DIGITAL (SEGUNDO) -->
+            <div class="dashboard-card digital-id-preview" onclick="abrirCarteirinha()">
+                <div class="preview-content">
+                    <img src="logo-saude-facil.png" alt="Logo Saúde Fácil" class="preview-logo"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'">
+                    <h3>Minha Caderneta de Vacinação</h3>
+                    <p>Toque para abrir a caderneta</p>
+                </div>
+            </div>
+
+            <!-- OBSERVAÇÕES E EXAMES (NO ARQUIVO PERFIL.HTML) -->
+            <section class="dashboard-card messages-card">
+                <h2><i class="fi fi-rr-document"></i>  Prontuário & Observações</h2>
+
+                <div class="tabs-paciente"
+                    style="display: flex; gap: 10px; border-bottom: 1px solid #eee; margin-bottom: 15px;">
+                    <button class="tab-btn-paciente active" onclick="mudarTabPaciente('observacoes')"
+                        style="border:none; background:none; padding:10px; cursor:pointer; font-weight:bold; color:#004b82; border-bottom:2px solid #004b82;">Observações
+                        do Médico</button>
+                    <button class="tab-btn-paciente" onclick="mudarTabPaciente('exames')"
+                        style="border:none; background:none; padding:10px; cursor:pointer; color:#666;">Meus Documentos
+                        (Receitas/Atestados)</button>
+                    <button class="tab-btn-paciente" onclick="mudarTabPaciente('medicacoes')"
+                        style="border:none; background:none; padding:10px; cursor:pointer; color:#666;">Minhas
+                        Medicações</button>
+                </div>
+
+                <div id="paciente-tab-observacoes">
+                    <div id="lista-observacoes-paciente"
+                        style="height: 250px; overflow-y: auto; background: #fff8e1; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; margin-bottom: 0;">
+                        <p class="empty-msg">Nenhuma observação registrada pelo seu médico.</p>
+                    </div>
+                </div>
+
+                <div id="paciente-tab-exames" style="display: none;">
+                    <ul id="lista-exames-paciente" style="list-style: none; padding: 0;">
+                        <!-- Exames anexados pelo médico aparecerão aqui -->
+                        <li class="empty-msg">Nenhum exame disponível.</li>
+                    </ul>
+                </div>
+
+                <div id="paciente-tab-medicacoes" style="display: none;">
+                    <div id="lista-medicacoes-paciente"
+                        style="height: 250px; overflow-y: auto; background: #fdfdfd; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 0;">
+                        <p class="empty-msg">Nenhuma prescrição ou aplicação registrada.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HISTÓRICO DE CONSULTAS (TERCEIRO) -->
+            <section class="dashboard-card history-card">
+                <h2>📂 Histórico de Atendimentos</h2>
+                <div class="timeline" id="history-list">
+                    <!-- Itens do histórico serão inseridos via JS -->
+                    <div class="loading-spinner">Carregando histórico...</div>
+                </div>
+            </section>
+
+            <!-- MEU RESUMO DE SAÚDE (QUARTO) -->
+            <div class="dashboard-card health-summary">
+                <h3><i class="fi fi-rr-heart"></i>  Meu Resumo de Saúde</h3>
+                <ul class="health-stats">
+                    <li>
+                        <span class="label">Última PA:</span>
+                        <span class="value" id="rs-pressao">--</span>
+                    </li>
+                    <li>
+                        <span class="label">IMC / Temp:</span>
+                        <span class="value" id="rs-imc">--</span>
+                    </li>
+                    <li>
+                        <span class="label">Peso Atual:</span>
+                        <span class="value" id="rs-peso">--</span>
+                    </li>
+                </ul>
+                <small class="update-note" id="rs-data">Coletando dados...</small>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL CARTEIRINHA (ESTILO CADERNETA DE VACINAÇÃO) -->
+    <div id="modalCarteirinha" class="modal-booklet-overlay">
+        <div class="booklet-container">
+            <button class="btn-fechar-booklet" onclick="fecharCarteirinha()">✕</button>
+            <div class="booklet-page left">
+                <div class="sus-header">
+                    <img src="logo-saude-facil.png" alt="Logo Saúde Fácil" class="booklet-logo"
+                        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2230%22 fill=%22%23004b82%22>SUS</text></svg>'">
+                    <span>Caderneta de Vacinação</span>
+                </div>
+                <div class="booklet-section-title">
+                    <h4><i class="fi fi-rr-check-circle"></i>  Vacinas Realizadas</h4>
+                </div>
+                <div class="booklet-list" id="booklet-list-realizadas">
+                    <!-- Lista de vacinas tomadas preenchida via JS -->
+                </div>
+            </div>
+            <div class="booklet-spine"></div>
+            <div class="booklet-page right">
+                <div class="booklet-user-small">
+                    <span id="booklet-name-small">PACIENTE</span> • <span id="booklet-sus-small">CNS ...</span>
+                </div>
+                <div class="booklet-section-title pending">
+                    <h4>⏳ Próximas Vacinas (Pendentes)</h4>
+                </div>
+                <div class="booklet-list" id="booklet-list-pendentes">
+                    <!-- Lista de vacinas pendentes preenchida via JS -->
+                </div>
+                <div class="booklet-footer">
+                    <p>Mantenha sua vacinação em dia</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HISTÓRICO DE CHAT DA TELEMEDICINA -->
+    <div id="modalChatHistorico" class="modal-booklet-overlay"
+        style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;">
+        <div class="modal-content-simple"
+            style="background: white; width: 90%; max-width: 500px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+            <div
+                style="background: var(--sus-blue-dark); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0;"><i class="fi fi-rr-messages"></i>  Histórico da Telemedicina</h3>
+                <button onclick="fecharChatHistorico()"
+                    style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">✕</button>
+            </div>
+
+            <div
+                style="padding: 15px; background: #e3f2fd; color: #004b82; border-bottom: 1px solid #b6d4fe; text-align: center;">
+                <strong>Sessão com <span id="chat-historico-medico">Médico</span></strong>
+            </div>
+
+            <div id="chat-historico-msgs"
+                style="flex: 1; padding: 15px; background: #f9f9f9; min-height: 300px; max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Mensagens carregadas via JS -->
+            </div>
+
+            <div style="padding: 15px; text-align: center; border-top: 1px solid #eee; background: white;">
+                <p style="margin: 0; font-size: 0.8rem; color: #666;">Este é um registro estritamente confidencial da
+                    sua consulta.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EXAMES (NOVO) -->
+    <div id="modalExames" class="modal-booklet-overlay">
+        <div class="modal-content-simple">
+            <button class="btn-fechar-simple" onclick="fecharExames()">✕</button>
+            <h2>📑 Resultados de Exames</h2>
+            <div class="exam-list-container">
+                <div class="exam-item">
+                    <div class="exam-icon">📄</div>
+                    <div class="exam-info">
+                        <strong>Hemograma Completo</strong>
+                        <span>Data: 20/12/2025 • Lab. Central</span>
+                    </div>
+                    <button class="btn-download" onclick="alert('📥 Baixando PDF: Hemograma_Completo.pdf...')">
+                        ⬇ PDF
+                    </button>
+                </div>
+                <div class="exam-item">
+                    <div class="exam-icon">📄</div>
+                    <div class="exam-info">
+                        <strong>Raio-X de Tórax</strong>
+                        <span>Data: 15/01/2026 • Hospital Municipal</span>
+                    </div>
+                    <button class="btn-download" onclick="alert('📥 Baixando PDF: RaioX_Torax.pdf...')">
+                        ⬇ PDF
+                    </button>
+                </div>
+                <div class="exam-item">
+                    <div class="exam-icon">📄</div>
+                    <div class="exam-info">
+                        <strong>Glicemia em Jejum</strong>
+                        <span>Data: 10/02/2026 • Lab. Central</span>
+                    </div>
+                    <button class="btn-download" onclick="alert('📥 Baixando PDF: Glicemia_Jejum.pdf...')">
+                        ⬇ PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAIS DE AUTENTICAÇÃO (Apenas para logout se necessário, mas geralmente não precisa aqui) -->
+
+    <script src="api.js?v=20260419-1"></script>
+    <script src="home.js?v=20260419-2"></script>
+    <script src="perfil.js"></script>
+</body>
+
+</html>

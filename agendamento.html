@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento | Portal Saúde Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="agendamento.css">
+    <link rel="stylesheet" href="responsive.css">
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR ANIMADA -->
+    <header class="navbar" id="navbar">
+        <div class="logo"><a href="index.html"><img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'"></a>
+        </div>
+        <nav class="nav-links">
+            <a href="agendamento.html">Agendamento</a>
+            <a href="telemedicina.html">Telemedicina</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="mapas.html">Mapas</a>
+            <a href="duvidas.html">Dúvidas</a>
+        </nav>
+        <div class="nav-auth">
+            <button class="btn-auth btn-login" onclick="abrirModalAuth()">LOGIN</button>
+            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">CADASTRE-SE</button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="container">
+
+        <div class="page-header">
+            <h1><i class="fi fi-rr-calendar"></i>  Agendamento de Consultas</h1>
+            <p>Agende sua consulta de forma rápida e prática</p>
+        </div>
+
+        <section class="agendamento-section">
+            <div class="agendamento-form">
+                <h3>Dados do Agendamento</h3>
+
+                <div class="form-group">
+                    <label><i class="fi fi-rr-clipboard-list"></i>  Tipo de Atendimento</label>
+                    <select id="tipo-atendimento">
+                        <option value="">Selecione...</option>
+                        <option value="consulta">Consulta Médica</option>
+                        <option value="exame">Exames</option>
+                        <option value="vacina">Vacinação</option>
+                        <option value="retorno">Retorno</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fi fi-rr-hospital"></i>  Especialidade</label>
+                    <select id="especialidade">
+                        <option value="">Selecione...</option>
+                        <option value="clinico">Clínico Geral</option>
+                        <option value="pediatria">Pediatria</option>
+                        <option value="ginecologia">Ginecologia</option>
+                        <option value="cardiologia">Cardiologia</option>
+                        <option value="ortopedia">Ortopedia</option>
+                        <option value="dermatologia">Dermatologia</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📆 Data</label>
+                        <input type="date" id="data-agendamento">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🕐 Horário</label>
+                        <input type="time" id="horario-agendamento">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>📍 Unidade de Saúde</label>
+                    <select id="unidade">
+                        <option value="">Selecione...</option>
+                        <option value="ubs-centro">UBS Centro</option>
+                        <option value="ubs-coqueiral">UBS Coqueiral</option>
+                        <option value="ubs-brasmadeira">UBS Brasmadeira</option>
+                        <option value="ubs-periolo">UBS Periolo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fi fi-rr-messages"></i>  Observações (opcional)</label>
+                    <textarea id="observacoes" rows="4"
+                        placeholder="Descreva o motivo da consulta ou observações importantes..."></textarea>
+                </div>
+
+                <button class="btn-confirmar" onclick="confirmarAgendamento()">
+                    CONFIRMAR AGENDAMENTO
+                </button>
+            </div>
+
+            <div class="agendamento-info">
+                <div class="info-card">
+                    <h4>ℹ️ Informações Importantes</h4>
+                    <ul>
+                        <li>Chegue <strong>15 minutos antes</strong> do horário agendado</li>
+                        <li>Leve <strong>documento com foto</strong> e <strong>Cartão SUS</strong></li>
+                        <li>Para consultas de retorno, leve os <strong>exames anteriores</strong></li>
+                        <li>Cancelamentos devem ser feitos com <strong>2 horas de antecedência</strong></li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4><i class="fi fi-rr-smartphone"></i>  Confirmação</h4>
+                    <p>Você receberá a confirmação do agendamento via:</p>
+                    <ul>
+                        <li><i class="fi fi-rr-envelope"></i>  E-mail cadastrado</li>
+                        <li><i class="fi fi-rr-messages"></i>  SMS no celular</li>
+                        <li><i class="fi fi-rr-bell"></i>  Notificação no app (se instalado)</li>
+                    </ul>
+                </div>
+
+                <div class="info-card highlight">
+                    <h4>⏰ Horários de Atendimento</h4>
+                    <p><strong>Segunda a Sexta:</strong> 7h às 18h</p>
+                    <p><strong>Sábados:</strong> 7h às 12h</p>
+                    <p><strong>Domingos e Feriados:</strong> Fechado</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="main-footer" style="background: rgba(0, 75, 130, 0.9); color: white; padding: 40px 0; margin-top: 60px;">
+        <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px;">
+            <div class="footer-info" style="flex: 1 1 300px;">
+                <h3 style="margin-bottom: 15px;">Portal Saúde Fácil</h3>
+                <p>O portal de saúde mais completo da região. Agendamentos, telemedicina e informações reais para você.</p>
+            </div>
+            <div class="footer-links" style="flex: 1 1 200px;">
+                <h4 style="margin-bottom: 15px;">Links Úteis</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li><a href="privacidade.html" style="color: white; text-decoration: none;">Privacidade</a></li>
+                    <li><a href="termos.html" style="color: white; text-decoration: none;">Termos de Uso</a></li>
+                    <li><a href="duvidas.html" style="color: white; text-decoration: none;">Contato</a></li>
+                </ul>
+            </div>
+            <div class="footer-copy" style="width: 100%; text-align: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                &copy; 2026 Portal Saúde Fácil. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- =========================================================================
+         MODAL DE AUTENTICAÇÃO INTEGRADO (3D FLIP & MEDICAL NEON)
+         ========================================================================= -->
+    <div id="modalAuth" class="modal-auth">
+        <div class="modal-auth-flipper" id="modalAuthFlipper">
+
+            <!-- SEÇÃO FRONT: LOGIN -->
+            <div class="login-side-neon" id="loginNeonWrapper">
+                <div class="card-padrao modal-auth-card" id="loginCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+                    <div class="auth-header-neon">
+                        <div class="header-icon-pulsing"><i class="fi fi-rr-hospital"></i> </div>
+                        <h2>Acesso Saúde</h2>
+                        <p>Entre no seu painel inteligente</p>
+                    </div>
+
+                    <form id="formLogin" class="form-auth" onsubmit="finalizarLogin(event); verificarSessao();">
+                        <div class="form-group-3d">
+                            <label for="login-cpf"><i class="fi fi-rr-id-badge"></i>  CPF</label>
+                            <input type="text" id="login-cpf" class="cpf-mask input-neon-focus" required
+                                placeholder="000.000.000-00">
+                        </div>
+                        <div class="form-group-3d">
+                            <label for="login-senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                            <input type="password" id="login-senha" class="input-neon-focus" required
+                                placeholder="Sua senha secreta">
+                        </div>
+                        <div class="form-aux">
+                            <a href="#" class="link-fale-conosco" onclick="abrirModalRecuperar()">Esqueci a senha</a>
+                        </div>
+                        <div class="form-footer">
+                            <button type="submit" class="btn-enviar-auth-3d btn-neon-health">ENTRAR NO PORTAL
+                                 </button>
+                        </div>
+                        <div class="auth-switch">
+                            Não tem conta? <a href="#" onclick="flipParaCadastro()">Cadastre-se agora</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SEÇÃO BACK: CADASTRO -->
+            <div class="cadastro-side-neon" id="cadastroNeonWrapper">
+                <div class="card-padrao modal-auth-card cadastro-wide" id="cadastroCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+
+                    <!-- Barra de Progresso 3D -->
+                    <div class="auth-progress-container">
+                        <div class="auth-progress-bar" id="authProgressBar"></div>
+                        <div class="auth-progress-steps">
+                            <div class="step active" data-step="1">1</div>
+                            <div class="step" data-step="2">2</div>
+                            <div class="step" data-step="3">3</div>
+                            <div class="step" data-step="4">4</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-header-neon">
+                        <h2 id="cadastroTitle">Novo Cadastro</h2>
+                        <p id="cadastroSub">Identificação básica no portal</p>
+                    </div>
+
+                    <form id="formCadastro" class="form-auth" onsubmit="finalizarCadastro(event)">
+
+                        <!-- PASSO 1: IDENTIFICAÇÃO -->
+                        <div class="auth-step-content active" id="authStep1">
+                            <div class="form-grid">
+                                <div class="form-group-3d full-width">
+                                    <label for="nome"><i class="fi fi-rr-user"></i>  Nome Completo</label>
+                                    <input type="text" id="nome" class="input-neon-focus" required
+                                        placeholder="Digite seu nome completo">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="cpf"><i class="fi fi-rr-id-badge"></i>  CPF / CNPJ</label>
+                                    <input type="text" id="cpf" class="cpf-mask input-neon-focus" required
+                                        placeholder="000.000.000-00">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="nascimento"><i class="fi fi-rr-calendar"></i>  Nascimento</label>
+                                    <input type="text" id="nascimento" class="date-mask input-neon-focus" required
+                                        placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(2)">PRÓXIMO PASSO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 2: PERFIL E PROFISSÃO -->
+                        <div class="auth-step-content" id="authStep2">
+                            <div class="role-selector-3d">
+                                <p class="role-label">Quero me cadastrar como:</p>
+                                <div class="role-cards-grid">
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="paciente" checked
+                                            onchange="mudarTipoCadastro('paciente')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-user"></i> </div>
+                                            <span>Paciente</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="medico"
+                                            onchange="mudarTipoCadastro('medico')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-stethoscope"></i> </div>
+                                            <span>Médico</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="enfermeiro"
+                                            onchange="mudarTipoCadastro('enfermeiro')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-hospital"></i> </div>
+                                            <span>Enfermeiro</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="admin"
+                                            onchange="mudarTipoCadastro('admin')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-shield"></i> </div>
+                                            <span>Admin</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="campos-medico" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d">
+                                        <label for="crm"><i class="fi fi-rr-stethoscope"></i>  CRM / Registro</label>
+                                        <input type="text" id="crm" class="input-neon-focus" placeholder="Ex: 12345/PR">
+                                    </div>
+                                    <div class="form-group-3d">
+                                        <label for="especialidade"><i class="fi fi-rr-briefcase-medical"></i>  Especialidade</label>
+                                        <select id="especialidade" class="input-neon-focus">
+                                            <option value="">Selecione...</option>
+                                            <option value="Clinica Geral">Clínica Geral</option>
+                                            <option value="Cardiologia">Cardiologia</option>
+                                            <option value="Pediatria">Pediatria</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="campos-enfermeiro" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d">
+                                        <label for="coren"><i class="fi fi-rr-stethoscope"></i>  COREN</label>
+                                        <input type="text" id="coren" class="input-neon-focus"
+                                            placeholder="Ex: 123456/PR">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="campos-admin" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d full-width">
+                                        <label for="admin-key"><i class="fi fi-rr-key"></i>  Chave Mestra</label>
+                                        <input type="password" id="admin-key" class="input-neon-focus"
+                                            placeholder="Digite a chave">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(1)">⬅
+                                    VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(3)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 3: LOCALIZAÇÃO -->
+                        <div class="auth-step-content" id="authStep3">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="cidade"><i class="fi fi-rr-city"></i>  Cidade</label>
+                                    <select id="cidade" class="input-neon-focus" required>
+                                        <option value="Cascavel">Cascavel</option>
+                                        <option value="Toledo">Toledo</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="bairro"><i class="fi fi-rr-house-chimney"></i>  Bairro</label>
+                                    <input type="text" id="bairro" class="input-neon-focus" required
+                                        placeholder="Ex: Centro">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="sus"><i class="fi fi-rr-credit-card"></i>  Cartão SUS</label>
+                                    <input type="text" id="sus" class="sus-mask input-neon-focus" required
+                                        placeholder="000 0000 0000 0000">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(2)">⬅
+                                    VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(4)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 4: CONTATO E SENHA -->
+                        <div class="auth-step-content" id="authStep4">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="telefone"><i class="fi fi-rr-smartphone"></i>  Celular</label>
+                                    <input type="tel" id="telefone" class="tel-mask input-neon-focus" required
+                                        placeholder="(45) 99999-0000">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="email"><i class="fi fi-rr-envelope"></i>  E-mail</label>
+                                    <input type="email" id="email" class="input-neon-focus" required
+                                        placeholder="seu@email.com">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                                    <input type="password" id="senha" class="input-neon-focus" required
+                                        placeholder="Mínimo 6 caracteres">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(3)">⬅
+                                    VOLTAR</button>
+                                <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONCLUIR <i class="fi fi-rr-party-horn"></i> </button>
+                            </div>
+                        </div>
+
+                        <div class="auth-switch">
+                            Já tem conta? <a href="#" onclick="flipParaLogin()">Faça login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="api.js?v=20260419-1"></script>
+    <script src="home.js?v=20260419-2"></script>
+    <script>
+        // Efeito de scroll na navbar
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // VERIFICAÇÃO DE LOGIN (GATEKEEPER)
+        document.addEventListener('DOMContentLoaded', function () {
+            const logado = localStorage.getItem('usuarioLogado') === 'true';
+
+            if (!logado) {
+                const formContainer = document.querySelector('.agendamento-form');
+                if (formContainer) {
+                    // Adicionar classe de bloqueio
+                    formContainer.classList.add('blocked');
+
+                    // Adicionar overlay
+                    const overlayHTML = `
+                        <div class="login-overlay">
+                            <h3><i class="fi fi-rr-lock"></i>  Login Necessário</h3>
+                            <p>Para agendar uma consulta, você precisa se identificar no Portal Saúde Digital.</p>
+                            <button class="btn-overlay-login" onclick="abrirModalAuth()">Fazer Login Agora</button>
+                        </div>
+                    `;
+                    formContainer.insertAdjacentHTML('afterbegin', overlayHTML);
+
+                    // Desabilitar campos (extra safety)
+                    const inputs = formContainer.querySelectorAll('input, select, textarea, button:not(.btn-overlay-login)');
+                    inputs.forEach(input => input.disabled = true);
+                }
+            }
+        });
+
+        // Bloquear datas retroativas
+        const dataInput = document.getElementById('data-agendamento');
+        if (dataInput) {
+            const hoje = new Date().toISOString().split('T')[0];
+            dataInput.setAttribute('min', hoje);
+        }
+
+        function confirmarAgendamento() {
+            const tipo = document.getElementById('tipo-atendimento').value;
+            const especialidade = document.getElementById('especialidade').value;
+            const data = document.getElementById('data-agendamento').value;
+            const horario = document.getElementById('horario-agendamento').value;
+            const unidade = document.getElementById('unidade').value;
+            const observacoes = document.getElementById('observacoes').value;
+
+            if (!tipo || !especialidade || !data || !horario || !unidade) {
+                Swal.fire({ icon: 'warning', title: 'Campos Obrigatórios', text: 'Por favor, preencha todos os campos obrigatórios para prosseguir com o agendamento.' });
+                return;
+            }
+
+            // Validar data futura
+            const dataSelecionada = new Date(data + 'T' + horario);
+            const agora = new Date();
+            if (dataSelecionada < agora) {
+                Swal.fire({ icon: 'error', title: 'Data Inválida', text: 'O agendamento deve ser realizado para uma data e hora futuras.' });
+                return;
+            }
+
+            // Dados do Paciente (Recuperar da Sessão ou Mock)
+            const pacienteNome = localStorage.getItem('usuarioNome') || 'Paciente Visitante';
+            const pacienteCpf = localStorage.getItem('usuarioCpf') || '000.000.000-00';
+            const pacienteSus = localStorage.getItem('usuarioSUS') || '000 0000 0000 0000';
+
+            const novoAgendamento = {
+                id: Date.now(),
+                dataCriacao: new Date().toLocaleDateString(),
+                tipo: tipo,
+                especialidade: especialidade,
+                dataAgendamento: data.split('-').reverse().join('/'), // DD/MM/AAAA
+                dataRaw: data, // YYYY-MM-DD
+                horario: horario,
+                unidade: unidade,
+                observacoes: observacoes,
+                paciente: {
+                    nome: pacienteNome,
+                    cpf: pacienteCpf,
+                    sus: pacienteSus
+                },
+                status: 'Agendado'
+            };
+
+            // Salvar no LocalStorage
+            let agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+            agendamentos.push(novoAgendamento);
+            localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'Sucesso!', 
+                html: '<i class="fi fi-rr-check-circle"></i>  Agendamento solicitado com sucesso!<br><br>Verifique seu e-mail e SMS para a confirmação definitiva.' 
+            });
+
+            // Limpar formulário
+            document.getElementById('tipo-atendimento').value = '';
+            document.getElementById('especialidade').value = '';
+            document.getElementById('data-agendamento').value = '';
+            document.getElementById('horario-agendamento').value = '';
+            document.getElementById('unidade').value = '';
+            document.getElementById('observacoes').value = '';
+        }
+    </script>
+
+    <script src="cookie-consent.js" defer></script>
+</body>
+
+</html>

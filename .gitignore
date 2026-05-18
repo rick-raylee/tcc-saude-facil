@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+scratch/
+backend/_arquivos_antigos/
+backend/uploads/
+.vscode/

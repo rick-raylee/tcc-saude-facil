@@ -1,0 +1,948 @@
+/* ====================================================================
+   MEDICO.CSS - Estilos do Painel Profissional
+   ==================================================================== */
+
+:root {
+    --sus-blue-dark: #004b82;
+    --sus-blue-light: #0056AC;
+    --sus-green: #28a745;
+    --white: #ffffff;
+    --bg-light: #f4f7f9;
+    --text-dark: #2d3436;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+body {
+    /* Paleta pedida pelo usuário */
+    background: linear-gradient(135deg, #3E5C6E, #52B29D, #9BCEAA, #D7E3B4, #EFEFD6);
+    background-attachment: fixed;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* App-like feel */
+}
+
+/* --- NAVBAR MÉDICA --- */
+.navbar-medica {
+    height: 80px; /* Aumentado levemente para respirar melhor */
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    z-index: 1000;
+    position: relative;
+    border-bottom: 1px solid #eee;
+}
+
+.logo-medica {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-medica img {
+    height: 48px !important; /* Force height against global resets */
+    width: auto !important;
+    max-height: 48px !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+.logo-medica span {
+    font-weight: 700;
+    color: #666;
+    border-left: 2px solid #eee;
+    padding-left: 15px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.user-medico {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.medico-info {
+    text-align: right;
+    line-height: 1.2;
+}
+
+.medico-info span {
+    display: block;
+    font-weight: 700;
+    color: var(--sus-blue-dark);
+}
+
+.medico-info small {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.btn-logout-medico {
+    padding: 8px 20px;
+    border: 1px solid #ffcccc;
+    background: #fff5f5;
+    color: #ff4757;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-logout-medico:hover {
+    background: #ff4757;
+    color: white;
+}
+
+/* --- LAYOUT PRINCIPAL --- */
+.container-medico {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* SIDEBAR BUSCA */
+.sidebar-busca {
+    width: 320px;
+    background: white;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+}
+
+.busca-card {
+    background: #f8faff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e1e8f0;
+}
+
+.busca-card h3 {
+    font-size: 1rem;
+    color: var(--sus-blue-dark);
+    margin-bottom: 15px;
+}
+
+.busca-card input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: border 0.3s;
+}
+
+.busca-card input:focus {
+    border-color: var(--sus-blue-light);
+    outline: none;
+}
+
+.btn-buscar {
+    width: 100%;
+    background: var(--sus-blue-dark);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-buscar:hover {
+    background: var(--sus-blue-light);
+}
+
+.tip {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 5px;
+    display: block;
+    text-align: center;
+}
+
+.lista-recentes h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.lista-recentes ul {
+    list-style: none;
+}
+
+.lista-recentes li {
+    padding: 10px;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.lista-recentes li:hover {
+    background: #f9f9f9;
+}
+
+.lista-recentes .nome-paciente {
+    font-weight: 600;
+    color: #333;
+    display: block;
+}
+
+.lista-recentes .status-paciente {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* ÁREA PRINCIPAL */
+.main-atendimento {
+    flex: 1;
+    background: #f4f7f9;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.dashboard-medico h2 {
+    margin: 10px 0 25px 0;
+    color: var(--sus-blue-dark);
+    font-size: 1.8rem;
+}
+
+/* Empty State */
+.empty-atendimento {
+    text-align: center;
+    margin-top: 100px;
+    color: #aaa;
+}
+
+.icon-empty {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+/* Ficha de Atendimento */
+.ficha-atendimento {
+    max-width: 900px;
+    margin: 0 auto;
+    background: transparent;
+}
+
+.paciente-header {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.paciente-avatar {
+    width: 60px;
+    height: 60px;
+    background: #eef2f7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--sus-blue-dark);
+}
+
+.paciente-dados h2 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.paciente-meta {
+    display: flex;
+    gap: 15px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.badge-status {
+    background: #e6fffa;
+    color: #00b894;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 1px solid #b2f5ea;
+}
+
+/* Tabs */
+.prontuario-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.tab-btn.active {
+    background: var(--sus-blue-dark);
+    color: white;
+}
+
+/* Conteúdo Tabs */
+.tab-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--sus-blue-dark);
+    outline: none;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn-secondary {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-salvar-atendimento {
+    background: var(--sus-green);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+}
+
+.btn-salvar-atendimento:hover {
+    background: #218838;
+}
+
+/* =========================================
+   SALA DE TELEMEDICINA (Dark Mode UI)
+   ========================================= */
+
+.sala-telemedicina {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0f1014;
+    /* Fundo quase preto */
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+/* Header */
+.tele-header {
+    height: 60px;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+.tele-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: 'Inter', sans-serif;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background: #ff4757;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+    }
+
+    70% {
+        opacity: 0.5;
+        box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
+    }
+
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+    }
+}
+
+#tele-timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.tele-divider {
+    opacity: 0.3;
+}
+
+.btn-minimizar {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-minimizar:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Área de Vídeo */
+.tele-video-area {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+}
+
+.video-main {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, #2a2a2a, #111);
+    color: #666;
+}
+
+.placeholder-icon {
+    font-size: 5rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.video-placeholder p {
+    font-size: 1.1rem;
+    opacity: 0.6;
+}
+
+/* Vídeo (médico e paciente) */
+.video-main video,
+.video-pip video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-main video {
+    transform: scaleX(-1);
+}
+
+.video-label {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    backdrop-filter: blur(4px);
+}
+
+/* Picture in Picture (Medico) */
+.video-pip {
+    position: absolute;
+    bottom: 100px;
+    right: 30px;
+    width: 280px;
+    height: 180px;
+    background: #222;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    z-index: 5;
+    transition: all 0.3s ease;
+}
+
+.video-pip video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    /* Espelhar */
+}
+
+/* Controles */
+.tele-controls {
+    height: 90px;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.tele-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: #333;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tele-btn:hover {
+    background: #444;
+}
+
+.tele-btn.active {
+    background: white;
+    color: black;
+}
+
+/* Estado Mutado/Off */
+
+.tele-btn.end-call {
+    background: #ff4757;
+    width: auto;
+    padding: 0 30px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.tele-btn.end-call:hover {
+    background: #ff6b81;
+}
+
+/* Painel Lateral (Prontuário Overlay) */
+.tele-panel {
+    position: absolute;
+    top: 0;
+    right: -400px;
+    /* Escondido */
+    width: 400px;
+    height: calc(100% - 90px);
+    /* Menos a barra de controles */
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    color: #333;
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+}
+
+.tele-panel.open {
+    right: 0;
+}
+
+.tele-panel-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.panel-tab {
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #999;
+    border-bottom: 2px solid transparent;
+}
+
+.panel-tab.active {
+    color: #004b82;
+    border-bottom: 2px solid #004b82;
+}
+
+.tele-panel-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #004b82;
+}
+
+.tele-panel-content {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tele-panel-content textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    font-family: inherit;
+    background: #f8f9fa;
+}
+
+.tele-panel-content input {
+    background: #f8f9fa;
+}
+
+.btn-salvar-tele {
+    background: #218838;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .video-pip {
+        width: 120px;
+        height: 80px;
+        bottom: 110px;
+        right: 20px;
+    }
+
+    .tele-panel {
+        width: 100%;
+        height: 60%;
+        top: auto;
+        bottom: 90px;
+        right: 0;
+        transform: translateY(100%);
+    }
+
+    .tele-panel.open {
+        transform: translateY(0);
+    }
+}
+
+/* Botão de Swap Video */
+.btn-swap {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+.btn-swap:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== TRIAGEM ENFERMAGEM ========== */
+.triagem-enfermagem-alert {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border: 2px solid #a5d6a7;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.triagem-alert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+    color: #2e7d32;
+}
+
+.risco-badge {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+}
+
+.risco-badge.verde {
+    background: #4caf50;
+}
+
+.risco-badge.amarelo {
+    background: #ffca28;
+    color: #333;
+}
+
+.risco-badge.laranja {
+    background: #ff9800;
+}
+
+.risco-badge.vermelho {
+    background: #f44336;
+}
+
+/* Bordas para o card de triagem no médico */
+.triagem-enfermagem-alert.verde { border-left: 5px solid #4caf50; }
+.triagem-enfermagem-alert.amarelo { border-left: 5px solid #ffca28; }
+.triagem-enfermagem-alert.laranja { border-left: 5px solid #ff9800; }
+.triagem-enfermagem-alert.vermelho { border-left: 5px solid #f44336; }
+
+.risco-badge.vermelho {
+    background: #f44336;
+}
+
+.triagem-sinais-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.ts-item {
+    background: white;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #c8e6c9;
+}
+
+.ts-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+.ts-valor {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.triagem-queixa-box {
+    background: #fff8e1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #555;
+    border-left: 3px solid #ffc107;
+}
+
+.triagem-queixa-box small {
+    color: #999;
+}
+
+/* =========================================
+   ESTILOS DE IMPRESSÃO (PDF/PAPEL)
+   ========================================= */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print-area,
+    .print-area * {
+        visibility: visible;
+    }
+
+    .print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 30px;
+        background: white;
+        box-shadow: none;
+        border: none;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .doc-oficial {
+        font-family: 'Times New Roman', Times, serif;
+        color: #000;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .doc-header {
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+    }
+
+    .doc-header h2 {
+        margin: 0 0 5px 0;
+        font-size: 1.5rem;
+        text-transform: uppercase;
+    }
+
+    .doc-header p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .doc-body {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        text-align: justify;
+        min-height: 300px;
+    }
+
+    .doc-footer {
+        margin-top: 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .doc-assinatura {
+        width: 300px;
+        border-top: 1px solid #000;
+        text-align: center;
+        padding-top: 10px;
+    }
+
+    .doc-assinatura strong {
+        display: block;
+    }
+}

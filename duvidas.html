@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dúvidas Frequentes | Portal Saúde Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="duvidas.css">
+    <link rel="stylesheet" href="responsive.css">
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+</head>
+
+<body class="flex-body">
+
+    <!-- NAVBAR ANIMADA -->
+    <header class="navbar" id="navbar">
+        <div class="logo"><a href="index.html"><img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'"></a>
+        </div>
+        <nav class="nav-links">
+            <a href="agendamento.html">Agendamento</a>
+            <a href="telemedicina.html">Telemedicina</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="mapas.html">Mapas</a>
+            <a href="duvidas.html">Dúvidas</a>
+        </nav>
+        <div class="nav-auth">
+            <button class="btn-auth btn-login" onclick="abrirModalAuth()">LOGIN</button>
+            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">CADASTRE-SE</button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="container">
+
+        <div class="page-header">
+            <h1><i class="fi fi-rr-interrogation"></i>  Perguntas Frequentes</h1>
+            <p>Encontre respostas rápidas para as dúvidas mais comuns</p>
+        </div>
+
+        <!-- BARRA DE PESQUISA -->
+        <div class="search-box" style="position: relative; max-width: 600px; margin: 0 auto 30px auto;">
+            <i class="fi fi-rr-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; font-size: 1.2rem;"></i>
+            <input type="text" id="search-faq" placeholder="Buscar dúvida..." onkeyup="buscarDuvida()" style="width: 100%; padding: 15px 15px 15px 45px; border-radius: 30px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 1.1rem; outline: none;">
+        </div>
+
+        <!-- CATEGORIAS DE FAQ -->
+        <div class="categorias-faq">
+            <button class="cat-btn active" onclick="filtrarCategoria('todas')">Todas</button>
+            <button class="cat-btn" onclick="filtrarCategoria('agendamento')">Agendamento</button>
+            <button class="cat-btn" onclick="filtrarCategoria('telemedicina')">Telemedicina</button>
+            <button class="cat-btn" onclick="filtrarCategoria('campanhas')">Campanhas</button>
+            <button class="cat-btn" onclick="filtrarCategoria('geral')">Geral</button>
+        </div>
+
+        <!-- FAQ ACCORDION -->
+        <section class="faq-section">
+
+            <details class="faq-item" data-categoria="telemedicina">
+                <summary>Como recebo o link da consulta de telemedicina?</summary>
+                <p>Após agendar, a consulta ficará disponível na sua <strong>Home</strong> e na página de
+                    <strong>Telemedicina</strong>.
+                    Basta entrar no horário agendado pelo portal. Certifique-se de que seus dados de contato estão
+                    atualizados no sistema.
+                </p>
+            </details>
+
+            <details class="faq-item" data-categoria="agendamento">
+                <summary>Posso desmarcar um agendamento?</summary>
+                <p>Sim. O cancelamento deve ser feito com pelo menos <strong>2 horas de antecedência</strong> através da
+                    aba "Meus Agendamentos" no seu perfil. Cancelamentos em cima da hora podem impedir outros pacientes
+                    de usar a vaga.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="telemedicina">
+                <summary>Quais os requisitos técnicos para a telemedicina?</summary>
+                <p>Você precisa de:</p>
+                <ul>
+                    <li>Dispositivo com <strong>câmera e microfone</strong> (celular, tablet ou computador)</li>
+                    <li>Conexão estável com a internet (mínimo 2 Mbps)</li>
+                    <li>Navegador atualizado (Chrome, Firefox ou Edge recomendados)</li>
+                    <li>Ambiente tranquilo e com boa iluminação</li>
+                </ul>
+            </details>
+
+            <details class="faq-item" data-categoria="geral">
+                <summary>O atendimento é gratuito?</summary>
+                <p>Sim! Todos os serviços oferecidos neste portal fazem parte da rede <strong>SUS de Cascavel</strong> e
+                    são <strong>100% gratuitos</strong> ao cidadão. Não há cobranças em nenhuma etapa.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="agendamento">
+                <summary>Quanto tempo antes devo chegar para a consulta presencial?</summary>
+                <p>Recomendamos chegar com <strong>15 minutos de antecedência</strong> para realizar o check-in,
+                    atualizar cadastro se necessário, e aguardar confortavelmente o chamado do profissional.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="geral">
+                <summary>Quais documentos devo levar na consulta presencial?</summary>
+                <p>É obrigatório apresentar:</p>
+                <ul>
+                    <li>📄 <strong>Documento com foto</strong> (RG, CNH ou Carteira de Trabalho)</li>
+                    <li><i class="fi fi-rr-hospital"></i>  <strong>Cartão SUS</strong></li>
+                    <li><i class="fi fi-rr-clipboard-list"></i>  <strong>Exames anteriores</strong> (se for consulta de retorno)</li>
+                    <li><i class="fi fi-rr-medicine"></i>  <strong>Receitas de medicamentos</strong> em uso (se aplicável)</li>
+                </ul>
+            </details>
+
+            <details class="faq-item" data-categoria="telemedicina">
+                <summary>A receita médica da telemedicina tem validade?</summary>
+                <p>Sim! A receita digital emitida pelo médico via telemedicina tem a <strong>mesma validade
+                        legal</strong> que uma receita presencial. Você pode utilizá-la em qualquer farmácia da rede SUS
+                    ou particular.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="campanhas">
+                <summary>Como saber se estou no público-alvo de uma campanha?</summary>
+                <p>Cada campanha especifica critérios como <strong>faixa etária, sexo, condições de saúde</strong>, etc.
+                    Acesse a página de <a href="campanhas.html">Campanhas</a>
+            <a href="mapas.html">Mapas</a> para ver os detalhes de cada ação. Em caso
+                    de dúvida, consulte sua UBS.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="agendamento">
+                <summary>Posso agendar consulta para outra pessoa?</summary>
+                <p>Sim, desde que você tenha os dados pessoais completos da pessoa (nome completo, CPF, data de
+                    nascimento, etc.). Para menores de idade, o responsável legal deve realizar o agendamento.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="geral">
+                <summary>Como atualizo meus dados cadastrais?</summary>
+                <p>Acesse a área "<strong>Meu Perfil</strong>" após fazer login no portal. Lá você pode atualizar
+                    telefone, e-mail, endereço e outras informações. Alterações em dados básicos (nome, CPF) devem ser
+                    feitas presencialmente na UBS.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="telemedicina">
+                <summary>E se eu perder a consulta de telemedicina?</summary>
+                <p>Se você não entrar na sala virtual em até <strong>15 minutos após o horário</strong> agendado, a
+                    consulta será automaticamente cancelada e a vaga disponibilizada para outro paciente. Será
+                    necessário reagendar.</p>
+            </details>
+
+            <details class="faq-item" data-categoria="campanhas">
+                <summary>Preciso agendar para participar de uma campanha de vacinação?</summary>
+                <p>Depende da campanha. Algumas exigem agendamento prévio, outras funcionam por <strong>demanda
+                        espontânea</strong> (ordem de chegada). Verifique os detalhes específicos na página de cada
+                    campanha.</p>
+            </details>
+
+        </section>
+
+        <!-- SEÇÃO DE CONTATO -->
+        <section class="contato-section">
+            <h3>Não encontrou sua resposta?</h3>
+            <p>Entre em contato conosco através dos canais abaixo:</p>
+            <div class="contato-grid">
+                <div class="contato-card">
+                    <div class="contato-icon"><i class="fi fi-rr-phone-call"></i> </div>
+                    <h4>Telefone</h4>
+                    <p>(45) 3321-5800</p>
+                </div>
+                <div class="contato-card">
+                    <div class="contato-icon"><i class="fi fi-rr-envelope"></i> </div>
+                    <h4>E-mail</h4>
+                    <p>saude@cascavel.pr.gov.br</p>
+                </div>
+                <div class="contato-card">
+                    <div class="contato-icon"><i class="fi fi-rr-messages"></i> </div>
+                    <h4>WhatsApp</h4>
+                    <p>(45) 99999-8888</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="modern-footer">
+        <div class="container">
+            <div class="footer-brand">
+                <h3>Portal Saúde Fácil</h3>
+                <p>O portal de saúde mais completo da região. Agendamentos, telemedicina e informações reais para você.</p>
+            </div>
+            <div class="footer-links-col">
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="index.html">Página Inicial</a></li>
+                    <li><a href="agendamento.html">Agendamentos</a></li>
+                    <li><a href="telemedicina.html">Telemedicina</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacidade.html">Política de Privacidade</a></li>
+                    <li><a href="termos.html">Termos de Uso</a></li>
+                    <li><a href="duvidas.html">Dúvidas Frequentes</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Portal Saúde Fácil. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- =========================================================================
+         MODAL DE AUTENTICAÇÃO INTEGRADO (3D FLIP & MEDICAL NEON)
+         ========================================================================= -->
+    <div id="modalAuth" class="modal-auth">
+        <div class="modal-auth-flipper" id="modalAuthFlipper">
+
+            <!-- SEÇÃO FRONT: LOGIN -->
+            <div class="login-side-neon" id="loginNeonWrapper">
+                <div class="card-padrao modal-auth-card" id="loginCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+                    <div class="auth-header-neon">
+                        <div class="header-icon-pulsing"><i class="fi fi-rr-hospital"></i> </div>
+                        <h2>Acesso Saúde</h2>
+                        <p>Entre no seu painel inteligente</p>
+                    </div>
+
+                    <form id="formLogin" class="form-auth" onsubmit="finalizarLogin(event); verificarSessao();">
+                        <div class="form-group-3d">
+                            <label for="login-cpf"><i class="fi fi-rr-id-badge"></i>  CPF</label>
+                            <input type="text" id="login-cpf" class="cpf-mask input-neon-focus" required
+                                placeholder="000.000.000-00">
+                        </div>
+                        <div class="form-group-3d">
+                            <label for="login-senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                            <input type="password" id="login-senha" class="input-neon-focus" required
+                                placeholder="Sua senha secreta">
+                        </div>
+                        <div class="form-aux">
+                            <a href="#" class="link-fale-conosco" onclick="abrirModalRecuperar()">Esqueci a senha</a>
+                        </div>
+                        <div class="form-footer">
+                            <button type="submit" class="btn-enviar-auth-3d btn-neon-health">ENTRAR NO PORTAL
+                                 </button>
+                        </div>
+                        <div class="auth-switch">
+                            Não tem conta? <a href="#" onclick="flipParaCadastro()">Cadastre-se agora</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SEÇÃO BACK: CADASTRO -->
+            <div class="cadastro-side-neon" id="cadastroNeonWrapper">
+                <div class="card-padrao modal-auth-card cadastro-wide" id="cadastroCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+
+                    <!-- Barra de Progresso 3D -->
+                    <div class="auth-progress-container">
+                        <div class="auth-progress-bar" id="authProgressBar"></div>
+                        <div class="auth-progress-steps">
+                            <div class="step active" data-step="1">1</div>
+                            <div class="step" data-step="2">2</div>
+                            <div class="step" data-step="3">3</div>
+                            <div class="step" data-step="4">4</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-header-neon">
+                        <h2 id="cadastroTitle">Novo Cadastro</h2>
+                        <p id="cadastroSub">Identificação básica no portal</p>
+                    </div>
+
+                    <form id="formCadastro" class="form-auth" onsubmit="finalizarCadastro(event)">
+
+                        <!-- PASSO 1: IDENTIFICAÇÃO -->
+                        <div class="auth-step-content active" id="authStep1">
+                            <div class="form-grid">
+                                <div class="form-group-3d full-width">
+                                    <label for="nome"><i class="fi fi-rr-user"></i>  Nome Completo</label>
+                                    <input type="text" id="nome" class="input-neon-focus" required
+                                        placeholder="Digite seu nome completo">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="cpf"><i class="fi fi-rr-id-badge"></i>  CPF / CNPJ</label>
+                                    <input type="text" id="cpf" class="cpf-mask input-neon-focus" required
+                                        placeholder="000.000.000-00">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="nascimento"><i class="fi fi-rr-calendar"></i>  Nascimento</label>
+                                    <input type="text" id="nascimento" class="date-mask input-neon-focus" required
+                                        placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(2)">PRÓXIMO PASSO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 2: PERFIL E PROFISSÃO -->
+                        <div class="auth-step-content" id="authStep2">
+                            <div class="role-selector-3d">
+                                <p class="role-label">Quero me cadastrar como:</p>
+                                <div class="role-cards-grid">
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="paciente" checked
+                                            onchange="mudarTipoCadastro('paciente')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-user"></i> </div>
+                                            <span>Paciente</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="medico"
+                                            onchange="mudarTipoCadastro('medico')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-stethoscope"></i> </div>
+                                            <span>Médico</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="enfermeiro"
+                                            onchange="mudarTipoCadastro('enfermeiro')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-hospital"></i> </div>
+                                            <span>Enfermeiro</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="admin"
+                                            onchange="mudarTipoCadastro('admin')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-shield"></i> </div>
+                                            <span>Admin</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="campos-medico" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d">
+                                        <label for="crm"><i class="fi fi-rr-stethoscope"></i>  CRM / Registro</label>
+                                        <input type="text" id="crm" class="input-neon-focus" placeholder="Ex: 12345/PR">
+                                    </div>
+                                    <div class="form-group-3d">
+                                        <label for="especialidade"><i class="fi fi-rr-briefcase-medical"></i>  Especialidade</label>
+                                        <select id="especialidade" class="input-neon-focus">
+                                            <option value="">Selecione...</option>
+                                            <option value="Clinica Geral">Clínica Geral</option>
+                                            <option value="Cardiologia">Cardiologia</option>
+                                            <option value="Pediatria">Pediatria</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="campos-enfermeiro" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d">
+                                        <label for="coren"><i class="fi fi-rr-stethoscope"></i>  COREN</label>
+                                        <input type="text" id="coren" class="input-neon-focus"
+                                            placeholder="Ex: 123456/PR">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="campos-admin" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d full-width">
+                                        <label for="admin-key"><i class="fi fi-rr-key"></i>  Chave Mestra</label>
+                                        <input type="password" id="admin-key" class="input-neon-focus"
+                                            placeholder="Digite a chave">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(1)">⬅
+                                    VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(3)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 3: LOCALIZAÇÃO -->
+                        <div class="auth-step-content" id="authStep3">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="cidade"><i class="fi fi-rr-city"></i>  Cidade</label>
+                                    <select id="cidade" class="input-neon-focus" required>
+                                        <option value="Cascavel">Cascavel</option>
+                                        <option value="Toledo">Toledo</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="bairro"><i class="fi fi-rr-house-chimney"></i>  Bairro</label>
+                                    <input type="text" id="bairro" class="input-neon-focus" required
+                                        placeholder="Ex: Centro">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="sus"><i class="fi fi-rr-credit-card"></i>  Cartão SUS</label>
+                                    <input type="text" id="sus" class="sus-mask input-neon-focus" required
+                                        placeholder="000 0000 0000 0000">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(2)">⬅
+                                    VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(4)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 4: CONTATO E SENHA -->
+                        <div class="auth-step-content" id="authStep4">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="telefone"><i class="fi fi-rr-smartphone"></i>  Celular</label>
+                                    <input type="tel" id="telefone" class="tel-mask input-neon-focus" required
+                                        placeholder="(45) 99999-0000">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="email"><i class="fi fi-rr-envelope"></i>  E-mail</label>
+                                    <input type="email" id="email" class="input-neon-focus" required
+                                        placeholder="seu@email.com">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                                    <input type="password" id="senha" class="input-neon-focus" required
+                                        placeholder="Mínimo 6 caracteres">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(3)">⬅
+                                    VOLTAR</button>
+                                <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONCLUIR <i class="fi fi-rr-party-horn"></i> </button>
+                            </div>
+                        </div>
+
+                        <div class="auth-switch">
+                            Já tem conta? <a href="#" onclick="flipParaLogin()">Faça login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="api.js?v=20260419-1"></script>
+    <script src="home.js?v=20260419-2"></script>
+    <script>
+        // Efeito de scroll na navbar
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Buscar dúvida
+        function buscarDuvida() {
+            const input = document.getElementById('search-faq').value.toLowerCase();
+            const items = document.querySelectorAll('.faq-item');
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(input)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Filtrar por categoria
+        function filtrarCategoria(categoria) {
+            const items = document.querySelectorAll('.faq-item');
+            const buttons = document.querySelectorAll('.cat-btn');
+
+            // Atualizar botões ativos
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Filtrar itens
+            items.forEach(item => {
+                if (categoria === 'todas' || item.dataset.categoria === categoria) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+    <script src="cookie-consent.js" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,402 @@
+/* ==========================================================================
+   RESPONSIVE.CSS - REVISÃO DEFINITIVA (3D & 4K)
+   Status: Etapa 2-8 — Reestruturação Completa
+   ========================================================================== */
+
+/* 1. PADRONIZAÇÃO E RESETS (ETAPA 2, 5, 6) */
+.container {
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+}
+
+.container-wide {
+    width: 100% !important;
+    max-width: 1600px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+}
+
+img {
+    max-width: 100% !important;
+    display: block;
+    object-fit: cover !important;
+}
+
+/* Override para imagens dentro dos cards do carrossel vertical */
+.vertical-card > img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+}
+
+
+h1, h2, h3, h4, h5, h6, p, span, .stat-numero, .stat-label {
+    height: auto !important;
+    overflow: visible !important;
+    word-break: normal !important;
+    white-space: normal !important;
+}
+
+/* 2. ESTRUTURA PRINCIPAL (ETAPA 2 - GRID) */
+.main-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+}
+
+/* 3. SANDBOX PARA ANIMAÇÕES 3D (ETAPA 3) */
+.animation-container {
+    width: 100% !important;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    perspective: 1000px !important;
+    overflow: visible !important;
+    position: relative !important;
+}
+
+/* 4. ORGANIZAÇÃO DE CARDS (ETAPA 4) */
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.card {
+    flex: 1 1 300px;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-card:hover {
+    transform: translateY(-15px) scale(1.05) !important;
+    box-shadow: 0 25px 50px rgba(0, 75, 130, 0.3) !important;
+    border-color: var(--health-cyan) !important;
+}
+
+/* Cores vibrantes para os cards (Estilo Full Stack Premium) */
+.stat-card.azul { background: linear-gradient(135deg, rgba(74, 144, 226, 0.2), rgba(0, 75, 130, 0.4)); }
+.stat-card.verde { background: linear-gradient(135deg, rgba(80, 227, 194, 0.2), rgba(46, 204, 113, 0.4)); }
+.stat-card.laranja { background: linear-gradient(135deg, rgba(255, 171, 102, 0.2), rgba(230, 126, 34, 0.4)); }
+.stat-card.roxo { background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(142, 68, 173, 0.4)); }
+
+.stat-icon-wrapper {
+    width: 70px !important;
+    height: 70px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    font-size: 2.5rem !important;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+}
+
+.stat-numero {
+    font-size: 2.2rem !important;
+    font-weight: 900 !important;
+    margin-bottom: 8px !important;
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+    letter-spacing: -1px !important;
+}
+
+.stat-label {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    margin-bottom: 5px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+.stat-detalhe {
+    font-size: 0.9rem !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-weight: 500 !important;
+}
+
+/* ==========================================================================
+   TIPOGRAFIA E LAYOUT FLUÍDO (RESPONSIVIDADE AUTOMÁTICA)
+   ========================================================================== */
+
+/* Regras Globais para evitar Transbordo */
+* {
+    box-sizing: border-box !important;
+}
+
+html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+}
+
+.container {
+    width: 100% !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    padding: 0 15px !important;
+}
+
+/* Tipografia Fluida com Clamp */
+h1 { font-size: clamp(1.8rem, 5vw, 3.2rem) !important; }
+h2 { font-size: clamp(1.5rem, 4vw, 2.5rem) !important; }
+h3 { font-size: clamp(1.2rem, 3vw, 1.8rem) !important; }
+p, a, span { font-size: clamp(0.9rem, 1.1vw, 1.1rem) !important; }
+
+/* 5. CORREÇÕES DE COMPONENTES CRÍTICOS (NAVBAR INTEGRADA) */
+.navbar {
+    min-height: 80px !important;
+    height: auto !important;
+    padding: 15px 5% !important;
+    z-index: 2000 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: rgba(0, 75, 130, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.logo img {
+    height: clamp(40px, 6vw, 60px) !important;
+}
+
+@media (max-width: 1024px) {
+    .hamburger-menu {
+        display: flex !important;
+    }
+
+    .nav-links {
+        display: none !important;
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 20px 0 !important;
+        order: 3; /* Garante que os links fiquem abaixo do logo/hambúrguer */
+    }
+
+    .menu-toggle-checkbox:checked ~ .nav-links {
+        display: flex !important;
+    }
+
+    .nav-auth {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    .hamburger-menu {
+        display: none !important;
+    }
+    .nav-links {
+        display: flex !important;
+        gap: 25px !important;
+    }
+}
+
+/* BREAKPOINT: 320px (MOBILE) */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 10px 3% !important;
+    }
+
+    .logo img {
+        height: 50px !important;
+    }
+
+    .news-slide-item {
+        padding: 10px !important;
+    }
+
+    .news-slide-info h3 {
+        font-size: 1.3rem !important;
+    }
+
+    .news-slide-info p {
+        font-size: 0.85rem !important;
+    }
+
+    .btn-auth {
+        padding: 12px !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* AJUSTES FINAIS DE BOTÕES E CENTRALIZAÇÃO */
+.btn-auth, .news-slide-btn, .btn-link {
+    display: table !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    width: auto !important;
+    min-width: 160px !important;
+}
+
+body {
+    overflow-x: hidden !important;
+}
+
+.news-slider-wrapper {
+    height: auto !important;
+    min-height: 550px !important;
+    position: relative !important;
+    margin: 40px auto !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    padding: 0 10px !important;
+}
+
+.mapa-estatisticas {
+    height: 550px;
+    min-height: 400px;
+    width: 100%;
+    border-radius: 30px;
+    overflow: hidden;
+}
+
+/* Carrossel vertical: estilos definidos em home.css - não sobrescrever aqui */
+
+
+/* 6. RESPONSIVIDADE POR BREAKPOINTS (ETAPA 7) */
+
+/* DESKTOP GRANDE (1440px - 2560px) */
+@media (min-width: 1240px) {
+    .container { max-width: 1200px !important; }
+}
+
+@media (min-width: 1440px) {
+    .container { max-width: 1400px !important; }
+    .container-wide { max-width: 1600px !important; }
+    .main-layout { gap: 60px !important; }
+}
+
+@media (min-width: 1920px) {
+    .container { max-width: 1600px !important; }
+    .container-wide { max-width: 1800px !important; }
+}
+
+@media (min-width: 2560px) {
+    .container { max-width: 2000px !important; }
+    .container-wide { max-width: 2400px !important; }
+}
+
+/* TABLET (768px - 1024px) */
+@media (max-width: 1024px) {
+    .cards .card {
+        flex: 1 1 45%;
+    }
+}
+
+/* MOBILE AVANÇADO (Até 768px) */
+@media (max-width: 768px) {
+
+    .news-slider-wrapper { min-height: 750px !important; }
+}
+
+/* MOBILE CELULARES (480px) - OTIMIZAÇÃO 3D (ETAPA 8) */
+@media (max-width: 480px) {
+    .container { padding: 15px !important; }
+    
+    .cards, .stats-grid {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 25px !important;
+    }
+    
+    .card {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    button, .btn-auth, .btn-nav, .news-slide-btn {
+        width: 100% !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* ESCALA DINÂMICA DE ANIMAÇÕES 3D (ETAPA 8) */
+    .animation-container, .carousel-3d-container {
+        transform: scale(0.8) !important;
+        transform-origin: center center !important;
+    }
+
+    .stat-numero { font-size: 1.6rem !important; }
+    h1 { font-size: 1.5rem !important; }
+
+    .vertical-disease-name {
+        font-size: 1.6rem !important;
+    }
+}
+
+
+/* AJUSTES PARA TELAS MUITO PEQUENAS (360px - 375px) */
+@media (max-width: 375px) {
+    .animation-container, .carousel-3d-container {
+        transform: scale(0.7) !important;
+    }
+}
+
+/* ==========================================================================
+   REGRAS ESTRITAS DO PROPRIETÁRIO (CARROSSEL E RESPONSIVIDADE)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .news-slider-wrapper {
+        min-height: 450px !important;
+        padding: 0 !important;
+        overflow: visible !important; /* CORREÇÃO: Permitir o 3D respirar */
+    }
+    
+    .news-slide-item {
+        width: 98% !important; /* Quase 100% conforme pedido */
+        max-width: none !important;
+        padding: 15px !important;
+        flex-direction: column !important;
+        left: 50% !important;
+    }
+
+    .news-slide-info h3 {
+        font-size: clamp(1.2rem, 5vw, 1.8rem) !important;
+    }
+
+    .news-slide-info p {
+        font-size: clamp(0.85rem, 3vw, 1rem) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .news-slider-wrapper {
+        min-height: 400px !important;
+    }
+
+    .news-slide-item {
+        width: 100% !important;
+        padding: 10px !important;
+    }
+
+    .news-slide-img {
+        height: 180px !important;
+    }
+    
+    .news-slide-btn {
+        width: 100% !important;
+        padding: 10px !important;
+    }
+}
+

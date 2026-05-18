@@ -1,0 +1,3 @@
+deletarNoticia: 'deletarNoticia(${noticia.id})">🗑️</button>'
+abrirModalNoticia: 'abrirModalNoticia(${JSON.stringify(noticia).replace(/\'/g, "&#39;")})\'>✏️</button>'
+bullet: "dataStr = noticia.criada_em || noticia.data || '---';"

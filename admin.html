@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo | Portal Saúde Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            const isFile = window.location.protocol === 'file:';
+            window.ADMIN_ASSET_BASE = isFile ? './' : '/';
+            window.ADMIN_INDEX_URL = isFile ? 'index.html' : '/index.html';
+
+            const base = window.ADMIN_ASSET_BASE;
+            document.write(
+                '<link rel="stylesheet" href="' + base + 'main.css?v=20260418-4">' +
+                '<link rel="stylesheet" href="' + base + 'admin.css?v=20260418-4">' +
+                '<link rel="stylesheet" href="' + base + 'responsive.css?v=20260418-4">'
+            );
+        })();
+    </script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- amCharts 4 -->
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/geodata/brazilLow.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body style="display: none;">
+
+    <header class="navbar-admin">
+        <div class="logo-admin">
+            <a href="#dashboard" class="logo-link">
+                <img src="logo-saude-facil.png" alt="Logo Saúde Fácil">
+                <span>PAINEL ADMIN</span>
+            </a>
+        </div>
+        <div class="user-admin" style="display: flex; align-items: center;">
+            <div style="display: flex; flex-direction: column; text-align: right; margin-right: 15px;">
+                <span id="admin-welcome-message" style="margin: 0;">Aguarde...</span>
+                <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+            </div>
+            <button class="btn-logout-admin" onclick="logoutAdmin()">Sair</button>
+        </div>
+    </header>
+
+    <div class="container-admin">
+        <aside class="sidebar-admin">
+            <nav>
+                <a href="#dashboard" class="nav-btn" data-section="dashboard"><i class="fi fi-rr-chart-histogram"></i>  Dashboard</a>
+                <a href="#carrossel" class="nav-btn" data-section="carrossel">🖼️ Carrossel</a>
+                <a href="#noticias" class="nav-btn" data-section="noticias"><i class="fi fi-rr-newspaper"></i>  Notícias</a>
+                <a href="#comentarios" class="nav-btn" data-section="comentarios"><i class="fi fi-rr-messages"></i>  Comentários</a>
+                <a href="#campanhas" class="nav-btn" data-section="campanhas">📢 Campanhas</a>
+                <a href="#notificacoes" class="nav-btn" data-section="notificacoes"><i class="fi fi-rr-bell"></i>  Notificações</a>
+                <a href="#stats" class="nav-btn" data-section="stats">📈 Estatísticas</a>
+                <a href="#doencas" class="nav-btn" data-section="doencas">🏃 Mapa de Doenças 3D</a>
+                <a href="#logs" class="nav-btn" data-section="logs">📜 Logs do Sistema</a>
+                <a href="#preview" class="nav-btn" data-section="preview" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">👁️ Ver Site Inicial</a>
+            </nav>
+        </aside>
+
+        <main class="content-admin">
+
+            <!-- DASHBOARD -->
+            <section id="sec-dashboard" class="admin-section">
+                <h2>Visão Geral</h2>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <h3>Total de Notícias</h3>
+                        <p id="counter-noticias">0</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Total de Visualizações</h3>
+                        <p id="counter-acessos">0</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Total de Cliques</h3>
+                        <p id="counter-cliques">0</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Total de Comentários</h3>
+                        <p id="counter-comentarios">0</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Campanhas Ativas</h3>
+                        <p id="counter-campanhas">0</p>
+                    </div>
+                </div>
+                <div class="chart-container"
+                    style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                    <canvas id="acessosChart"></canvas>
+                </div>
+            </section>
+
+            <section id="sec-noticias" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Gerenciar Notícias de Saúde</h2>
+                    <button class="btn-add" onclick="abrirModalNoticia()">+ Nova Notícia</button>
+                </div>
+                <div id="lista-noticias" class="admin-list">
+                    <!-- Lista renderizada via JS -->
+                </div>
+            </section>
+
+            <!-- COMENTÁRIOS -->
+            <section id="sec-comentarios" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Gerenciar Comentários</h2>
+                </div>
+                <div id="lista-comentarios" class="admin-list">
+                    <!-- Lista renderizada via JS -->
+                </div>
+            </section>
+
+            <!-- CAMPANHAS -->
+            <section id="sec-campanhas" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Gerenciar Campanhas</h2>
+                    <button class="btn-add" onclick="abrirModalCampanha()">+ Nova Campanha</button>
+                </div>
+                <div id="lista-campanhas" class="admin-list">
+                    <!-- Lista renderizada via JS -->
+                </div>
+            </section>
+
+            <!-- NOTIFICAÇÕES DIRETAS -->
+            <section id="sec-notificacoes" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Gerenciar Notificações Diretas</h2>
+                    <button class="btn-add" onclick="abrirModalNotificacao()">+ Enviar Aviso</button>
+                </div>
+                <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom: 20px; font-size: 0.9rem; color:#555; border-left: 4px solid #f39c12;">
+                    <strong>ℹ️ Aviso:</strong> Estas notificações são enviadas diretamente para o "Sininho" na conta do paciente. Use para avisos importantes ou lembretes individuais.
+                </div>
+                <div id="lista-notificacoes" class="admin-list">
+                    <!-- Lista renderizada via JS -->
+                </div>
+            </section>
+
+            <!-- ESTATÍSTICAS -->
+            <section id="sec-stats" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Editar Estatísticas Brasileiras</h2>
+                    <button class="btn-add" onclick="adicionarEstatistica()">+ Nova Estatística</button>
+                </div>
+                <div id="grid-stats-edit" class="form-grid-stats">
+                    <!-- Form renderizado via JS -->
+                </div>
+
+                <div id="admin-map-wrapper" style="margin-top: 30px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    <h3 style="margin-top:0; color:#0056AC; display:flex; align-items:center; gap:10px;">
+                        <i class="fi fi-rr-map"></i>  Seletor de Coordenadas (Clique no Mapa)
+                        <span id="map-edit-status" style="font-size:0.8rem; background:#e2e8f0; padding:4px 12px; border-radius:20px; color:#666; font-weight:normal;">Selecione uma estatística para editar posição</span>
+                    </h3>
+                    <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">Clique em qualquer lugar do mapa para capturar a Latitude e Longitude automaticamente para a estatística selecionada (marcada em azul na lista).</p>
+                    <div id="adminChartDiv" style="width: 100%; height: 500px; background: #f8f9fa; border-radius: 8px; border: 1px solid #eee;"></div>
+                </div>
+                <div style="margin-top:20px; text-align:right;">
+                    <button class="btn-save-stats" onclick="salvarStats()">💾 Salvar Alterações</button>
+                </div>
+            </section>
+
+            <!-- CARROSSEL (REFACTORED) -->
+            <section id="sec-carrossel" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Gerenciar Banner Carrossel</h2>
+                    <button class="btn-add" onclick="abrirModalCarrossel()">+ Novo Slide</button>
+                </div>
+                <div id="lista-carrossel" class="admin-list">
+                    <!-- Lista renderizada via JS -->
+                </div>
+            </section>
+
+            <!-- CARROSSEL DE DOENÇAS (FRONT-END) -->
+            <section id="sec-doencas" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Gerenciar Carrossel de Doenças</h2>
+                    <button class="btn-add" onclick="abrirModalDoenca()">+ Adicionar Doença</button>
+                </div>
+                <!-- Legenda de Cores/Órgãos para ajudar o Admin a ver o que ele tá criando -->
+                <div
+                    style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom: 20px; font-size: 0.9rem; color:#555; border-left: 4px solid #0056AC;">
+                    <strong>ℹ️ Como funciona:</strong> Ao cadastrar uma doença neste menu, ela aparecerá como um card
+                    interativo no Carrossel Vertical (efeito 3D) na página inicial do site.
+                </div>
+                <div id="lista-doencas" class="admin-list">
+                    <!-- Lista renderizada via JS -->
+                </div>
+            </section>
+
+            <!-- LOGS DO SISTEMA -->
+            <section id="sec-logs" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>Histórico de Ações Administrativas</h2>
+                    <button class="btn-delete" onclick="limparLogs()" style="padding: 8px 15px;">🗑️ Limpar
+                        Histórico</button>
+                </div>
+                <div class="logs-container"
+                    style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); max-height: 500px; overflow-y: auto;">
+                    <ul id="lista-logs" style="list-style: none; padding: 0;">
+                        <!-- Logs renderizados via JS -->
+                        <li style="padding: 15px; text-align: center; color: #666;">Nenhuma ação registrada ainda.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- PREVISUALIZAÇÃO DO SITE -->
+            <section id="sec-preview" class="admin-section" style="display: none; height: calc(100vh - 130px); padding: 0;">
+                <div class="header-section" style="padding: 20px 30px 10px 30px;">
+                    <h2>Pre-visualização da Página Inicial</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-add" onclick="window.open(window.ADMIN_INDEX_URL, '_blank')" style="background: #007bff;"><i class="fi fi-rr-globe"></i>  Abrir em Nova Aba</button>
+                        <button class="btn-edit" onclick="document.getElementById('iframe-preview').src = window.ADMIN_INDEX_URL"><i class="fi fi-rr-refresh"></i>  Atualizar</button>
+                    </div>
+                </div>
+                <div class="preview-iframe-wrapper" style="height: calc(100% - 80px); padding: 0 30px 20px 30px;">
+                    <iframe id="iframe-preview" src="index.html" style="width: 100%; height: 100%; border: 4px solid #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); background: white;"></iframe>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL GENÉRICO -->
+    <div id="modal-admin" class="modal-wrapper" style="display: none;">
+        <div class="modal-content-admin">
+            <span class="close-modal" onclick="fecharModalAdmin()">✕</span>
+            <h3 id="modal-title">Título</h3>
+            <form id="form-admin" onsubmit="salvarDadosAdmin(event)">
+                <!-- Campos injetados via JS -->
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const base = window.ADMIN_ASSET_BASE || (window.location.protocol === 'file:' ? './' : '/');
+            const altBase = base === '/' ? './' : '/';
+
+            function loadScript(candidates, index, onSuccess) {
+                if (index >= candidates.length) {
+                    console.error('Não foi possível carregar um dos scripts do painel admin.', candidates);
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = candidates[index];
+                script.onload = () => {
+                    if (onSuccess) onSuccess();
+                };
+                script.onerror = () => loadScript(candidates, index + 1, onSuccess);
+                document.body.appendChild(script);
+            }
+
+            loadScript([
+                base + 'api.js?v=20260419-1',
+                altBase + 'api.js?v=20260419-1'
+            ], 0, function () {
+                loadScript([
+                    base + 'admin.js?v=20260418-4',
+                    altBase + 'admin.js?v=20260418-4'
+                ], 0);
+            });
+        })();
+    </script>
+</body>
+
+</html>

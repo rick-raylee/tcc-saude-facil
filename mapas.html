@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Saúde Fácil - Mapas das Unidades</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <link rel="stylesheet" href="mapas.css?v=1.1">
+    <link rel="stylesheet" href="responsive.css">
+
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+</head>
+
+<body>
+
+    <!-- NAVBAR ANIMADA -->
+    <header class="navbar" id="navbar">
+        <div class="logo">
+            <a href="index.html">
+                <img src="logo-saude-facil.png" alt="Logo Saúde Fácil" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'">
+            </a>
+        </div>
+
+        <input type="checkbox" id="menu-toggle" class="menu-toggle-checkbox">
+        <label for="menu-toggle" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
+        <nav class="nav-links">
+            <a href="agendamento.html">Agendamento</a>
+            <a href="telemedicina.html">Telemedicina</a>
+            <a href="campanhas.html">Campanhas</a>
+            <a href="mapas.html" style="color: #00ffe6; font-weight: bold;">Mapas</a>
+            <a href="duvidas.html">Dúvidas</a>
+            <div class="nav-auth-mobile">
+                <button class="btn-auth btn-login" onclick="window.location.href='index.html'">LOGIN</button>
+            </div>
+        </nav>
+
+        <div class="nav-auth">
+            <button class="btn-auth btn-login" onclick="window.location.href='index.html'">LOGIN</button>
+        </div>
+    </header>
+
+    <!-- MAPA SECTION -->
+    <section class="mapa-section" id="mapaSection">
+        <div class="mapa-card-container">
+            
+            <!-- LATERAL -->
+            <div class="mapa-sidebar-solid">
+                <div class="sidebar-header">
+                    <h2 style="text-align: center;"><i class="fi fi-rr-map"></i>  Rede Saúde</h2>
+                    <p style="text-align: center;">Unidades mapeadas em Cascavel.</p>
+                    <div class="search-glass-wrapper">
+                        <span class="search-icon"><i class="fi fi-rr-search"></i> </span>
+                        <input id="pac-input" class="search-glass-input" style="text-align: center;" type="text" placeholder="Buscar unidade...">
+                    </div>
+                </div>
+                <div id="placesLister" class="places-list custom-scrollbar">
+                    <!-- Lista injetada via JS -->
+                </div>
+            </div>
+
+            <!-- MAPA -->
+            <div class="map-container-wrapper">
+                <button id="btnGeolocation" class="btn-geolocation" title="Minha Localização">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                </button>
+                <div id="map"></div>
+            </div>
+
+        </div>
+    </section>
+    <!-- RODAPÉ PADRÃO AZUL -->
+    <footer class="main-footer" style="background: rgba(0, 75, 130, 0.9); color: white; padding: 40px 0; margin-top: 60px;">
+        <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px;">
+            <div class="footer-info" style="flex: 1 1 300px;">
+                <h3 style="margin-bottom: 15px;">Portal Saúde Fácil</h3>
+                <p>O portal de saúde mais completo da região. Agendamentos, telemedicina e informações reais para você.</p>
+            </div>
+            <div class="footer-links" style="flex: 1 1 200px;">
+                <h4 style="margin-bottom: 15px;">Links Úteis</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li><a href="privacidade.html" style="color: white; text-decoration: none;">Privacidade</a></li>
+                    <li><a href="termos.html" style="color: white; text-decoration: none;">Termos de Uso</a></li>
+                    <li><a href="duvidas.html" style="color: white; text-decoration: none;">Contato</a></li>
+                </ul>
+            </div>
+            <div class="footer-copy" style="width: 100%; text-align: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                &copy; 2026 Portal Saúde Fácil. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="mapas.js?v=1.1"></script>
+    <script src="cookie-consent.js" defer></script>
+</body>
+</html>
+
