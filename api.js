@@ -345,34 +345,6 @@ window.showHealthLoader = function (mensagem = 'Aguarde') {
     initHealthLoader();
     const overlay = document.getElementById('health-loader-overlay');
     const msgEl = document.getElementById('health-loader-msg');
-    tiSystemCleanupCpfs: () => apiCall('/api/ti/system/cleanup-cpfs', 'POST')
-};
-
-// ==========================================================================
-// HEALTH LOADER (ANIMAÇÃO GLOBAL DE CARREGAMENTO)
-// Pode ser chamado em qualquer tela importando api.js
-// ==========================================================================
-
-function initHealthLoader() {
-    if (document.getElementById('health-loader-overlay')) return;
-
-    const loaderHTML = `
-        <div id="health-loader-overlay">
-            <div class="health-loader-container">
-                <div class="health-heart">
-                    <div class="health-cross"></div>
-                </div>
-            </div>
-            <div class="health-loader-text" id="health-loader-msg">Carregando<span>.</span></div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', loaderHTML);
-}
-
-window.showHealthLoader = function (mensagem = 'Aguarde') {
-    initHealthLoader();
-    const overlay = document.getElementById('health-loader-overlay');
-    const msgEl = document.getElementById('health-loader-msg');
 
     if (msgEl) msgEl.innerHTML = mensagem + '<span>.</span>';
     if (overlay) overlay.classList.add('show');

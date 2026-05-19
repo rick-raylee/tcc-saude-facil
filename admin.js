@@ -855,16 +855,18 @@ window.salvarDadosAdmin = async function (e) {
         const titulo = document.getElementById('form-titulo').value;
         const resumo = document.getElementById('form-resumo').value;
         const conteudo = document.getElementById('form-texto').value;
-        let imagem = document.getElementById('form-img').value || 'https://via.placeholder.com/300x200?text=Saude';
+        let imagem = document.getElementById('form-img') ? document.getElementById('form-img').value.trim() : '';
         const fileInput = document.getElementById('form-img-file');
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            showHealthLoader('Processando imagem');
+            if (typeof showHealthLoader === 'function') showHealthLoader('Processando imagem');
             try {
                 imagem = await converteParaBase64(fileInput.files[0]);
             } catch (e) { console.error('Erro ao ler imagem', e); }
             if (typeof hideHealthLoader === 'function') hideHealthLoader();
         }
+
+        if (!imagem) imagem = 'https://via.placeholder.com/300x200?text=Saude';
 
         const categoria = document.getElementById('form-categoria').value;
         const status = document.getElementById('form-status').value;
@@ -910,14 +912,17 @@ window.salvarDadosAdmin = async function (e) {
         let imagem = '';
         const fileInput = document.getElementById('form-slide-file');
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            showHealthLoader('Processando imagem');
+            if (typeof showHealthLoader === 'function') showHealthLoader('Processando imagem');
             try {
                 imagem = await converteParaBase64(fileInput.files[0]);
             } catch (e) { console.error('Erro ao ler imagem', e); }
             if (typeof hideHealthLoader === 'function') hideHealthLoader();
         } else {
-            imagem = document.getElementById('form-img-url').value;
+            const imgUrlInput = document.getElementById('form-img-url');
+            imagem = imgUrlInput ? imgUrlInput.value.trim() : '';
         }
+
+        if (!imagem) imagem = 'https://via.placeholder.com/300x200?text=Saude';
 
         const link = document.getElementById('form-img-link').value;
         const ordem = parseInt(document.getElementById('form-img-ordem').value) || 0;
@@ -960,16 +965,18 @@ window.salvarDadosAdmin = async function (e) {
         const idCampanha = document.getElementById('form-camp-id') ? document.getElementById('form-camp-id').value : null;
         const titulo = document.getElementById('form-camp-titulo').value;
         const descricao = document.getElementById('form-camp-descricao').value;
-        let imagem = document.getElementById('form-camp-img').value;
+        let imagem = document.getElementById('form-camp-img') ? document.getElementById('form-camp-img').value.trim() : '';
 
         const fileInput = document.getElementById('form-camp-file');
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            showHealthLoader('Processando imagem');
+            if (typeof showHealthLoader === 'function') showHealthLoader('Processando imagem');
             try {
                 imagem = await converteParaBase64(fileInput.files[0]);
             } catch (e) { console.error('Erro ao ler imagem', e); }
             if (typeof hideHealthLoader === 'function') hideHealthLoader();
         }
+
+        if (!imagem) imagem = 'https://via.placeholder.com/300x200?text=Saude';
 
         const data_inicio = document.getElementById('form-camp-inicio').value;
         const data_fim = document.getElementById('form-camp-fim').value;
