@@ -1220,7 +1220,11 @@ window.limparLogs = async function () {
 
     if (typeof API !== 'undefined') {
         const resp = await API.limparLogs();
-        if (resp && resp.sucesso) Swal.fire({ icon: 'success', title: 'Limpo', text: 'Todo o histórico de logs foi removido!' });
+        if (resp && resp.erro) {
+            Swal.fire({ icon: 'error', title: 'Erro', text: 'Erro ao limpar logs: ' + resp.erro });
+        } else if (resp && resp.sucesso) {
+            Swal.fire({ icon: 'success', title: 'Limpo', text: 'Todo o histórico de logs foi removido!' });
+        }
     }
 
     localStorage.setItem('admin_logs', JSON.stringify([]));
@@ -1511,7 +1515,9 @@ async function excluirDoenca(idx) {
     try {
         const resp = await API.adminDoencas('DELETE', null, d.id);
         if (resp && resp.sucesso) {
-            if (typeof addLog === 'function') addLog(`Excluiu Doença do Mapa: ${d.titulo || d.nome}`);
+            if (typeof API !== 'undefined' && typeof API.criarLog === 'function') {
+                await API.criarLog(`Excluiu Doença do Mapa: ${d.titulo || d.nome}`);
+            }
             await carregarDoencas();
             Swal.fire({ icon: 'success', title: 'Excluído', text: 'Doença removida do mapa com sucesso.' });
         } else {
