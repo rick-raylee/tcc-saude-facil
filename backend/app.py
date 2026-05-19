@@ -142,6 +142,21 @@ def migrar_schema_admin():
         if col[0] not in colunas_doencas:
             cur.execute(f"ALTER TABLE doencas_prevencao ADD COLUMN {col[0]} {col[1]}")
 
+    # Migração para a tabela de logs do sistema
+    cur.execute("CREATE TABLE IF NOT EXISTS logs ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "usuario_id INTEGER, "
+                "usuario TEXT, "
+                "acao TEXT, "
+                "ip TEXT, "
+                "data_acao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+                ")")
+    cur.execute("PRAGMA table_info(logs)")
+    colunas_logs = {row[1] for row in cur.fetchall()}
+    if 'data_acao' not in colunas_logs:
+        cur.execute("ALTER TABLE logs ADD COLUMN data_acao TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+
     # Migração para a tabela estatisticas
     cur.execute("PRAGMA table_info(estatisticas)")
     colunas_stats = {row[1] for row in cur.fetchall()}
