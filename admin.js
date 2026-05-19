@@ -1184,7 +1184,17 @@ async function carregarLogs() {
 
     let logs = [];
     if (typeof API !== 'undefined') {
-        logs = await API.logs();
+        const response = await API.logs();
+        // Verifica se a resposta é um array ou tem erro
+        if (Array.isArray(response)) {
+            logs = response;
+        } else if (response && response.erro) {
+            console.error('Erro ao carregar logs:', response.erro);
+            lista.innerHTML = '<li style="padding: 15px; text-align: center; color: #d32f2f;">❌ Erro ao carregar logs: ' + response.erro + '</li>';
+            return;
+        } else {
+            logs = [];
+        }
     } else {
         logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
     }

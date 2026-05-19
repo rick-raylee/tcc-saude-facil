@@ -554,6 +554,37 @@ def listar_logs():
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
+@admin_bp.route('/api/admin/logs', methods=['POST'])
+@login_required
+def criar_log():
+    from app import get_db_connection
+    data = request.get_json()
+    acao = data.get('acao', '').strip()
+    
+    if not acao:
+        return jsonify({'erro': 'Ação é obrigatória'}), 400
+    
+    try:
+        registrar_log(acao)
+        return jsonify({'sucesso': True}), 201
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@admin_bp.route('/api/admin/logs', methods=['DELETE'])
+@login_required
+def limpar_logs():
+    from app import get_db_connection
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        cur.execute("DELETE FROM logs")
+        db.commit()
+        db.close()
+        registrar_log("Limpou todo o histórico de logs")
+        return jsonify({'sucesso': True})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
 @admin_bp.route('/api/admin/resumo', methods=['GET'])
 @login_required
 def dashboard_resumo():
