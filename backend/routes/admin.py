@@ -448,7 +448,11 @@ def listar_doencas_prevencao():
             ("especialista", "TEXT"),
             ("encaminhamento", "TEXT"),
             ("gravidade", "TEXT"),
-            ("bg_class", "TEXT")
+            ("bg_class", "TEXT"),
+            ("tratamento", "TEXT"),
+            ("prevencao", "TEXT"),
+            ("imagem", "TEXT"),
+            ("cor", "TEXT")
         ]
         for col_nome, col_tipo in colunas_necessarias:
             try:

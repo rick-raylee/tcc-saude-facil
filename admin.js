@@ -1337,7 +1337,9 @@ async function carregarDoencas() {
                 </div>
                 <div style="margin-top:10px; text-align:center; color:#444; width:100%; max-width:400px;">
                     <h3 style="margin:5px 0; font-size:1.1rem; color:var(--primary-color);">${d.icone || '<i class=\"fi fi-rr-stethoscope\"></i> '} ${d.titulo}</h3>
-                    <p style="font-size:0.85rem; line-height:1.4; color:#666; margin:0;">${d.o_que_e}</p>
+                    <p style="font-size:0.85rem; line-height:1.4; color:#666; margin:0 0 10px;">${d.o_que_e}</p>
+                    ${d.tratamento ? `<p style="font-size:0.8rem; color:#444; margin:0 0 5px;"><strong>Tratamento:</strong> ${d.tratamento}</p>` : ''}
+                    ${d.prevencao ? `<p style="font-size:0.8rem; color:#444; margin:0;"><strong>Prevenção:</strong> ${d.prevencao}</p>` : ''}
                 </div>
             </div>
         </div>

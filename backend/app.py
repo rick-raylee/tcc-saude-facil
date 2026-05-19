@@ -138,7 +138,7 @@ def migrar_schema_admin():
     # Migração para a tabela doencas_prevencao
     cur.execute("PRAGMA table_info(doencas_prevencao)")
     colunas_doencas = {row[1] for row in cur.fetchall()}
-    for col in [("especialista", "TEXT"), ("encaminhamento", "TEXT"), ("gravidade", "TEXT"), ("bg_class", "TEXT")]:
+    for col in [("especialista", "TEXT"), ("encaminhamento", "TEXT"), ("gravidade", "TEXT"), ("bg_class", "TEXT"), ("tratamento", "TEXT"), ("prevencao", "TEXT"), ("imagem", "TEXT"), ("cor", "TEXT")]:
         if col[0] not in colunas_doencas:
             cur.execute(f"ALTER TABLE doencas_prevencao ADD COLUMN {col[0]} {col[1]}")
 
