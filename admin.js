@@ -1367,7 +1367,7 @@ function abrirModalDoenca(idx = null) {
             </div>
             <div>
                 <label>Ícone (Emoji / Classe):</label>
-                <input type="text" id="form-doenca-icon" value="${(d.icone || d.icon || '<i class=\"fi fi-rr-stethoscope\"></i> ').replace(/\"/g, '&quot;').replace(/\'/g, '&#39;')}" required placeholder="Ex: <i class='fi fi-rr-brain'></i> " style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                <input type="text" id="form-doenca-icon" value="${(d.icone || d.icon || '<i class=\"fi fi-rr-stethoscope\"></i> ').replace(/\"/g, '&quot;').replace(/\'/g, '&#39;')}" placeholder="Ex: <i class='fi fi-rr-brain'></i> " style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
             </div>
             <div>
                 <label>Gravidade:</label>
