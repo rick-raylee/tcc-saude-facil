@@ -188,6 +188,14 @@ app.register_blueprint(consultas_bp)
 app.register_blueprint(telemedicina_bp)
 app.register_blueprint(ti_bp)
 
+# Executa migrações essenciais na inicialização para garantir integridade do banco
+try:
+    migrar_schema_admin()
+    normalizar_cpfs_legados()
+except Exception as e:
+    print(f"Erro ao executar migrações na inicialização: {e}")
+
+
 
 @app.after_request
 def add_no_cache_headers(response):
