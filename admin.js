@@ -397,8 +397,8 @@ async function carregarNoticias() {
                 <small>${dataStr} • Categoria: ${noticia.categoria || 'Geral'}</small>
             </div>
             <div class="item-actions">
-                <button class="btn-delete" style="background:#007bff; margin-right:5px;" onclick='abrirModalNoticia(${JSON.stringify(noticia).replace(/'/g, "&#39;")})'>✏️</button>
-                <button class="btn-delete" onclick="deletarNoticia(${noticia.id})">🗑️</button>
+                <button class="btn-edit btn-icon-only" onclick='abrirModalNoticia(${JSON.stringify(noticia).replace(/'/g, "&#39;")})'>✏️</button>
+                <button class="btn-delete btn-icon-only" onclick="deletarNoticia(${noticia.id})">🗑️</button>
             </div>
         `;
         lista.appendChild(item);
@@ -889,8 +889,8 @@ async function carregarCarrosselEditor() {
                 </div>
             </div>
             <div class="item-actions">
-                <button class="btn-edit" style="background:#007bff; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;" onclick="window.abrirModalCarrossel(window._adminCarouselCache.slides[${idx}])">✏️ Editar</button>
-                <button class="btn-delete" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-left:5px;" onclick="deletarSlide('${slide.id}')">🗑️ Excluir</button>
+                <button class="btn-edit" onclick="window.abrirModalCarrossel(window._adminCarouselCache.slides[${idx}])">✏️ Editar</button>
+                <button class="btn-delete" onclick="deletarSlide('${slide.id}')">🗑️ Excluir</button>
             </div>
         `;
         lista.appendChild(item);
@@ -1199,15 +1199,15 @@ async function carregarComentarios() {
         const comentarios = await API.comentariosAdmin();
         if (comentarios && !comentarios.erro) {
             lista.innerHTML = comentarios.map(c => `
-                <div class="admin-item" style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #ddd; align-items:center;">
+                <div class="admin-item">
                     <div style="flex:1;">
                         <h4 style="margin:0 0 5px 0;">De: ${c.nome} ${c.noticia_titulo ? `(Notícia: ${c.noticia_titulo})` : ''}</h4>
                         <p style="margin:0 0 5px 0; font-size:0.9rem; color:#444;">"${c.mensagem || c.texto}"</p>
                         <span style="font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; background: ${c.status === 'aprovado' ? '#d4edda' : '#fff3cd'}; color: ${c.status === 'aprovado' ? '#155724' : '#856404'};">${c.status.toUpperCase()}</span>
                     </div>
-                    <div style="display:flex; gap:10px;">
-                        ${c.status !== 'aprovado' ? `<button style="background:#28a745; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="aprovarComentario(${c.id})">Aprovar</button>` : ''}
-                        <button style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="rejeitarComentario(${c.id})">Excluir</button>
+                    <div class="item-actions">
+                        ${c.status !== 'aprovado' ? `<button class="btn-edit" style="background:#28a745; color:white;" onclick="aprovarComentario(${c.id})">Aprovar</button>` : ''}
+                        <button class="btn-delete" onclick="rejeitarComentario(${c.id})">Excluir</button>
                     </div>
                 </div>
             `).join('');
@@ -1267,7 +1267,7 @@ async function carregarCampanhas() {
 
     if (campanhas && !campanhas.erro) {
         lista.innerHTML = campanhas.map(c => `
-                <div class="admin-item" style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #ddd; align-items:center;">
+                <div class="admin-item">
                     <div style="display:flex; gap:15px; flex:1; align-items:center;">
                         <img src="${c.imagem || 'https://via.placeholder.com/80x50?text=Campanha'}" style="width:80px; height:50px; object-fit:cover; border-radius:4px;" />
                         <div>
@@ -1276,9 +1276,9 @@ async function carregarCampanhas() {
                             <span style="font-size:0.7rem; background:${c.status == 1 || String(c.status).toLowerCase() === 'ativa' ? '#28a745' : '#dc3545'}; color:white; padding:2px 5px; border-radius:3px;">${c.status == 1 || String(c.status).toLowerCase() === 'ativa' ? 'ATIVA' : 'INATIVA'}</span>
                         </div>
                     </div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn-delete" style="background:#007bff;" onclick='abrirModalCampanha(${JSON.stringify(c).replace(/'/g, "&#39;")})'>✏️</button>
-                        <button class="btn-delete" onclick="deletarCampanha(${c.id})">🗑️</button>
+                    <div class="item-actions">
+                        <button class="btn-edit btn-icon-only" onclick='abrirModalCampanha(${JSON.stringify(c).replace(/'/g, "&#39;")})'>✏️</button>
+                        <button class="btn-delete btn-icon-only" onclick="deletarCampanha(${c.id})">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -1485,18 +1485,18 @@ async function carregarDoencas() {
     if (!lista) return;
 
     lista.innerHTML = doencasDb.map((d, idx) => `
-        <div class="admin-item" style="display:flex; flex-direction:column; background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+        <div class="admin-item" style="flex-direction:column; align-items:stretch; gap:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                 <div style="display:flex; gap:15px; flex:1; align-items:center;">
-                    <div style="font-size: 2rem;">${d.icone || '<i class=\"fi fi-rr-stethoscope\"></i> '}</div>
+                    <div style="font-size: 2rem;">${d.icone || '<i class="fi fi-rr-stethoscope"></i>'}</div>
                     <div>
                         <h4 style="margin: 0 0 5px 0; color:#0056AC;">${d.titulo} <span style="font-size:0.8rem; background:#e2e8f0; padding:2px 8px; border-radius:10px; margin-left:10px;">Médico: ${d.especialista || 'Geral'}</span></h4>
                         <p style="margin: 0; font-size: 0.9rem; color:#666;">${(d.o_que_e || '').substring(0, 100)}...</p>
                     </div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-edit" onclick="abrirModalDoenca(${idx})" style="padding: 6px 12px; font-size: 0.85rem;">✏️</button>
-                    <button class="btn-delete" onclick="excluirDoenca(${idx})" style="padding: 6px 12px; font-size: 0.85rem;">Excluir</button>
+                <div class="item-actions">
+                    <button class="btn-edit btn-icon-only" onclick="abrirModalDoenca(${idx})">✏️</button>
+                    <button class="btn-delete btn-icon-only" onclick="excluirDoenca(${idx})">🗑️</button>
                 </div>
             </div>
             
@@ -1735,14 +1735,14 @@ async function carregarNotificacoesAdmin() {
 
     if (notificacoes && !notificacoes.erro) {
         lista.innerHTML = notificacoes.map(n => `
-            <div class="admin-item" style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #ddd; align-items:center;">
+            <div class="admin-item">
                 <div style="flex:1;">
                     <h4 style="margin:0 0-5px 0;">Para: ${n.usuario_nome || 'Usuário Desconhecido'} (${n.usuario_cpf || '---'})</h4>
                     <p style="margin:5px 0; font-size:0.95rem; color:#333;">"${n.mensagem}"</p>
                     <small style="color:#888;">Enviada em: ${n.criada_em || '---'} | Status: ${n.lida ? '<i class=\"fi fi-rr-check-circle\"></i>  Lida' : '📩 Pendente'}</small>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-delete" onclick="deletarNotificacaoAdmin(${n.id})">🗑�? Excluir</button>
+                <div class="item-actions">
+                    <button class="btn-delete" onclick="deletarNotificacaoAdmin(${n.id})">🗑️ Excluir</button>
                 </div>
             </div>
         `).join('');

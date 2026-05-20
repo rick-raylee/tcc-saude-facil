@@ -41,10 +41,10 @@
                 <span>PAINEL ADMIN</span>
             </a>
         </div>
-        <div class="user-admin" style="display: flex; align-items: center;">
-            <div style="display: flex; flex-direction: column; text-align: right; margin-right: 15px;">
-                <span id="admin-welcome-message" style="margin: 0;">Aguarde...</span>
-                <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+        <div class="user-admin">
+            <div class="user-admin-info">
+                <span id="admin-welcome-message">Aguarde...</span>
+                <a href="#" onclick="abrirModalEditarPerfil(event)"><i class="fi fi-rr-user-edition"></i> Editar Perfil</a>
             </div>
             <button class="btn-logout-admin" onclick="logoutAdmin()">Sair</button>
         </div>
@@ -53,17 +53,17 @@
     <div class="container-admin">
         <aside class="sidebar-admin">
             <nav>
-                <a href="#dashboard" class="nav-btn" data-section="dashboard"><i class="fi fi-rr-chart-histogram"></i>  Dashboard</a>
-                <a href="#carrossel" class="nav-btn" data-section="carrossel">🖼️ Carrossel</a>
-                <a href="#noticias" class="nav-btn" data-section="noticias"><i class="fi fi-rr-newspaper"></i>  Notícias</a>
-                <a href="#comentarios" class="nav-btn" data-section="comentarios"><i class="fi fi-rr-messages"></i>  Comentários</a>
-                <a href="#campanhas" class="nav-btn" data-section="campanhas">📢 Campanhas</a>
-                <a href="#notificacoes" class="nav-btn" data-section="notificacoes"><i class="fi fi-rr-bell"></i>  Notificações</a>
-                <a href="#stats" class="nav-btn" data-section="stats">📈 Estatísticas</a>
-                <a href="#doencas" class="nav-btn" data-section="doencas">🏃 Mapa de Doenças 3D</a>
-                <a href="#logs" class="nav-btn" data-section="logs">📜 Logs do Sistema</a>
+                <a href="#dashboard" class="nav-btn" data-section="dashboard"><i class="fi fi-rr-chart-histogram"></i> Dashboard</a>
+                <a href="#carrossel" class="nav-btn" data-section="carrossel"><i class="fi fi-rr-picture"></i> Carrossel</a>
+                <a href="#noticias" class="nav-btn" data-section="noticias"><i class="fi fi-rr-newspaper"></i> Notícias</a>
+                <a href="#comentarios" class="nav-btn" data-section="comentarios"><i class="fi fi-rr-messages"></i> Comentários</a>
+                <a href="#campanhas" class="nav-btn" data-section="campanhas"><i class="fi fi-rr-megaphone"></i> Campanhas</a>
+                <a href="#notificacoes" class="nav-btn" data-section="notificacoes"><i class="fi fi-rr-bell"></i> Notificações</a>
+                <a href="#stats" class="nav-btn" data-section="stats"><i class="fi fi-rr-stats"></i> Estatísticas</a>
+                <a href="#doencas" class="nav-btn" data-section="doencas"><i class="fi fi-rr-map-marker"></i> Mapa de Doenças 3D</a>
+                <a href="#logs" class="nav-btn" data-section="logs"><i class="fi fi-rr-document-signed"></i> Logs do Sistema</a>
                 <a href="#settings" class="nav-btn" data-section="settings"><i class="fi fi-rr-settings"></i> Configurações</a>
-                <a href="#preview" class="nav-btn" data-section="preview" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">👁️ Ver Site Inicial</a>
+                <a href="#preview" class="nav-btn" data-section="preview" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;"><i class="fi fi-rr-globe"></i> Ver Site Inicial</a>
             </nav>
         </aside>
 
