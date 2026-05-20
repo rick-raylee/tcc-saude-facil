@@ -1366,9 +1366,36 @@ async function carregarDoencas() {
 
 function abrirModalDoenca(idx = null) {
     const isEdit = idx !== null;
-    const d = isEdit ? adminDoencasCache[idx] : { titulo: '', icone: '<i class=\"fi fi-rr-stethoscope\"></i> ', bg_class: 'bg-diabetes', especialista: '', encaminhamento: '', imagem: '', o_que_e: '', tratamento: '', prevencao: '', gravidade: 'Baixa', ordem: 0 };
+    const d = isEdit ? adminDoencasCache[idx] : { titulo: '', icone: '', bg_class: 'bg-diabetes', especialista: '', encaminhamento: '', imagem: '', o_que_e: '', tratamento: '', prevencao: '', gravidade: 'Baixa', ordem: 0 };
 
     document.getElementById('modal-title').textContent = isEdit ? 'Editar Doença (Mapa 3D)' : 'Nova Doença (Mapa 3D)';
+
+    // Detectar ícone atual: é emoji ou classe flaticon?
+    const iconeAtual = d.icone || d.icon || '';
+    const iconeOpcoes = [
+        { value: '', label: '-- Selecione um ícone --' },
+        { value: "<i class='fi fi-rr-heart'></i> ", label: '❤️ Coração (Hipertensão/Cardio)' },
+        { value: "<i class='fi fi-rr-syringe'></i> ", label: '💉 Seringa (Diabetes/Vacinas)' },
+        { value: "<i class='fi fi-rr-brain'></i> ", label: '🧠 Cérebro (Mental/Neurológico)' },
+        { value: "<i class='fi fi-rr-lungs'></i> ", label: '🫁 Pulmões (Respiratório/Asma)' },
+        { value: "<i class='fi fi-rr-bug'></i> ", label: '🦟 Inseto (Dengue/Infecções)' },
+        { value: "<i class='fi fi-rr-medicine'></i> ", label: '💊 Remédio (Medicamentos)' },
+        { value: "<i class='fi fi-rr-stethoscope'></i> ", label: '🩺 Estetoscópio (Geral)' },
+        { value: "<i class='fi fi-rr-hospital'></i> ", label: '🏥 Hospital (Emergência)' },
+        { value: "<i class='fi fi-rr-eye'></i> ", label: '👁️ Olho (Oftalmologia)' },
+        { value: "<i class='fi fi-rr-tooth'></i> ", label: '🦷 Dente (Odontologia)' },
+        { value: "<i class='fi fi-rr-bone'></i> ", label: '🦴 Osso (Ortopedia)' },
+        { value: "<i class='fi fi-rr-wheelchair'></i> ", label: '♿ Cadeirante (Mobilidade)' },
+        { value: "<i class='fi fi-rr-virus'></i> ", label: '🦠 Vírus (COVID/Gripe)' },
+        { value: '🩸', label: '🩸 Sangue (Hematologia)' },
+        { value: '🔬', label: '🔬 Microscópio (Análises)' },
+        { value: '🚑', label: '🚑 Ambulância (Emergência)' },
+    ];
+
+    const iconeOptionsHtml = iconeOpcoes.map(op => {
+        const sel = op.value === iconeAtual ? 'selected' : '';
+        return `<option value="${op.value.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}" ${sel}>${op.label}</option>`;
+    }).join('');
 
     document.getElementById('form-admin').innerHTML = `
         <input type="hidden" id="form-doenca-id" value="${isEdit ? d.id : ''}">
@@ -1377,17 +1404,19 @@ function abrirModalDoenca(idx = null) {
         <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:15px;">
             <div>
                 <label>Nome da Doença:</label>
-                <input type="text" id="form-doenca-nome" value="${d.titulo || d.nome || ''}" required placeholder="Ex: Diabetes Tipo 2" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                <input type="text" id="form-doenca-nome" value="${(d.titulo || d.nome || '').replace(/"/g, '&quot;')}" required placeholder="Ex: Diabetes Tipo 2" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
             </div>
             <div>
-                <label>Ícone (Emoji / Classe):</label>
-                <input type="text" id="form-doenca-icon" value="${(d.icone || d.icon || '<i class=\"fi fi-rr-stethoscope\"></i> ').replace(/\"/g, '&quot;').replace(/\'/g, '&#39;')}" placeholder="Ex: <i class='fi fi-rr-brain'></i> " style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                <label>Ícone:</label>
+                <select id="form-doenca-icon" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                    ${iconeOptionsHtml}
+                </select>
             </div>
             <div>
                 <label>Gravidade:</label>
                 <select id="form-doenca-gravidade" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
                     <option value="Baixa" ${d.gravidade === 'Baixa' ? 'selected' : ''}>Baixa</option>
-                    <option value="Média" ${d.gravidade === 'Média' ? 'selected' : ''}>Média</option>
+                    <option value="Média" ${(d.gravidade === 'Média' || d.gravidade === 'Media') ? 'selected' : ''}>Média</option>
                     <option value="Alta" ${d.gravidade === 'Alta' ? 'selected' : ''}>Alta</option>
                 </select>
             </div>
@@ -1396,7 +1425,7 @@ function abrirModalDoenca(idx = null) {
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:15px;">
             <div>
                 <label>Especialista:</label>
-                <input type="text" id="form-doenca-especialista" value="${d.especialista || ''}" required placeholder="Ex: Cardiologista" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                <input type="text" id="form-doenca-especialista" value="${(d.especialista || '').replace(/"/g, '&quot;')}" required placeholder="Ex: Cardiologista" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
             </div>
             <div>
                 <label>Cor de Fundo:</label>
@@ -1416,7 +1445,7 @@ function abrirModalDoenca(idx = null) {
 
         <div style="margin-bottom:15px;">
             <label>Encaminhamento na Rede:</label>
-            <input type="text" id="form-doenca-encaminhamento" value="${d.encaminhamento || ''}" required placeholder="Ex: UPA para emergência, UBS para rotina" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+            <input type="text" id="form-doenca-encaminhamento" value="${(d.encaminhamento || '').replace(/"/g, '&quot;')}" required placeholder="Ex: UPA para emergência, UBS para rotina" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
         </div>
 
         <div style="margin-bottom:15px; border:1px solid #ccc; padding:10px; border-radius:5px; background:#fafafa;">
@@ -1430,21 +1459,21 @@ function abrirModalDoenca(idx = null) {
                  <option value="assets/organs/mouth_3d_stylized.png">Boca 3D</option>
                  <option value="assets/organs/human_body_3d_stylized.png">Corpo Inteiro 3D</option>
              </select>
-             <input type="text" id="form-doenca-img" value="${d.imagem || d.img || ''}" placeholder="URL da imagem..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+             <input type="text" id="form-doenca-img" value="${(d.imagem || d.img || '').replace(/"/g, '&quot;')}" placeholder="URL da imagem..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr; gap:10px; margin-bottom:15px;">
             <div>
                 <label>O que é:</label>
-                <textarea id="form-doenca-o-que-e" rows="2" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">${d.o_que_e || d.descricao || ''}</textarea>
+                <textarea id="form-doenca-o-que-e" rows="2" required style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;"></textarea>
             </div>
             <div>
                 <label>Tratamento:</label>
-                <textarea id="form-doenca-tratamento" rows="2" placeholder="Como é tratado..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">${d.tratamento || ''}</textarea>
+                <textarea id="form-doenca-tratamento" rows="2" placeholder="Como é tratado..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;"></textarea>
             </div>
             <div>
                 <label>Prevenção:</label>
-                <textarea id="form-doenca-prevencao" rows="2" placeholder="Como prevenir..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">${d.prevencao || ''}</textarea>
+                <textarea id="form-doenca-prevencao" rows="2" placeholder="Como prevenir..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;"></textarea>
             </div>
         </div>
         
@@ -1453,6 +1482,11 @@ function abrirModalDoenca(idx = null) {
             <button type="submit" class="btn-save" style="background:#28a745; color:white; border:none; padding:10px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">Salvar Alterações</button>
         </div>
     `;
+
+    // Preencher textareas via .value para evitar problemas de encoding HTML
+    document.getElementById('form-doenca-o-que-e').value = d.o_que_e || d.descricao || '';
+    document.getElementById('form-doenca-tratamento').value = d.tratamento || '';
+    document.getElementById('form-doenca-prevencao').value = d.prevencao || '';
 
     document.getElementById('form-admin').onsubmit = salvarDoenca;
     document.getElementById('modal-admin').style.display = 'flex';
