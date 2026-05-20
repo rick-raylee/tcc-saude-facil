@@ -62,6 +62,7 @@
                 <a href="#stats" class="nav-btn" data-section="stats">📈 Estatísticas</a>
                 <a href="#doencas" class="nav-btn" data-section="doencas">🏃 Mapa de Doenças 3D</a>
                 <a href="#logs" class="nav-btn" data-section="logs">📜 Logs do Sistema</a>
+                <a href="#settings" class="nav-btn" data-section="settings"><i class="fi fi-rr-settings"></i> Configurações</a>
                 <a href="#preview" class="nav-btn" data-section="preview" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">👁️ Ver Site Inicial</a>
             </nav>
         </aside>
@@ -93,9 +94,38 @@
                         <p id="counter-campanhas">0</p>
                     </div>
                 </div>
-                <div class="chart-container"
-                    style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                    <canvas id="acessosChart"></canvas>
+                <div class="dashboard-charts-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                        <h4 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+                            <i class="fi fi-rr-chart-line" style="color: var(--sus-blue-dark, #004b82);"></i> Visitas ao Portal nos Últimos 7 Dias
+                        </h4>
+                        <canvas id="acessosChart" style="max-height: 320px;"></canvas>
+                    </div>
+                    
+                    <div class="analytics-status-card" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 22px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; min-height: 250px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">Google Analytics</span>
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Google_Analytics_logo_%282015-2019%29.svg/1200px-Google_Analytics_logo_%282015-2019%29.svg.png" alt="GA4 Logo" style="height: 20px; filter: brightness(0) invert(1);">
+                            </div>
+                            <h3 style="margin: 0 0 10px 0; font-size: 1.2rem;" id="ga-status-title">Aguardando Conexão</h3>
+                            
+                            <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 12px; margin-top: 15px;">
+                                <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">ID de Medição GA4:</div>
+                                <div id="ga-status-id" style="font-family: monospace; font-weight: bold; font-size: 0.95rem;">Não Configurado</div>
+                            </div>
+                            
+                            <div id="ga-status-text" style="font-size: 0.8rem; opacity: 0.9; margin-top: 12px; display: flex; align-items: center; gap: 6px;">
+                                <span id="ga-status-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f44336;"></span> <span id="ga-status-msg">Integração desativada</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <a href="https://analytics.google.com/" target="_blank" style="display: block; text-align: center; background: #ff9800; color: white; padding: 10px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 0.85rem; transition: background 0.3s; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.15);" onmouseover="this.style.background='#e68a00'" onmouseout="this.style.background='#ff9800'">
+                                <i class="fi fi-rr-arrow-right"></i> Abrir Console GA
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -208,6 +238,58 @@
                         <!-- Logs renderizados via JS -->
                         <li style="padding: 15px; text-align: center; color: #666;">Nenhuma ação registrada ainda.</li>
                     </ul>
+                </div>
+            </section>
+
+            <!-- CONFIGURAÇÕES GLOBAIS E GOOGLE ANALYTICS -->
+            <section id="sec-settings" class="admin-section" style="display: none;">
+                <div class="header-section">
+                    <h2>⚙️ Configurações Gerais e Google Analytics</h2>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <!-- Card de Informações Gerais -->
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea;">
+                        <h3 style="margin-top: 0; color: #333; margin-bottom: 20px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fi fi-rr-browser" style="color: var(--sus-blue-dark, #004b82);"></i> Identidade do Portal
+                        </h3>
+                        <form id="form-settings-gerais" onsubmit="salvarSettingsGerais(event)">
+                            <div class="form-group" style="margin-bottom: 15px; text-align: left;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #555; font-size: 0.85rem;">Título Principal do Portal</label>
+                                <input type="text" id="settings-portal-titulo" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #555; font-size: 0.85rem;">Subtítulo Principal do Portal</label>
+                                <textarea id="settings-portal-subtitulo" required rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; resize: vertical; box-sizing: border-box; font-family: inherit;"></textarea>
+                            </div>
+                            <button type="submit" class="btn-add" style="width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; background: var(--sus-blue-dark, #004b82); cursor: pointer;"><i class="fi fi-rr-disk"></i> Salvar Identidade</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Card do Google Analytics -->
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <h3 style="margin-top: 0; color: #333; margin-bottom: 10px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <i class="fi fi-rr-stats" style="color: #ff9800;"></i> Google Analytics 4 (GA4)
+                            </h3>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.45; text-align: left;">
+                                Insira seu ID de medição do GA4 para monitorar em tempo real cliques, campanhas acessadas, agendamentos iniciados e a audiência geral do portal de saúde.
+                            </p>
+                            
+                            <form id="form-settings-analytics" onsubmit="salvarSettingsAnalytics(event)">
+                                <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+                                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #555; font-size: 0.85rem;">ID de Medição do GA4</label>
+                                    <input type="text" id="settings-ga-id" placeholder="Ex: G-XXXXXXXXXX" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: monospace; box-sizing: border-box;">
+                                    <span style="font-size: 0.75rem; color: #888; display: block; margin-top: 5px; line-height: 1.2;">Digite o código obtido no painel administrativo do Google Analytics.</span>
+                                </div>
+                                <button type="submit" class="btn-add" style="width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; background: #ff9800; border: none; cursor: pointer;"><i class="fi fi-rr-power"></i> Ativar Integração</button>
+                            </form>
+                        </div>
+                        
+                        <div style="margin-top: 25px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800; font-size: 0.8rem; color: #555; text-align: left; line-height: 1.35;">
+                            <strong>Como funciona:</strong> Ao salvar o ID de medição, o portal injetará automaticamente a tag <code>gtag.js</code> em todas as páginas públicas do portal do SUS para realizar o rastreamento em tempo real.
+                        </div>
+                    </div>
                 </div>
             </section>
 

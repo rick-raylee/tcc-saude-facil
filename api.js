@@ -171,6 +171,12 @@ const API = {
     criarLog: (acao) => apiCall('/api/admin/logs', 'POST', { acao }),
     limparLogs: () => apiCall('/api/admin/logs', 'DELETE'),
     dashboard: () => apiCall('/api/admin/resumo'),
+    
+    // Configurações do Sistema e Acessos Google Analytics
+    settingsPublic: () => apiCall('/api/public/settings'),
+    settings: () => apiCall('/api/admin/settings'),
+    salvarSettings: (dados) => apiCall('/api/admin/settings', 'POST', dados),
+    acessosSemana: () => apiCall('/api/admin/acessos-semana'),
 
     // Campanhas e Comentários (Admin e Publico)
     campanhasPublic: () => apiCall('/api/public/campanhas'),
@@ -490,4 +496,51 @@ window.salvarEdicaoPerfil = function(event) {
         alert("Dados atualizados com sucesso!");
         window.location.reload();
     }
+}
+
+// ==========================================================================
+// INICIALIZAÇÃO DINÂMICA DO GOOGLE ANALYTICS (TCC SUS)
+// ==========================================================================
+async function initGoogleAnalytics() {
+    try {
+        if (window.GA_INJECTED) return;
+        
+        const base = resolveApiBase();
+        const url = (base ? base : '') + '/api/public/settings';
+        
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const settings = await res.json();
+        
+        const gaId = settings.google_analytics_id;
+        if (gaId && gaId.trim() !== '') {
+            console.log(`[Google Analytics] Inicializando rastreamento com ID: ${gaId}`);
+            
+            // Injetar o script global do Google Analytics (gtag.js)
+            const scriptTag = document.createElement('script');
+            scriptTag.async = true;
+            scriptTag.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+            document.head.appendChild(scriptTag);
+            
+            // Injetar código de configuração interno
+            const configScript = document.createElement('script');
+            configScript.innerHTML = `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}', { 'anonymize_ip': true });
+            `;
+            document.head.appendChild(configScript);
+            window.GA_INJECTED = true;
+        }
+    } catch (e) {
+        console.warn("[Google Analytics] Falha ao injetar rastreamento:", e);
+    }
+}
+
+// Inicializar Google Analytics na carga da página
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGoogleAnalytics);
+} else {
+    initGoogleAnalytics();
 }

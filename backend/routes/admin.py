@@ -703,3 +703,88 @@ def deletar_notificacao_admin(notif_id):
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
+# ══════════════════════════════════════════════════════════════════
+#  SISTEMA, CONFIGURAÇÕES E ESTADÍSTICAS REAIS
+# ══════════════════════════════════════════════════════════════════
+
+@admin_bp.route('/api/admin/acessos-semana', methods=['GET'])
+@login_required
+def obter_acessos_semana():
+    from app import get_db_connection
+    from datetime import date, timedelta
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Mapeamento do dia da semana
+        dias_semana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+        meses_abrev = {
+            "01": "Jan", "02": "Fev", "03": "Mar", "04": "Abr", "05": "Mai", "06": "Jun",
+            "07": "Jul", "08": "Ago", "09": "Set", "10": "Out", "11": "Nov", "12": "Dez"
+        }
+        
+        labels = []
+        valores = []
+        
+        # Pega os últimos 7 dias dinamicamente
+        for i in range(6, -1, -1):
+            d = date.today() - timedelta(days=i)
+            data_str = d.strftime('%Y-%m-%d')
+            
+            dia_sem_idx = int(d.strftime('%w'))
+            dia_semana_nome = dias_semana[dia_sem_idx]
+            
+            dia_num = d.strftime('%d')
+            mes_num = d.strftime('%m')
+            mes_nome = meses_abrev.get(mes_num, mes_num)
+            
+            label_dia = f"{dia_semana_nome} ({dia_num}/{mes_nome})"
+            
+            cur.execute("SELECT quantidade FROM acessos_diarios WHERE data = ?", (data_str,))
+            row = cur.fetchone()
+            qtd = row[0] if row else 0
+            
+            labels.append(label_dia)
+            valores.append(qtd)
+            
+        conn.close()
+        return jsonify({
+            'labels': labels,
+            'valores': valores
+        })
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@admin_bp.route('/api/admin/settings', methods=['GET'])
+@login_required
+def get_settings():
+    from app import get_db_connection
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT chave, valor FROM settings")
+        rows = cur.fetchall()
+        conn.close()
+        settings_dict = {row['chave']: row['valor'] for row in rows}
+        return jsonify(settings_dict)
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@admin_bp.route('/api/admin/settings', methods=['POST'])
+@login_required
+def save_settings():
+    from app import get_db_connection
+    try:
+        data = request.get_json()
+        conn = get_db_connection()
+        cur = conn.cursor()
+        for chave, valor in data.items():
+            cur.execute("INSERT OR REPLACE INTO settings (chave, valor) VALUES (?, ?)", (chave, str(valor)))
+        conn.commit()
+        conn.close()
+        registrar_log("Atualizou configurações globais do sistema")
+        return jsonify({'status': 'sucesso', 'mensagem': 'Configurações salvas com sucesso!'})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+

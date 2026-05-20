@@ -166,6 +166,23 @@ def migrar_schema_admin():
                 cur.execute(f"ALTER TABLE estatisticas ADD COLUMN {col_nome} {col_tipo}")
             except Exception: pass
 
+    # Criação da tabela de acessos_diarios caso não exista
+    cur.execute("CREATE TABLE IF NOT EXISTS acessos_diarios ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "data TEXT UNIQUE, "
+                "quantidade INTEGER DEFAULT 0"
+                ")")
+
+    # Criação da tabela de settings caso não exista
+    cur.execute("CREATE TABLE IF NOT EXISTS settings ("
+                "chave TEXT PRIMARY KEY, "
+                "valor TEXT"
+                ")")
+    # Valores padrões para settings
+    cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('portal_titulo', 'Bem-vindo ao Portal Saúde Digital')")
+    cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('portal_subtitulo', 'A saúde de Cascavel ao alcance de um clique. Agendamentos, telemedicina, campanhas e muito mais.')")
+    cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('google_analytics_id', '')")
+
     db.commit()
     db.close()
 
@@ -214,8 +231,37 @@ def add_no_cache_headers(response):
 def uploaded_files(filename):
     return send_from_directory('uploads', filename)
 
+def registrar_acesso_visita():
+    try:
+        from datetime import date
+        today = date.today().strftime('%Y-%m-%d')
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Se o dia já existe, incrementa. Senão, cria com valor 1.
+        cur.execute("INSERT INTO acessos_diarios (data, quantidade) VALUES (?, 1) "
+                    "ON CONFLICT(data) DO UPDATE SET quantidade = quantidade + 1", (today,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Erro ao registrar visita do dia: {e}")
+
+@app.route('/api/public/settings', methods=['GET'])
+def get_public_settings():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT chave, valor FROM settings")
+        rows = cur.fetchall()
+        conn.close()
+        # Retorna dicionário com chave e valor
+        settings_dict = {row['chave']: row['valor'] for row in rows}
+        return jsonify(settings_dict)
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
 @app.route('/')
 def index():
+    registrar_acesso_visita()
     return send_from_directory('../', 'index.html')
 
 from flask import session, redirect, url_for

@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // 5. Verificações secundárias
         checkAppointments();
+        carregarConfiguracoesPortal().catch(err => console.error('Falha ao carregar config identidade:', err));
     } catch (err) {
         console.error('ERRO CRÍTICO NA INICIALIZAÇÃO:', err);
         // Fallback: Tentar iniciar ao menos a lógica básica do carrossel para não quebrar a UI
@@ -274,6 +275,27 @@ function normalizeApiArray(resp) {
         if (Array.isArray(item)) return item;
     }
     return [];
+}
+
+async function carregarConfiguracoesPortal() {
+    try {
+        if (typeof API !== 'undefined' && typeof API.settingsPublic === 'function') {
+            const config = await API.settingsPublic();
+            if (config && !config.erro) {
+                const tituloEl = document.getElementById('portal-hero-titulo');
+                const subtituloEl = document.getElementById('portal-hero-subtitulo');
+                
+                if (tituloEl && config.portal_titulo && config.portal_titulo.trim() !== '') {
+                    tituloEl.innerHTML = config.portal_titulo;
+                }
+                if (subtituloEl && config.portal_subtitulo && config.portal_subtitulo.trim() !== '') {
+                    subtituloEl.textContent = config.portal_subtitulo;
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Falha ao carregar configurações de identidade do portal:", e);
+    }
 }
 
 // --- CONFIGURAÇÃO DINÂMICA (ADMIN) ---

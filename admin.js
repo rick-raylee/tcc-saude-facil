@@ -45,7 +45,7 @@ async function initAdmin() {
         // Se estiver rodando local ou Live Server, verifica se tem hash (ex: admin.html#noticias)
         if (window.location.hash) {
             const hashRoute = window.location.hash.replace('#', '');
-            if (['dashboard', 'carrossel', 'noticias', 'comentarios', 'campanhas', 'estatisticas', 'doencas', 'logs', 'preview'].includes(hashRoute)) {
+            if (['dashboard', 'carrossel', 'noticias', 'comentarios', 'campanhas', 'estatisticas', 'doencas', 'logs', 'preview', 'settings'].includes(hashRoute)) {
                 sectionToLoad = (hashRoute === 'estatisticas' || hashRoute === 'stats') ? 'stats' : hashRoute;
             }
         }
@@ -53,7 +53,7 @@ async function initAdmin() {
         // Nativo do Flask
         if (path.startsWith('/admin/') && path.length > 7) {
             const route = path.split('/')[2];
-            if (['dashboard', 'carrossel', 'noticias', 'comentarios', 'campanhas', 'estatisticas', 'doencas', 'logs', 'preview'].includes(route)) {
+            if (['dashboard', 'carrossel', 'noticias', 'comentarios', 'campanhas', 'estatisticas', 'doencas', 'logs', 'preview', 'settings'].includes(route)) {
                 sectionToLoad = (route === 'estatisticas' || route === 'stats') ? 'stats' : route;
             }
         }
@@ -157,6 +157,7 @@ async function mudarSecao(secaoId, push = true) {
     if (secaoId === 'doencas') await carregarDoencas();
     if (secaoId === 'carrossel') await carregarCarrosselEditor();
     if (secaoId === 'logs') await carregarLogs();
+    if (secaoId === 'settings') await carregarSettings();
 
     // Forçar carregamento do Preview se necessário
     if (secaoId === 'preview') {
@@ -173,6 +174,8 @@ async function mudarSecao(secaoId, push = true) {
 
 // --- DASHBOARD ---
 async function carregarDashboard() {
+    let googleAnalyticsId = '';
+    
     // Tentar via API
     if (typeof API !== 'undefined') {
         const dados = await API.dashboard();
@@ -183,27 +186,181 @@ async function carregarDashboard() {
             document.getElementById('counter-comentarios').textContent = dados.comentarios || 0;
             document.getElementById('counter-campanhas').textContent = dados.campanhas_ativas || 0;
         }
+
+        // Tentar obter configurações gerais públicas
+        const config = await API.settingsPublic();
+        if (config && !config.erro) {
+            googleAnalyticsId = config.google_analytics_id || '';
+        }
     }
 
-    // Gráfico Chart.js (Fixo/Mock para visual)
+    // Atualizar Widget de Status do Google Analytics
+    const gaTitle = document.getElementById('ga-status-title');
+    const gaIdVal = document.getElementById('ga-status-id');
+    const gaDot = document.getElementById('ga-status-dot');
+    const gaMsg = document.getElementById('ga-status-msg');
+
+    if (gaTitle && gaIdVal && gaDot && gaMsg) {
+        if (googleAnalyticsId && googleAnalyticsId.trim() !== '') {
+            gaTitle.textContent = "Sincronizado e Ativo";
+            gaIdVal.textContent = googleAnalyticsId;
+            gaDot.style.background = "#4caf50"; // Verde
+            gaDot.style.boxShadow = "0 0 10px #4caf50";
+            gaMsg.textContent = "Conectado e rastreando visitas";
+        } else {
+            gaTitle.textContent = "Não Conectado";
+            gaIdVal.textContent = "Não Configurado";
+            gaDot.style.background = "#f44336"; // Vermelho
+            gaDot.style.boxShadow = "none";
+            gaMsg.textContent = "Integração desativada";
+        }
+    }
+
+    // Carregar Gráfico com Dados Reais do Banco
+    let labelsGrafico = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    let dadosGrafico = [120, 190, 300, 500, 200, 300, 450]; // Mock de fallback
+
+    if (typeof API !== 'undefined') {
+        const dadosAcessos = await API.acessosSemana();
+        if (dadosAcessos && !dadosAcessos.erro && dadosAcessos.labels && dadosAcessos.valores) {
+            labelsGrafico = dadosAcessos.labels;
+            dadosGrafico = dadosAcessos.valores;
+        }
+    }
+
     const chartCanvas = document.getElementById('acessosChart');
     if (chartCanvas) {
+        if (window.myAcessosChartInstance) {
+            window.myAcessosChartInstance.destroy();
+        }
+        
         const ctx = chartCanvas.getContext('2d');
-        new Chart(ctx, {
+        window.myAcessosChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                labels: labelsGrafico,
                 datasets: [{
-                    label: 'Acessos na Semana',
-                    data: [120, 190, 300, 500, 200, 300, 450],
-                    borderColor: '#007bff',
-                    tension: 0.4
+                    label: 'Acessos Reais (Visitas)',
+                    data: dadosGrafico,
+                    borderColor: '#004b82',
+                    backgroundColor: 'rgba(0, 75, 130, 0.08)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#004b82',
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6,
+                    tension: 0.4,
+                    fill: true
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
         });
     }
 }
+
+// --- CONFIGURAÇÕES DO SISTEMA ---
+async function carregarSettings() {
+    if (typeof API === 'undefined') return;
+    
+    showHealthLoader("Buscando configurações");
+    const settings = await API.settings();
+    hideHealthLoader();
+    
+    if (settings && !settings.erro) {
+        document.getElementById('settings-portal-titulo').value = settings.portal_titulo || '';
+        document.getElementById('settings-portal-subtitulo').value = settings.portal_subtitulo || '';
+        document.getElementById('settings-ga-id').value = settings.google_analytics_id || '';
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Não foi possível carregar as configurações do sistema.'
+        });
+    }
+}
+
+async function salvarSettingsGerais(event) {
+    event.preventDefault();
+    if (typeof API === 'undefined') return;
+    
+    const titulo = document.getElementById('settings-portal-titulo').value.trim();
+    const subtitulo = document.getElementById('settings-portal-subtitulo').value.trim();
+    
+    showHealthLoader("Salvando configurações");
+    const resp = await API.salvarSettings({
+        portal_titulo: titulo,
+        portal_subtitulo: subtitulo
+    });
+    hideHealthLoader();
+    
+    if (resp && resp.status === 'sucesso') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Identidade Atualizada',
+            text: 'As informações de identidade do portal foram salvas com sucesso!'
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Falha ao Salvar',
+            text: resp.erro || 'Ocorreu um erro ao salvar as configurações.'
+        });
+    }
+}
+
+async function salvarSettingsAnalytics(event) {
+    event.preventDefault();
+    if (typeof API === 'undefined') return;
+    
+    const gaId = document.getElementById('settings-ga-id').value.trim();
+    
+    showHealthLoader("Salvando configurações");
+    const resp = await API.salvarSettings({
+        google_analytics_id: gaId
+    });
+    hideHealthLoader();
+    
+    if (resp && resp.status === 'sucesso') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Integração Google Analytics',
+            text: gaId === '' ? 'Integração desativada com sucesso.' : `ID ${gaId} ativado com sucesso! As visitas já estão sendo sincronizadas.`
+        });
+        await carregarDashboard();
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Falha ao Salvar',
+            text: resp.erro || 'Ocorreu um erro ao salvar as configurações.'
+        });
+    }
+}
+
+// Exportar manipuladores globais
+window.salvarSettingsGerais = salvarSettingsGerais;
+window.salvarSettingsAnalytics = salvarSettingsAnalytics;
+window.carregarSettings = carregarSettings;
+
 
 // --- NOT�?CIAS ---
 async function carregarNoticias() {
