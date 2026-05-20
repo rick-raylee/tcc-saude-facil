@@ -1608,14 +1608,14 @@ footer {
 
 .vertical-card img {
     position: absolute;
-    bottom: 0;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    width: 120% !important;
-    height: auto !important;
-    object-fit: unset !important;
+    transform: translate(-50%, -50%);
+    width: 90% !important;
+    height: 90% !important;
+    object-fit: contain !important;
     display: block !important;
-    transition: filter 0.7s ease;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     flex-shrink: 0;
     pointer-events: none;
 }
@@ -1635,68 +1635,69 @@ footer {
     z-index: 50;
     pointer-events: auto;
     box-shadow: 0 25px 60px rgba(0,75,130,0.45), 0 0 35px rgba(0,190,255,0.3);
-    /* Removido o keyframe flutuante pois conflita com transform no JS/CSS em alguns navegadores, e mantemos mais clean */
+    filter: grayscale(0%) brightness(1) blur(0) !important;
 }
 
 .vertical-card.center img {
+    width: 95% !important;
+    height: 95% !important;
     filter: none;
 }
 
 .vertical-card.up-1 {
     transform: perspective(1000px) translate(-50%, calc(-50% - 140px)) scale(0.85);
-    opacity: 0.6;
+    opacity: 0.65;
     z-index: 30;
     pointer-events: auto;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    filter: grayscale(50%) blur(1.5px);
+    filter: grayscale(100%) brightness(0.65) blur(1.5px) !important;
 }
 
 .vertical-card.up-2 {
     transform: perspective(1000px) translate(-50%, calc(-50% - 260px)) scale(0.70);
-    opacity: 0.3;
+    opacity: 0.35;
     z-index: 10;
     pointer-events: auto;
     box-shadow: 0 5px 15px rgba(0,0,0,0.12);
-    filter: grayscale(80%) blur(4px);
+    filter: grayscale(100%) brightness(0.45) blur(4px) !important;
 }
 
 .vertical-card.down-1 {
     transform: perspective(1000px) translate(-50%, calc(-50% + 140px)) scale(0.85);
-    opacity: 0.6;
+    opacity: 0.65;
     z-index: 30;
     pointer-events: auto;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    filter: grayscale(50%) blur(1.5px);
+    filter: grayscale(100%) brightness(0.65) blur(1.5px) !important;
 }
 
 .vertical-card.down-2 {
     transform: perspective(1000px) translate(-50%, calc(-50% + 260px)) scale(0.70);
-    opacity: 0.3;
+    opacity: 0.35;
     z-index: 10;
     pointer-events: auto;
     box-shadow: 0 5px 15px rgba(0,0,0,0.12);
-    filter: grayscale(80%) blur(4px);
+    filter: grayscale(100%) brightness(0.45) blur(4px) !important;
 }
 
-/* Imagens nos cards inativos (Filtros estão no container agora) */
+/* Imagens nos cards inativos */
 .vertical-card.up-1 img,
 .vertical-card.up-2 img,
 .vertical-card.down-1 img,
 .vertical-card.down-2 img {
-    /* Filters apply on the container now */
+    filter: grayscale(100%) brightness(0.75);
 }
 
 .vertical-card.center img {
     filter: none;
 }
-
 
 .vertical-card::after {
     content: '';
     position: absolute;
     inset: 0;
     background: transparent;
-    transition: background 0.7s ease;
+    transition: background 0.5s ease;
     z-index: 5;
     pointer-events: none;
     border-radius: inherit;
@@ -1704,12 +1705,12 @@ footer {
 
 .vertical-card.up-1::after,
 .vertical-card.down-1::after {
-    background: rgba(0,0,0,0.28);
+    background: rgba(0,0,0,0.12);
 }
 
 .vertical-card.up-2::after,
 .vertical-card.down-2::after {
-    background: rgba(0,0,0,0.48);
+    background: rgba(0,0,0,0.25);
 }
 
 .vertical-card.hidden {
