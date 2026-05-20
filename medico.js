@@ -1217,17 +1217,25 @@ async function gerarDocumento(tipo) {
 
         if (!motivo) return alert('⚠️ Informe o motivo do afastamento.');
 
+        // Hora atual
+        const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const dataRepouso = new Date();
+        dataRepouso.setDate(dataRepouso.getDate());
+        const dataRepousoStr = dataRepouso.toLocaleDateString('pt-BR');
+
         corpoHTML = `
-            <div style="font-size: 1.2rem; line-height: 1.8; text-align: justify; margin-top: 20px;">
-                Atesto para os devidos fins que o(a) Sr(a). <strong>${pacienteNome}</strong>, inscrito(a) sob o CPF <strong>${cpfPaciente || 'Não informado'}</strong>,
-                passou por atendimento médico nesta data e necessita de <strong>${dias} dia(s)</strong> de afastamento de suas atividades laborais e/ou escolares por motivo de doença.
-            </div>
-            
-            <div style="margin-top: 40px; text-align: left; background: #fff; padding: 15px; border: 1px solid #ccc; border-radius: 8px;">
-                <p style="margin: 0; font-size: 1.1rem;"><strong>Motivo do Afastamento:</strong> ${motivo}</p>
-                ${cid ? `<p style="margin: 10px 0 0 0; font-size: 1.1rem;"><strong>CID-10:</strong> <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; border: 1px solid #ddd;">${cid}</span></p>` : ''}
-            </div>
+            <p style="font-size: 1.05rem; line-height: 2; text-align: justify; margin-top: 10px;">
+                Atesto para os devidos fins que o Sr.(a) <strong style="border-bottom: 1px solid #000;">&nbsp;&nbsp;${pacienteNome}&nbsp;&nbsp;</strong>
+                portador do RG: <span style="border-bottom: 1px solid #000;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                e do CPF: <span style="border-bottom: 1px solid #000;">&nbsp;&nbsp;${cpfPaciente || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}&nbsp;&nbsp;</span>.
+                Foi atendido no consultório médico no dia <span style="border-bottom: 1px solid #000;">&nbsp;&nbsp;${dataAtual}&nbsp;&nbsp;</span>
+                às <span style="border-bottom: 1px solid #000;">&nbsp;&nbsp;${horaAtual}&nbsp;&nbsp;</span> horas,
+                necessitando de <span style="border-bottom: 1px solid #000;">&nbsp;&nbsp;${dias}&nbsp;&nbsp;</span> dia(s) de repouso
+                a partir de <span style="border-bottom: 1px solid #000;">&nbsp;&nbsp;${dataRepousoStr}&nbsp;&nbsp;</span>, por motivo de doença.
+            </p>
+            ${cid ? `<p style="margin-top:18px; font-size: 0.95rem; color: #555;"><strong>CID-10:</strong> ${cid}</p>` : ''}
         `;
+
     } else if (tipo === 'receita') {
         titulo = 'RECEITUÁRIO';
         const texto = document.getElementById('receita-texto').value || '';
@@ -1248,46 +1256,74 @@ async function gerarDocumento(tipo) {
         `;
     }
 
+    // Busca CRM do médico logado (se disponível)
+    let crmMedico = 'CRM 12345/PR';
+    try {
+        const usuarioId = localStorage.getItem('usuarioId');
+        if (typeof API !== 'undefined' && usuarioId) {
+            const perfil = await API.perfilMedico?.();
+            if (perfil && perfil.crm) crmMedico = perfil.crm;
+        }
+    } catch(e) {}
+
+    const logoSrc = window.location.protocol === 'file:' 
+        ? 'logo-saude-facil.png' 
+        : (window.location.origin + '/logo-saude-facil.png');
+
     const docLayout = `
-        <div class="pdf-container" style="background: #fff; width: 100%; max-width: 800px; margin: 0 auto; box-sizing: border-box; font-family: 'Arial', sans-serif; color: #000; position: relative;">
+        <div class="pdf-container" style="background: #fff; width: 100%; max-width: 750px; margin: 0 auto; box-sizing: border-box; font-family: 'Arial', sans-serif; color: #000; position: relative; padding: 40px 50px;">
             
-            <!-- HEADER INSTITUCIONAL -->
-            <div class="pdf-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #004b82; padding-bottom: 15px; margin-bottom: 30px;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="assets/sus-logo.png" alt="SUS" style="height: 60px;" onerror="this.style.display='none'">
+            <!-- HEADER INSTITUCIONAL NO ESTILO DO MODELO -->
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <img src="logo-saude-facil.png" alt="Saúde Fácil" style="height: 55px; object-fit: contain;" onerror="this.style.display='none'">
                     <div>
-                        <h2 style="margin: 0; color: #004b82; font-size: 1.5rem; text-transform: uppercase;">Portal Brasileiro de Saúde Pública</h2>
-                        <h4 style="margin: 5px 0 0 0; color: #555; font-size: 1rem;">Unidade de Ponto de Atendimento CEEP</h4>
+                        <div style="font-weight: 900; font-size: 1rem; color: #004b82; letter-spacing: 0.5px;">Portal Saúde Fácil</div>
+                        <div style="font-size: 0.78rem; color: #444; line-height: 1.5;">
+                            Unidade de Atendimento — CEEP Cascavel<br>
+                            Cascavel/PR &nbsp;|&nbsp; Tel: (45) 3000-0000
+                        </div>
                     </div>
+                </div>
+                <div style="font-size: 0.72rem; color: #777; text-align: right;">
+                    Emitido em: ${dataAtual}<br>
+                    Portal de Saúde Digital
                 </div>
             </div>
 
             <!-- TÍTULO PRINCIPAL -->
-            <h1 style="text-align: center; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 40px; color: #333;">
+            <h2 style="text-align: center; font-size: 1.3rem; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; margin: 30px 0 40px 0; color: #000;">
                 ${titulo}
-            </h1>
+            </h2>
 
             <!-- CORPO DO DOCUMENTO -->
-            <div class="pdf-body" style="min-height: 350px;">
+            <div style="min-height: 320px;">
                 ${corpoHTML}
             </div>
 
-            <!-- ASSINATURA E DATA -->
-            <div class="pdf-footer" style="margin-top: 80px; text-align: center; position: relative;">
-                <p style="font-size: 1.1rem; margin-bottom: 60px;">Cascavel/PR, ${dataAtual}</p>
-                
-                <div style="display: inline-block; width: 350px; border-top: 1px dashed #000; padding-top: 10px; text-align: center; margin-bottom: 20px;">
-                    <p style="margin: 0; font-weight: bold; font-size: 1.2rem;">${medicoNome}</p>
-                    <p style="margin: 5px 0 0 0; font-size: 1rem;">MÉDICO(A) - ${crm}</p>
+            <!-- ÁREA DE ASSINATURA (ESTILO DO MODELO) -->
+            <div style="margin-top: 80px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <!-- DATA / LOCAL -->
+                <div style="text-align: center; width: 220px;">
+                    <div style="border-top: 1.5px solid #000; padding-top: 8px; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px;">DATA / LOCAL</div>
                 </div>
 
-                <div style="font-size: 0.8rem; color: #777; border-top: 1px solid #eee; padding-top: 10px;">
-                    Este documento é válido em território nacional e pode ser verificado pelo QRCode ou sistema interno do Portal.
+                <!-- ASSINATURA MÉDICO -->
+                <div style="text-align: center; width: 250px;">
+                    <div style="font-weight: 900; font-size: 1rem; margin-bottom: 3px;">${medicoNome}</div>
+                    <div style="font-size: 0.82rem; color: #555;">Médico(a) - ${crmMedico}</div>
+                    <div style="border-top: 1.5px solid #000; padding-top: 8px; margin-top: 10px; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px;">MÉDICO</div>
                 </div>
+            </div>
+
+            <!-- RODAPÉ -->
+            <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 8px; font-size: 0.72rem; color: #888; text-align: center;">
+                Este documento é de uso exclusivo para fins médicos e legais. Portal Saúde Fácil — Cascavel/PR.
             </div>
             
         </div>
     `;
+
 
     // Render Preview
     document.getElementById('preview-conteudo').innerHTML = docLayout;
