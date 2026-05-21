@@ -1254,7 +1254,91 @@ async function gerarDocumento(tipo) {
                 ${textoHTML}
             </div>
         `;
+
+    } else if (tipo === 'exame') {
+        titulo = 'PEDIDO DE EXAMES';
+        const lista    = document.getElementById('exame-lista').value || '';
+        const urgencia = document.getElementById('exame-urgencia').value || 'Rotina';
+        const diag     = document.getElementById('exame-diagnostico').value || '';
+        const obs      = document.getElementById('exame-obs').value || '';
+
+        if (!lista) return alert('⚠️ Informe pelo menos um exame solicitado.');
+
+        const examesHTML = lista.split('\n').filter(e => e.trim()).map((e, i) =>
+            `<tr style="background:${i%2===0?'#fff':'#f9f9f9'}">
+                <td style="padding:8px 12px; border:1px solid #ddd; font-size:1rem;">${e.trim()}</td>
+             </tr>`
+        ).join('');
+
+        corpoHTML = `
+            <div style="margin-bottom: 20px; display:flex; gap:20px;">
+                <div style="flex:1; background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:14px;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:#e65100; margin-bottom:4px;">Paciente</div>
+                    <div style="font-size:1rem; font-weight:600;">${pacienteNome}</div>
+                    <div style="font-size:0.85rem; color:#666;">CPF: ${cpfPaciente || 'Não informado'}</div>
+                </div>
+                <div style="background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:14px; text-align:center; min-width:140px;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:#e65100; margin-bottom:4px;">Urgência</div>
+                    <div style="font-size:1.1rem; font-weight:900; color:${urgencia==='Rotina'?'#2e7d32':urgencia==='Urgente'?'#c62828':'#e65100'};">${urgencia}</div>
+                </div>
+            </div>
+            ${diag ? `<div style="background:#f1f8e9; border-left:4px solid #558b2f; padding:10px 15px; border-radius:6px; margin-bottom:20px; font-size:0.95rem;"><strong>Diagnóstico Presumido:</strong> ${diag}</div>` : ''}
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                <thead>
+                    <tr style="background:#e65100; color:white;">
+                        <th style="padding:10px 12px; text-align:left; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">Exame Solicitado</th>
+                    </tr>
+                </thead>
+                <tbody>${examesHTML}</tbody>
+            </table>
+            ${obs ? `<div style="background:#f5f5f5; padding:12px 15px; border-radius:6px; font-size:0.9rem; color:#555;"><strong>Obs. Clínicas:</strong> ${obs}</div>` : ''}
+        `;
+
+    } else if (tipo === 'encaminhamento') {
+        titulo = 'ENCAMINHAMENTO MÉDICO';
+        const especialidade = document.getElementById('encaminh-especialidade').value || '';
+        const prioridade    = document.getElementById('encaminh-prioridade').value || 'Eletivo';
+        const motivo        = document.getElementById('encaminh-motivo').value || '';
+        const historia      = document.getElementById('encaminh-historia').value || '';
+
+        if (!motivo) return alert('⚠️ Informe o motivo do encaminhamento.');
+
+        const corPrioridade = prioridade === 'Eletivo' ? '#2e7d32' : prioridade === 'Prioritário' ? '#e65100' : '#c62828';
+
+        corpoHTML = `
+            <div style="display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:180px; background:#f3e5f5; border:1px solid #ce93d8; border-radius:8px; padding:14px;">
+                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:700; color:#6a1b9a; margin-bottom:4px;">Paciente</div>
+                    <div style="font-size:1rem; font-weight:700;">${pacienteNome}</div>
+                    <div style="font-size:0.82rem; color:#666;">CPF: ${cpfPaciente || 'Não informado'}</div>
+                </div>
+                <div style="flex:1; min-width:180px; background:#f3e5f5; border:1px solid #ce93d8; border-radius:8px; padding:14px;">
+                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:700; color:#6a1b9a; margin-bottom:4px;">Especialidade de Destino</div>
+                    <div style="font-size:1.05rem; font-weight:900; color:#4a148c;">${especialidade}</div>
+                </div>
+                <div style="min-width:120px; background:#f3e5f5; border:1px solid #ce93d8; border-radius:8px; padding:14px; text-align:center;">
+                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:700; color:#6a1b9a; margin-bottom:4px;">Prioridade</div>
+                    <div style="font-size:1.05rem; font-weight:900; color:${corPrioridade};">${prioridade}</div>
+                </div>
+            </div>
+
+            <div style="background:#fce4ec; border-left:4px solid #c62828; padding:14px 18px; border-radius:8px; margin-bottom:20px;">
+                <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:#b71c1c; margin-bottom:6px;">Hipótese Diagnóstica / Motivo do Encaminhamento</div>
+                <div style="font-size:1rem; line-height:1.6;">${motivo}</div>
+            </div>
+
+            ${historia ? `
+            <div style="background:#f9f9f9; border:1px solid #e0e0e0; padding:14px 18px; border-radius:8px; margin-bottom:20px;">
+                <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:#555; margin-bottom:6px;">História Clínica Resumida</div>
+                <div style="font-size:0.95rem; line-height:1.7; color:#333;">${historia.replace(/\n/g, '<br>')}</div>
+            </div>` : ''}
+
+            <div style="background:#e8f5e9; border:1px solid #a5d6a7; padding:12px 18px; border-radius:8px; font-size:0.88rem; color:#1b5e20;">
+                <strong>Médico Solicitante:</strong> ${medicoNome} &nbsp;|&nbsp; Data: ${dataAtual}
+            </div>
+        `;
     }
+
 
     // Busca CRM do médico logado (se disponível)
     let crmMedico = 'CRM 12345/PR';
