@@ -450,13 +450,27 @@ def public_doencas():
 # ── Verificação e inicialização automática do banco de dados ───
 try:
     db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
-    # Se o banco SQLite não existir no container, ele se auto-inicializa e popula!
-    if not os.path.exists(db_path_verif):
-        print(f"--> [Banco de Dados] Não localizado em {db_path_verif}. Inicializando...")
+    # Verifica de forma ultra-robusta se o banco precisa de inicialização (se não existir, estiver vazio ou sem tabelas)
+    banco_precisa_inicializar = False
+    if not os.path.exists(db_path_verif) or os.path.getsize(db_path_verif) == 0:
+        banco_precisa_inicializar = True
+    else:
+        try:
+            conn_test = sqlite3.connect(db_path_verif)
+            cur_test = conn_test.cursor()
+            cur_test.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
+            if not cur_test.fetchone():
+                banco_precisa_inicializar = True
+            conn_test.close()
+        except Exception:
+            banco_precisa_inicializar = True
+
+    if banco_precisa_inicializar:
+        print(f"--> [Banco de Dados] Necessita inicialização em {db_path_verif}. Criando estrutura...")
         
         # 1. Cria as tabelas a partir do script SQL
         from init_db import init_db
-        init_db()
+        init_db(db_path_verif)
         
         # 2. Popula os usuários e médicos padrão de teste
         try:

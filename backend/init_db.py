@@ -1,10 +1,10 @@
 import sqlite3
 import os
 
-def init_db():
-    from app import app
-    # Caminho do banco (via config) e do script SQL
-    db_path = app.config['DATABASE_PATH']
+def init_db(db_path=None):
+    if db_path is None:
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
+        
     sql_path = os.path.join(os.path.dirname(__file__), '..', 'sql sus.sql')
 
     print(f"Iniciando criação do banco SQLite em: {db_path}")
