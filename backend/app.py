@@ -58,10 +58,33 @@ def log_request_info():
 
 @app.route('/api/ping')
 def ping():
+    db_status = "Não verificado"
+    total_usuarios = 0
+    amostra_cpfs = []
+    
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        cur.execute("SELECT COUNT(*) FROM usuarios")
+        total_usuarios = cur.fetchone()[0]
+        
+        cur.execute("SELECT cpf, nome, tipo FROM usuarios LIMIT 15")
+        amostra_cpfs = [f"{row['nome']} ({row['tipo']}) - CPF: {row['cpf']}" for row in cur.fetchall()]
+        db.close()
+        db_status = "Conectado e Inicializado com Sucesso!"
+    except Exception as e:
+        db_status = f"Erro ao acessar banco: {str(e)}"
+
     return jsonify({
         "status": "online",
-        "mensagem": "Servidor Flask funcionando na porta 5001",
-        "database": os.path.abspath(app.config['DATABASE_PATH'])
+        "mensagem": "Servidor Flask funcionando com sucesso!",
+        "versao_deploy": "Commit: 48be410 (Diagnóstico Ativo)",
+        "banco_de_dados": {
+            "status": db_status,
+            "caminho": os.path.abspath(app.config['DATABASE_PATH']),
+            "total_usuarios": total_usuarios,
+            "usuarios_carregados": amostra_cpfs
+        }
     })
 
 # ── SQLite ───────────────────────────────────────────────────────
