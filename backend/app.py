@@ -481,7 +481,8 @@ try:
         banco_precisa_seed = True
     else:
         try:
-            conn_test = sqlite3.connect(db_path_verif)
+            conn_test = sqlite3.connect(db_path_verif, timeout=15.0)
+            conn_test.execute('PRAGMA journal_mode=WAL;')
             cur_test = conn_test.cursor()
             
             # 1. Verifica se a tabela 'usuarios' existe
