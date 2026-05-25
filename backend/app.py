@@ -473,29 +473,42 @@ def public_doencas():
 # ── Verificação e inicialização automática do banco de dados ───
 try:
     db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
-    # Verifica de forma ultra-robusta se o banco precisa de inicialização (se não existir, estiver vazio ou sem tabelas)
     banco_precisa_inicializar = False
+    banco_precisa_seed = False
+    
     if not os.path.exists(db_path_verif) or os.path.getsize(db_path_verif) == 0:
         banco_precisa_inicializar = True
+        banco_precisa_seed = True
     else:
         try:
             conn_test = sqlite3.connect(db_path_verif)
             cur_test = conn_test.cursor()
+            
+            # 1. Verifica se a tabela 'usuarios' existe
             cur_test.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
             if not cur_test.fetchone():
                 banco_precisa_inicializar = True
+                banco_precisa_seed = True
+            else:
+                # 2. Se a tabela existe, verifica se ela tem pelo menos 1 usuário cadastrado
+                cur_test.execute("SELECT COUNT(*) FROM usuarios")
+                count_users = cur_test.fetchone()[0]
+                if count_users == 0:
+                    banco_precisa_seed = True
+                    
             conn_test.close()
         except Exception:
             banco_precisa_inicializar = True
+            banco_precisa_seed = True
 
     if banco_precisa_inicializar:
         print(f"--> [Banco de Dados] Necessita inicialização em {db_path_verif}. Criando estrutura...")
-        
-        # 1. Cria as tabelas a partir do script SQL
+        # Cria as tabelas a partir do script SQL
         from init_db import init_db
         init_db(db_path_verif)
         
-        # 2. Popula os usuários e médicos padrão de teste
+    if banco_precisa_seed:
+        print(f"--> [Banco de Dados] Populando massa de dados inicial (seed)...")
         try:
             from seed_users import seed
             seed()
