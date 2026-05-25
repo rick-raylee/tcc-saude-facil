@@ -447,17 +447,34 @@ def public_doencas():
     data = [dict(r) for r in rows]
     return jsonify(data if data else _fallback_public_doencas())
 
-# ── Iniciar servidor ─────────────────────────────────────────────
-if __name__ == '__main__':
-    # Verificar se o banco existe, senão inicializar
-    if not os.path.exists(app.config['DATABASE_PATH']):
+# ── Verificação e inicialização automática do banco de dados ───
+try:
+    db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
+    # Se o banco SQLite não existir no container, ele se auto-inicializa e popula!
+    if not os.path.exists(db_path_verif):
+        print(f"--> [Banco de Dados] Não localizado em {db_path_verif}. Inicializando...")
+        
+        # 1. Cria as tabelas a partir do script SQL
         from init_db import init_db
         init_db()
-
+        
+        # 2. Popula os usuários e médicos padrão de teste
+        try:
+            from seed_users import seed
+            seed()
+            print("--> [Banco de Dados] Massa de dados inicial populada com sucesso!")
+        except Exception as seed_err:
+            print(f"--> [Aviso] Falha ao popular massa de dados inicial: {seed_err}")
+            
+    # Executa migrações e normalizações em cada importação (garante funcionamento sob Gunicorn)
     migrar_schema_admin()
-    # Corrige CPFs legados com máscara para evitar falhas de login e busca.
     normalizar_cpfs_legados()
+    print("--> [Banco de Dados] Migrações e normalizações de CPF aplicadas.")
+except Exception as init_err:
+    print(f"--> [Crítico] Falha na auto-inicialização do banco de dados: {init_err}")
 
+# ── Iniciar servidor ─────────────────────────────────────────────
+if __name__ == '__main__':
     print("=" * 60)
     print("  Portal Saúde Digital — Backend Flask (SQLite)")
     print(f"  Diretório base: {os.path.abspath(os.curdir)}")
@@ -471,20 +488,11 @@ if __name__ == '__main__':
         count = cur.fetchone()[0]
         print(f"  [OK] Conectado! Usuários no sistema: {count}")
         db.close()
-        
-        print("  [2/3] Rodando migrações de esquema...")
-        migrar_schema_admin()
-        
-        print("  [3/3] Normalizando CPFs legados...")
-        normalizar_cpfs_legados()
-        
-        print("  [SUCESSO] Inicialização concluída.")
     except Exception as e:
-        print(f"  [CRÍTICO] ERRO DURANTE A INICIALIZAÇÃO: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"  [CRÍTICO] ERRO DE CONEXÃO COM O BANCO: {e}")
 
     print(f"  URL DE ACESSO: http://127.0.0.1:5001")
     print("=" * 60)
     
     app.run(debug=True, host='0.0.0.0', port=5001)
+

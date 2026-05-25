@@ -1,7 +1,8 @@
 import sqlite3
 from werkzeug.security import generate_password_hash
 
-db_path = 'database.db'
+import os
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
 
 users = [
     {"nome": "Admin Teste", "cpf": "11111111111", "tipo": "admin", "senha": "123"},

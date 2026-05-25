@@ -4,7 +4,7 @@ import re
 from werkzeug.security import generate_password_hash
 
 # Caminho absoluto para o banco de dados
-DB_PATH = r"c:\Users\ricar\Desktop\tcc ricardo\TCC CEEP\backend\database.db"
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
