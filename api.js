@@ -533,6 +533,201 @@ async function initGoogleAnalytics() {
             document.head.appendChild(configScript);
             window.GA_INJECTED = true;
         }
+                    <div class="health-cross"></div>
+                </div>
+            </div>
+            <div class="health-loader-text" id="health-loader-msg">Carregando<span>.</span></div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loaderHTML);
+}
+
+window.showHealthLoader = function (mensagem = 'Aguarde') {
+    initHealthLoader();
+    const overlay = document.getElementById('health-loader-overlay');
+    const msgEl = document.getElementById('health-loader-msg');
+
+    if (msgEl) msgEl.innerHTML = mensagem + '<span>.</span>';
+    if (overlay) overlay.classList.add('show');
+};
+
+window.hideHealthLoader = function () {
+    const overlay = document.getElementById('health-loader-overlay');
+    if (overlay) overlay.classList.remove('show');
+};
+
+// ==========================================================================
+// MODAL EDIÇÃO DE PERFIL (GLOBAL)
+// ==========================================================================
+function injetarModalEdicaoPerfil() {
+    if (document.getElementById('modalEditarPerfil')) return;
+
+    const modalHTML = `
+    <div id="modalEditarPerfil" class="modal-wrapper" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;">
+        <div class="modal-auth-card" style="background: white; width: 90%; max-width: 450px; border-radius: 12px; overflow: hidden; position: relative;">
+            <div style="background: var(--sus-blue-dark, #004b82); color: white; padding: 20px; text-align: center; position: relative;">
+                <h3 style="margin: 0; font-size: 1.2rem;"><i class="fi fi-rr-edit"></i> Editar Dados Pessoais</h3>
+                <button type="button" onclick="fecharModalEditarPerfil()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: white; cursor: pointer; font-size: 1.8rem; line-height: 1;">&times;</button>
+            </div>
+            <div style="padding: 20px; text-align: left;">
+                <form id="formEditarPerfil" onsubmit="salvarEdicaoPerfil(event)">
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">CPF (Não alterável)</label>
+                        <input type="text" id="edit-perfil-cpf" readonly style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; background: #f5f5f5; color: #999; cursor: not-allowed;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Nome Completo</label>
+                        <input type="text" id="edit-perfil-nome" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Data de Nascimento</label>
+                        <input type="date" id="edit-perfil-nasc" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Número do Cartão SUS</label>
+                        <input type="text" id="edit-perfil-sus" placeholder="Se não possuir, deixe em branco" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Nova Senha (Opcional)</label>
+                        <input type="password" id="edit-perfil-senha" placeholder="Deixe em branco para manter atual" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" onclick="fecharModalEditarPerfil()" style="flex: 1; background: #ef4444; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">Cancelar</button>
+                        <button type="submit" style="flex: 1; background: var(--sus-blue-dark, #004b82); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#003c66'" onmouseout="this.style.background='var(--sus-blue-dark, #004b82)'">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+window.abrirModalEditarPerfil = function(event) {
+    if (event) event.preventDefault();
+    injetarModalEdicaoPerfil();
+
+    const cpf = localStorage.getItem('usuarioCpf') || '';
+    const nome = localStorage.getItem('usuarioNome') || '';
+    const sus = localStorage.getItem('usuarioSUS') || '';
+    
+    let dataNasc = '';
+    const objKeys = ['adminRegistrado', 'medicoRegistrado', 'enfermeiroRegistrado', 'pacienteRegistrado']; 
+    
+    for (const key of objKeys) {
+        const str = localStorage.getItem(key);
+        if (str) {
+            try {
+                const obj = JSON.parse(str);
+                if (obj.cpf === cpf && obj.dataNascimento) {
+                    dataNasc = obj.dataNascimento;
+                    break;
+                }
+            } catch(e) {}
+        }
+    }
+    
+    document.getElementById('edit-perfil-cpf').value = cpf;
+    document.getElementById('edit-perfil-nome').value = nome;
+    document.getElementById('edit-perfil-sus').value = sus;
+    document.getElementById('edit-perfil-nasc').value = dataNasc;
+    document.getElementById('edit-perfil-senha').value = '';
+
+    document.getElementById('modalEditarPerfil').style.display = 'flex';
+}
+
+window.fecharModalEditarPerfil = function() {
+    const modal = document.getElementById('modalEditarPerfil');
+    if (modal) modal.style.display = 'none';
+}
+
+window.salvarEdicaoPerfil = function(event) {
+    event.preventDefault();
+    
+    const novoNome = document.getElementById('edit-perfil-nome').value.trim();
+    const novoSus = document.getElementById('edit-perfil-sus').value.trim();
+    const novaSenha = document.getElementById('edit-perfil-senha').value.trim();
+    const novoNasc = document.getElementById('edit-perfil-nasc').value;
+    
+    if (novoNome) localStorage.setItem('usuarioNome', novoNome);
+    if (novoSus) localStorage.setItem('usuarioSUS', novoSus);
+    
+    const cpfAtivo = localStorage.getItem('usuarioCpf');
+    const objKeys = ['adminRegistrado', 'medicoRegistrado', 'enfermeiroRegistrado', 'pacienteRegistrado'];
+    
+    objKeys.forEach(key => {
+        let str = localStorage.getItem(key);
+        if (str) {
+            try {
+                let obj = JSON.parse(str);
+                if (obj.cpf === cpfAtivo) {
+                    if (novoNome) obj.nome = novoNome;
+                    if (novoSus) obj.sus = novoSus;
+                    if (novoNasc) obj.dataNascimento = novoNasc;
+                    if (novaSenha) obj.senha = novaSenha;
+                    localStorage.setItem(key, JSON.stringify(obj));
+                }
+            } catch(e){}
+        }
+    });
+
+    fecharModalEditarPerfil();
+    
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Perfil Atualizado',
+            text: 'Seus dados foram atualizados com sucesso!'
+        }).then(() => {
+            if (typeof atualizarInterfaceLogin === 'function') {
+                atualizarInterfaceLogin();
+            }
+            const path = window.location.pathname;
+            if (path.includes('medico.html') || path.includes('enfermeiro.html') || path.includes('admin.html') || path.includes('ti.html') || path.includes('painel_telemedicina.html') || path.includes('perfil.html')) {
+                window.location.reload();
+            }
+        });
+    } else {
+        alert("Dados atualizados com sucesso!");
+        window.location.reload();
+    }
+}
+
+// ==========================================================================
+// INICIALIZAÇÃO DINÂMICA DO GOOGLE ANALYTICS (TCC SUS)
+// ==========================================================================
+async function initGoogleAnalytics() {
+    try {
+        if (window.GA_INJECTED) return;
+        
+        const base = resolveApiBase();
+        const url = (base ? base : '') + '/api/public/settings';
+        
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const settings = await res.json();
+        
+        const gaId = settings.google_analytics_id;
+        if (gaId && gaId.trim() !== '') {
+            console.log(`[Google Analytics] Inicializando rastreamento com ID: ${gaId}`);
+            
+            // Injetar o script global do Google Analytics (gtag.js)
+            const scriptTag = document.createElement('script');
+            scriptTag.async = true;
+            scriptTag.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+            document.head.appendChild(scriptTag);
+            
+            // Injetar código de configuração interno
+            const configScript = document.createElement('script');
+            configScript.innerHTML = `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}', { 'anonymize_ip': true });
+            `;
+            document.head.appendChild(configScript);
+            window.GA_INJECTED = true;
+        }
     } catch (e) {
         console.warn("[Google Analytics] Falha ao injetar rastreamento:", e);
     }
@@ -544,3 +739,100 @@ if (document.readyState === 'loading') {
 } else {
     initGoogleAnalytics();
 }
+
+// ==========================================================================
+// SUPORTE E CHAMADOS DE TI (MODAL GLOBAL PROFISSIONAL)
+// ==========================================================================
+window.abrirChamadoTI = async function() {
+    if (typeof Swal === 'undefined') {
+        alert("O serviço de alertas visuais (SweetAlert2) não está disponível nesta página.");
+        return;
+    }
+
+    const { value: formValues } = await Swal.fire({
+        title: '<i class="fas fa-headset" style="color: #3b82f6; margin-right: 8px;"></i> Abrir Chamado para a TI',
+        html: `
+            <div style="text-align: left; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">
+                    Descreva o problema ou a solicitação de suporte de TI. A equipe de infraestrutura analisará o caso em breve.
+                </p>
+                <div class="swal2-input-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 5px;">Assunto / Título do Chamado</label>
+                    <input id="swal-ticket-titulo" class="swal2-input" placeholder="Ex: Impressora de receitas não responde" style="width: 100%; margin: 0; box-sizing: border-box; font-size: 0.9rem;">
+                </div>
+                <div class="swal2-input-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 5px;">Prioridade</label>
+                    <select id="swal-ticket-prioridade" class="swal2-input" style="width: 100%; margin: 0; box-sizing: border-box; font-size: 0.9rem;">
+                        <option value="Baixa">🟢 Baixa</option>
+                        <option value="Média" selected>🟡 Média</option>
+                        <option value="Alta">🟠 Alta</option>
+                        <option value="Crítica">🔴 Crítica</option>
+                    </select>
+                </div>
+                <div class="swal2-input-group">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #334155; display: block; margin-bottom: 5px;">Descrição Detalhada do Problema</label>
+                    <textarea id="swal-ticket-descricao" class="swal2-textarea" placeholder="Descreva aqui o comportamento do sistema ou o problema de hardware..." style="width: 100%; margin: 0; box-sizing: border-box; font-size: 0.9rem; height: 120px; font-family: inherit;"></textarea>
+                </div>
+            </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-paper-plane"></i> Enviar Chamado',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#94a3b8',
+        preConfirm: () => {
+            const titulo = document.getElementById('swal-ticket-titulo').value.trim();
+            const descricao = document.getElementById('swal-ticket-descricao').value.trim();
+            const prioridade = document.getElementById('swal-ticket-prioridade').value;
+
+            if (!titulo) {
+                Swal.showValidationMessage('Por favor, informe o assunto/título do chamado.');
+                return false;
+            }
+            if (!descricao) {
+                Swal.showValidationMessage('Por favor, faça uma descrição detalhada do problema.');
+                return false;
+            }
+
+            return { titulo, descricao, prioridade };
+        }
+    });
+
+    if (formValues) {
+        Swal.fire({
+            title: 'Enviando chamado...',
+            text: 'Aguarde um momento enquanto registramos sua solicitação.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            const resp = await API.tiCreateTicket(formValues);
+            if (resp && resp.sucesso) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Chamado Aberto!',
+                    text: 'A equipe de TI foi notificada e o seu chamado já está na fila de atendimento.',
+                    confirmButtonColor: '#10b981'
+                });
+                
+                // Recarregar a fila se estivermos no painel de TI
+                if (typeof loadTickets === 'function') {
+                    loadTickets();
+                }
+            } else {
+                throw new Error(resp ? resp.erro : 'Erro desconhecido');
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Falha no Envio',
+                text: 'Não foi possível registrar seu chamado: ' + err.message,
+                confirmButtonColor: '#ef4444'
+            });
+        }
+    }
+};
