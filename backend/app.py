@@ -504,62 +504,22 @@ def public_doencas():
     data = [dict(r) for r in rows]
     return jsonify(data if data else _fallback_public_doencas())
 
-# ── Verificação e inicialização automática do banco de dados ───
-try:
-    db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
-    banco_precisa_inicializar = False
-    banco_precisa_seed = False
-    
-    if not os.path.exists(db_path_verif) or os.path.getsize(db_path_verif) == 0:
-        banco_precisa_inicializar = True
-        banco_precisa_seed = True
-    else:
-        try:
-            conn_test = sqlite3.connect(db_path_verif, timeout=15.0)
-            conn_test.execute('PRAGMA journal_mode=WAL;')
-            cur_test = conn_test.cursor()
-            
-            # 1. Verifica se a tabela 'usuarios' existe
-            cur_test.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
-            if not cur_test.fetchone():
-                banco_precisa_inicializar = True
-                banco_precisa_seed = True
-            else:
-                # 2. Se a tabela existe, verifica se ela tem pelo menos 1 usuário cadastrado
-                cur_test.execute("SELECT COUNT(*) FROM usuarios")
-                count_users = cur_test.fetchone()[0]
-                if count_users == 0:
-                    banco_precisa_seed = True
-                    
-            conn_test.close()
-        except Exception:
-            banco_precisa_inicializar = True
-            banco_precisa_seed = True
-
-    if banco_precisa_inicializar:
-        print(f"--> [Banco de Dados] Necessita inicialização em {db_path_verif}. Criando estrutura...")
-        # Cria as tabelas a partir do script SQL
-        from init_db import init_db
-        init_db(db_path_verif)
-        
-    if banco_precisa_seed:
-        print(f"--> [Banco de Dados] Populando massa de dados inicial (seed)...")
-        try:
-            from seed_users import seed
-            seed()
-            print("--> [Banco de Dados] Massa de dados inicial populada com sucesso!")
-        except Exception as seed_err:
-            print(f"--> [Aviso] Falha ao popular massa de dados inicial: {seed_err}")
-            
-    # Executa migrações e normalizações em cada importação (garante funcionamento sob Gunicorn)
-    migrar_schema_admin()
-    normalizar_cpfs_legados()
-    print("--> [Banco de Dados] Migrações e normalizações de CPF aplicadas.")
-except Exception as init_err:
-    print(f"--> [Crítico] Falha na auto-inicialização do banco de dados: {init_err}")
-
 # ── Iniciar servidor ─────────────────────────────────────────────
 if __name__ == '__main__':
+    # Em desenvolvimento local, verifica e inicializa se necessário de forma isolada
+    try:
+        db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
+        if not os.path.exists(db_path_verif) or os.path.getsize(db_path_verif) == 0:
+            print("--> [Local] Inicializando banco de dados local...")
+            from init_db import init_db
+            init_db(db_path_verif)
+            from seed_users import seed
+            seed()
+        
+        migrar_schema_admin()
+        normalizar_cpfs_legados()
+    except Exception as e:
+        print(f"--> [Aviso] Falha na inicialização local: {e}")
     print("=" * 60)
     print("  Portal Saúde Digital — Backend Flask (SQLite)")
     print(f"  Diretório base: {os.path.abspath(os.curdir)}")
