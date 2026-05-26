@@ -50,15 +50,15 @@ def seed():
             usuario_id = row['id']
             cur.execute("""
                 UPDATE usuarios 
-                SET nome = ?, tipo = ?, senha = ?, atende_telemedicina = ?, email = ?, sus = ?
+                SET nome = ?, tipo = ?, senha = ?, email = ?, sus = ?
                 WHERE id = ?
-            """, (nome, tipo, senha_hash, atende, email, sus, usuario_id))
+            """, (nome, tipo, senha_hash, email, sus, usuario_id))
             print(f"Atualizado: {nome} ({tipo}) - CPF: {cpf}")
         else:
             cur.execute("""
-                INSERT INTO usuarios (nome, cpf, tipo, senha, atende_telemedicina, email, sus)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (nome, cpf, tipo, senha_hash, atende, email, sus))
+                INSERT INTO usuarios (nome, cpf, tipo, senha, email, sus)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (nome, cpf, tipo, senha_hash, email, sus))
             usuario_id = cur.lastrowid
             print(f"Criado: {nome} ({tipo}) - CPF: {cpf}")
             
