@@ -13,8 +13,32 @@ class TerminalBuffer:
         self.log_buffer = deque(maxlen=200)
     
     def write(self, text):
-        self.original_stream.write(text)
-        txt = text.strip()
+        # Garante que text seja convertido para str para o buffer em memoria
+        if isinstance(text, bytes):
+            try:
+                text_str = text.decode('utf-8', errors='ignore')
+            except Exception:
+                text_str = text.decode('latin-1', errors='ignore')
+        else:
+            text_str = str(text)
+            
+        try:
+            if self.original_stream:
+                self.original_stream.write(text)
+        except Exception:
+            # Em caso de falha de console (ex. acentos no Windows CMD/PowerShell),
+            # tenta imprimir limpando acentos ou simplesmente ignora para nao travar a aplicacao
+            try:
+                if self.original_stream:
+                    if isinstance(text, bytes):
+                        self.original_stream.write(text)
+                    else:
+                        text_clean = text_str.encode('ascii', errors='replace').decode('ascii')
+                        self.original_stream.write(text_clean)
+            except Exception:
+                pass
+                
+        txt = text_str.strip()
         if txt:
             # Se for log bruto (werkzeug) não adicionar o timestamp
             if txt.startswith('[') or "HTTP" in txt:
@@ -25,7 +49,10 @@ class TerminalBuffer:
             
     def flush(self):
         if hasattr(self.original_stream, 'flush'):
-            self.original_stream.flush()
+            try:
+                self.original_stream.flush()
+            except Exception:
+                pass
 
 terminal_buffer = TerminalBuffer(sys.stderr)
 sys.stderr = terminal_buffer
@@ -54,7 +81,7 @@ CORS(app, origins=re.compile(r"https?://.*"), supports_credentials=True)
 def log_request_info():
     # Ignora logs de arquivos estáticos para não poluir o terminal demais
     if not request.path.startswith('/static') and not request.path.endswith(('.js', '.css', '.png', '.jpg')):
-        print(f"--> [REQUISIÇÃO] {request.method} {request.path} (Origin: {request.headers.get('Origin')})")
+        print(f"--> [REQUISICAO] {request.method} {request.path} (Origin: {request.headers.get('Origin')})")
 
 @app.route('/api/ping')
 def ping():
@@ -506,7 +533,7 @@ def public_doencas():
 
 # ── Iniciar servidor ─────────────────────────────────────────────
 if __name__ == '__main__':
-    # Em desenvolvimento local, verifica e inicializa se necessário de forma isolada
+    # Em desenvolvimento local, verifica e inicializa se necessario de forma isolada
     try:
         db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
         if not os.path.exists(db_path_verif) or os.path.getsize(db_path_verif) == 0:
@@ -519,22 +546,22 @@ if __name__ == '__main__':
         migrar_schema_admin()
         normalizar_cpfs_legados()
     except Exception as e:
-        print(f"--> [Aviso] Falha na inicialização local: {e}")
+        print(f"--> [Aviso] Falha na inicializacao local: {e}")
     print("=" * 60)
-    print("  Portal Saúde Digital — Backend Flask (SQLite)")
-    print(f"  Diretório base: {os.path.abspath(os.curdir)}")
+    print("  Portal Saude Digital - Backend Flask (SQLite)")
+    print(f"  Diretorio base: {os.path.abspath(os.curdir)}")
     print(f"  Banco de dados: {os.path.abspath(app.config['DATABASE_PATH'])}")
     
     try:
-        print("  [1/3] Verificando conexão com o banco...")
+        print("  [1/3] Verificando conexao com o banco...")
         db = get_db_connection()
         cur = db.cursor()
         cur.execute("SELECT COUNT(*) FROM usuarios")
         count = cur.fetchone()[0]
-        print(f"  [OK] Conectado! Usuários no sistema: {count}")
+        print(f"  [OK] Conectado! Usuarios no sistema: {count}")
         db.close()
     except Exception as e:
-        print(f"  [CRÍTICO] ERRO DE CONEXÃO COM O BANCO: {e}")
+        print(f"  [CRITICO] ERRO DE CONEXAO COM O BANCO: {e}")
 
     print(f"  URL DE ACESSO: http://127.0.0.1:5001")
     print("=" * 60)
