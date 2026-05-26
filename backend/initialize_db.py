@@ -33,7 +33,7 @@ def setup_database():
       email TEXT UNIQUE,
       senha TEXT NOT NULL,
       imagem TEXT,
-      tipo TEXT CHECK(tipo IN ('paciente','medico','enfermeiro','admin')) DEFAULT 'paciente',
+      tipo TEXT CHECK(tipo IN ('paciente','medico','enfermeiro','admin','ti')) DEFAULT 'paciente',
       telefone TEXT,
       cidade TEXT,
       bairro TEXT,
