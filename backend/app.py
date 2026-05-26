@@ -87,6 +87,40 @@ def ping():
         }
     })
 
+@app.route('/api/public/reseta-banco-secreto', methods=['GET'])
+def reseta_banco_secreto():
+    try:
+        db_path = os.path.abspath(app.config['DATABASE_PATH'])
+        print(f"--> [Reset Secreto] Apagando banco em: {db_path}")
+        
+        # Tenta fechar e remover o arquivo de banco antigo
+        if os.path.exists(db_path):
+            try:
+                os.remove(db_path)
+            except Exception as rm_err:
+                print(f"--> [Reset Secreto] Erro ao deletar arquivo, tentando sobrescrever: {rm_err}")
+                open(db_path, 'w').close() # Trunca o arquivo para 0 bytes
+        
+        # 1. Recria as tabelas
+        from init_db import init_db
+        init_db(db_path)
+        
+        # 2. Popula os dados de semente
+        from seed_users import seed
+        seed()
+        
+        return jsonify({
+            "sucesso": True,
+            "mensagem": "Banco de dados e todos os logins do seu TCC foram RECRIADOS e POPULADOS com sucesso em producao no Render!",
+            "database_path": db_path
+        })
+    except Exception as e:
+        print(f"--> [Reset Secreto] ERRO CRITICO: {e}")
+        return jsonify({
+            "sucesso": False,
+            "erro": str(e)
+        }), 500
+
 # ── SQLite ───────────────────────────────────────────────────────
 def get_db_connection():
     """Retorna uma conexão com o SQLite que retorna dicionários."""
