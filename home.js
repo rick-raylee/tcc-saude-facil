@@ -1541,12 +1541,15 @@ async function finalizarLogin(event) {
         // Se for "Senha incorreta", barramos imediatamente para exibir erro correto ao usuário.
         // Se for "CPF não encontrado", deixamos cair no Fallback Local pois pode ser um cadastro offline.
         if (resp && resp.erro) {
-            if (resp.erro.toLowerCase().includes('senha')) {
-                Swal.fire({ icon: 'error', title: 'Senha Incorreta', text: resp.erro });
+            const erroStr = String(resp.erro || '').toLowerCase();
+            const detalheStr = String(resp.detalhe || '').toLowerCase();
+            
+            if (erroStr.includes('senha') || detalheStr.includes('senha') || detalheStr.includes('incorreta')) {
+                Swal.fire({ icon: 'error', title: 'Senha Incorreta', text: resp.detalhe || resp.erro });
                 return;
             }
-            if (resp.erro.toLowerCase().includes('falha na cone')) {
-                Swal.fire({ icon: 'error', title: 'Servidor Indisponível', text: resp.erro + '\nDetalhe: ' + (resp.detalhe || '') });
+            if (erroStr.includes('falha na cone') || detalheStr.includes('falha na cone') || detalheStr.includes('tempo limite')) {
+                Swal.fire({ icon: 'error', title: 'Servidor Indisponível', text: (resp.erro || '') + '\nDetalhe: ' + (resp.detalhe || '') });
                 return;
             }
             console.warn('Login API falhou (' + resp.erro + '). Tentando fallback local...');

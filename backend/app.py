@@ -118,23 +118,61 @@ def ping():
 def reseta_banco_secreto():
     try:
         db_path = os.path.abspath(app.config['DATABASE_PATH'])
-        print(f"--> [Reset Secreto] Apagando banco em: {db_path}")
+        print(f"--> [Reset Secreto] Limpando dados do banco em: {db_path}")
         
-        # Tenta fechar e remover o arquivo de banco antigo
-        if os.path.exists(db_path):
+        tabelas = [
+            "medico_info", "enfermeiro_info", "paciente_doencas", "consultas", 
+            "triagens", "prontuarios", "receitas", "atestados", "exames", 
+            "vacinas_aplicadas", "chat", "prescricoes", "aplicacoes", 
+            "notificacoes", "noticias", "comentarios", "carrossel", 
+            "estatisticas", "campanhas", "doencas_prevencao", "faq", 
+            "settings", "logs", "acessos_diarios", "tickets", "usuarios"
+        ]
+        
+        # Conecta e limpa o banco de forma transacional e segura
+        db = get_db_connection()
+        cur = db.cursor()
+        
+        # Desativa chaves estrangeiras temporariamente para evitar conflito no drop
+        cur.execute("PRAGMA foreign_keys = OFF;")
+        
+        for tabela in tabelas:
             try:
-                os.remove(db_path)
-            except Exception as rm_err:
-                print(f"--> [Reset Secreto] Erro ao deletar arquivo, tentando sobrescrever: {rm_err}")
-                open(db_path, 'w').close() # Trunca o arquivo para 0 bytes
+                cur.execute(f"DROP TABLE IF EXISTS {tabela};")
+            except Exception as drop_err:
+                print(f"--> [Reset Secreto] Falha ao deletar {tabela}: {drop_err}")
+                
+        db.commit()
+        db.close()
         
-        # 1. Recria as tabelas
+        # 1. Recria as tabelas usando o script init_db
         from init_db import init_db
         init_db(db_path)
         
-        # 2. Popula os dados de semente
+        # 2. Popula os dados de semente dos usuarios
         from seed_users import seed
         seed()
+        
+        # 3. Executa as migracoes e recria tabelas extras (logs, settings, etc.)
+        migrar_schema_admin()
+        normalizar_cpfs_legados()
+        
+        # 4. Cria a tabela de tickets
+        db = get_db_connection()
+        cur = db.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS tickets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER,
+                titulo TEXT,
+                descricao TEXT,
+                prioridade TEXT,
+                status TEXT DEFAULT 'Aberto',
+                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        db.commit()
+        db.close()
         
         return jsonify({
             "sucesso": True,

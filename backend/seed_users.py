@@ -12,11 +12,11 @@ users = [
     {"nome": "Médico Telemedicina", "cpf": "66666666666", "tipo": "medico", "senha": "123", "crm": "CRM/SP-66666", "especialidade": "Cardiologista", "tipo_atendimento": "telemedicina", "atende_telemedicina": 1},
     {"nome": "Enfermeiro Teste", "cpf": "44444444444", "tipo": "enfermeiro", "senha": "123", "coren": "COREN/SP-12345", "funcao": "Enfermeiro"},
     
-    # Perfis Específicos do TCC
-    {"nome": "PACIENTE TESTE", "cpf": "32323254353", "tipo": "paciente", "senha": "123456", "email": "paciente@teste.com", "sus": "7000045612349988"},
-    {"nome": "DR. RICARDO", "cpf": "11122233344", "tipo": "medico", "senha": "123456", "email": "medico@teste.com", "crm": "CRM/PR-99999", "especialidade": "Cardiologista", "tipo_atendimento": "ambos", "atende_telemedicina": 1},
-    {"nome": "ENF. MARIA", "cpf": "55566677788", "tipo": "enfermeiro", "senha": "123456", "email": "enfermeiro@teste.com", "coren": "COREN/PR-88888", "funcao": "Enfermeira Chefe"},
-    {"nome": "ADMINISTRADOR", "cpf": "99900011122", "tipo": "admin", "senha": "admin123", "email": "admin@teste.com"},
+    # Perfis Específicos do TCC (Senhas Unificadas para '123')
+    {"nome": "Ricardo Marchi", "cpf": "32323254353", "tipo": "admin", "senha": "123", "email": "ricardo@teste.com", "sus": "7000045612349988"},
+    {"nome": "DR. RICARDO", "cpf": "11122233344", "tipo": "medico", "senha": "123", "email": "medico@teste.com", "crm": "CRM/PR-99999", "especialidade": "Cardiologista", "tipo_atendimento": "ambos", "atende_telemedicina": 1},
+    {"nome": "ENF. MARIA", "cpf": "55566677788", "tipo": "enfermeiro", "senha": "123", "email": "enfermeiro@teste.com", "coren": "COREN/PR-88888", "funcao": "Enfermeira Chefe"},
+    {"nome": "ADMINISTRADOR", "cpf": "99900011122", "tipo": "admin", "senha": "123", "email": "admin@teste.com"},
     
     # Perfis de Telemedicina Avançada
     {"nome": "Dr. Lucas (Telemedicina)", "cpf": "00000000011", "tipo": "medico", "senha": "123", "crm": "CRM/TELE-001", "especialidade": "Clínico Geral", "tipo_atendimento": "telemedicina", "atende_telemedicina": 1},
