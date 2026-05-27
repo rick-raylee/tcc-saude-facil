@@ -69,7 +69,7 @@ from config import Config
 app = Flask(__name__, static_folder='../') 
 app.config.from_object(Config)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_SECURE'] = True if os.environ.get('RENDER') or os.environ.get('PORT') else False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_NAME'] = 'sessao_portal_saude'
 
@@ -462,9 +462,13 @@ def static_files(filename):
             req_role = paineis_protegidos[clean_filename]
             if req_role:
                 user_role = session.get('usuario_tipo') or session.get('tipo')
-                # Admin can access TI panel
+                # Permissões Estendidas / Flexíveis para evitar bloqueio
                 if req_role == 'ti' and user_role == 'admin':
                     pass 
+                elif req_role == 'medico' and user_role == 'medico_tele':
+                    pass
+                elif req_role == 'medico_tele' and user_role == 'medico':
+                    pass
                 elif user_role != req_role:
                     return redirect('/')
 

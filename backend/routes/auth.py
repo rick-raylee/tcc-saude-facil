@@ -186,6 +186,13 @@ def login():
             return jsonify({'erro': 'Credenciais Inválidas', 'detalhe': 'Senha incorreta.'}), 401
 
         role_original = usuario['tipo']
+        med_info = None
+        if role_original == 'medico':
+            cur.execute("SELECT crm, especialidade, atende_telemedicina, tipo_atendimento FROM medico_info WHERE usuario_id = ?", (usuario['id'],))
+            med_info = cur.fetchone()
+            if med_info and (med_info['atende_telemedicina'] or med_info['tipo_atendimento'] in ['telemedicina', 'ambos']):
+                role_original = 'medico_tele'
+
         print(f"DEBUG LOGIN: Sucesso! Logando {usuario['nome']} ({role_original})")
 
         session['usuario_id'] = usuario['id']
@@ -211,14 +218,11 @@ def login():
         }
 
         # Info extra para médico
-        if usuario['tipo'] == 'medico':
-            cur.execute("SELECT crm, especialidade, atende_telemedicina, tipo_atendimento FROM medico_info WHERE usuario_id = ?", (usuario['id'],))
-            med = cur.fetchone()
-            if med:
-                resp['usuario']['crm'] = med['crm']
-                resp['usuario']['especialidade'] = med['especialidade']
-                resp['usuario']['telemedicina'] = bool(med['atende_telemedicina'])
-                resp['usuario']['tipo_atendimento'] = med['tipo_atendimento']
+        if usuario['tipo'] == 'medico' and med_info:
+            resp['usuario']['crm'] = med_info['crm']
+            resp['usuario']['especialidade'] = med_info['especialidade']
+            resp['usuario']['telemedicina'] = bool(med_info['atende_telemedicina'])
+            resp['usuario']['tipo_atendimento'] = med_info['tipo_atendimento']
 
         # Info extra para enfermeiro
         if usuario['tipo'] == 'enfermeiro':
