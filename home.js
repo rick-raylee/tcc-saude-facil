@@ -1667,7 +1667,7 @@ async function finalizarLogin(event) {
         localStorage.setItem('usuarioDoencas', JSON.stringify([]));
     } else {
         // Se a senha e cpf não combinarem com nenhum registro
-        if (cpfDigitado !== '000.000.000-00') {
+        if (cpfDigitado !== '000.000.000-00' && cpfDigitado !== '00000000000') {
             Swal.fire({ 
                 icon: 'warning', 
                 title: 'Credenciais Inválidas', 
@@ -1680,7 +1680,7 @@ async function finalizarLogin(event) {
         localStorage.setItem('usuarioNome', 'RICARDO MARCHI (TESTE)');
         localStorage.setItem('usuarioIdade', '28');
         localStorage.setItem('usuarioSUS', '7000.0456.1234.9988');
-        localStorage.setItem('usuarioCpf', '000.000.000-00');
+        localStorage.setItem('usuarioCpf', '00000000000');
         localStorage.setItem('tipoUsuario', 'paciente');
         localStorage.setItem('usuarioDoencas', JSON.stringify(['Diabético', 'Hipertenso', 'Asma']));
     }
