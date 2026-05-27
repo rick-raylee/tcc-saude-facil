@@ -1393,6 +1393,16 @@ function toggleSenhaLogin(eyeIcon) {
 // Máscaras de Input (Executa em todos os campos com as classes específicas)
 document.addEventListener('DOMContentLoaded', () => {
     initAuthMasks();
+    
+    // Remove programaticamente o required nativo para impedir bloqueios silenciosos
+    // de campos requeridos que estao ocultos em outras etapas do cadastro.
+    const formCadastro = document.getElementById('formCadastro');
+    if (formCadastro) {
+        console.log('[FormCadastro] Removendo required nativo para suporte a validacao programatica premium...');
+        formCadastro.querySelectorAll('[required]').forEach(el => {
+            el.removeAttribute('required');
+        });
+    }
 });
 
 function initAuthMasks() {
@@ -1681,32 +1691,102 @@ async function finalizarLogin(event) {
 // function finalizarCadastro... (Integrado com Backend API)
 async function finalizarCadastro(event) {
     event.preventDefault();
-    console.log("Iniciando finalização de cadastro...");
+    console.log("Iniciando finalização de cadastro com validação programática...");
     try {
         const nomeEl = document.getElementById('nome');
-        const nome = nomeEl ? nomeEl.value : '';
+        const nome = nomeEl ? nomeEl.value.trim() : '';
         const cpfEl = document.getElementById('cpf');
         const cpf = limparCPF(cpfEl ? cpfEl.value : '');
-
-        if (cpf.length !== 11 && cpf.length !== 14) {
-            Swal.fire({
-                icon: 'error',
-                title: 'CPF/CNPJ Inválido',
-                text: 'O CPF deve ter 11 dígitos e o CNPJ 14 dígitos.',
-                background: '#1a1a2e',
-                color: '#fff'
-            });
-            return;
-        }
         const nascEl = document.getElementById('nascimento');
-        const nascimento = nascEl ? nascEl.value : '';
-        const senhaEl = document.getElementById('senha-cadastro') || document.getElementById('senha');
-        const senha = senhaEl ? senhaEl.value : cpf; // fallback: usa CPF como senha
-
+        const nascimento = nascEl ? nascEl.value.trim() : '';
+        
         // Obter tipo selecionado
         const tipoCadastroEl = document.querySelector('input[name="tipoCadastro"]:checked');
         if (!tipoCadastroEl) throw new Error("Selecione o tipo de cadastro.");
         const tipoCadastro = tipoCadastroEl.value;
+
+        // Obter senha cadastrada
+        const senhaEl = document.getElementById('senha-cadastro') || document.getElementById('senha');
+        const senha = senhaEl ? senhaEl.value.trim() : cpf; // fallback: usa CPF como senha
+
+        // 1. Validação Passo 1
+        if (!nome) {
+            proximoPassoCadastro(1);
+            Swal.fire({ icon: 'warning', title: 'Nome Obrigatório', text: 'Por favor, informe seu Nome Completo.' });
+            return;
+        }
+        if (!cpf) {
+            proximoPassoCadastro(1);
+            Swal.fire({ icon: 'warning', title: 'CPF/CNPJ Obrigatório', text: 'Por favor, informe seu CPF ou CNPJ.' });
+            return;
+        }
+        if (cpf.length !== 11 && cpf.length !== 14) {
+            proximoPassoCadastro(1);
+            Swal.fire({
+                icon: 'error',
+                title: 'CPF/CNPJ Inválido',
+                text: 'O CPF deve ter 11 dígitos e o CNPJ 14 dígitos.'
+            });
+            return;
+        }
+        if (!nascimento) {
+            proximoPassoCadastro(1);
+            Swal.fire({ icon: 'warning', title: 'Nascimento Obrigatório', text: 'Por favor, informe sua Data de Nascimento.' });
+            return;
+        }
+
+        // 2. Validação Passo 3 (Apenas para Pacientes, Profissionais de saúde pulam o SUS)
+        const cidadeEl = document.getElementById('cidade');
+        const cidade = cidadeEl ? cidadeEl.value : '';
+        const bairroEl = document.getElementById('bairro');
+        const bairro = bairroEl ? bairroEl.value.trim() : '';
+        const susEl = document.getElementById('sus');
+        const sus = susEl ? susEl.value.trim() : '';
+
+        if (tipoCadastro === 'paciente') {
+            if (!cidade) {
+                proximoPassoCadastro(3);
+                Swal.fire({ icon: 'warning', title: 'Cidade Obrigatória', text: 'Por favor, selecione sua Cidade.' });
+                return;
+            }
+            if (!bairro) {
+                proximoPassoCadastro(3);
+                Swal.fire({ icon: 'warning', title: 'Bairro Obrigatório', text: 'Por favor, informe seu Bairro.' });
+                return;
+            }
+            if (!sus) {
+                proximoPassoCadastro(3);
+                Swal.fire({ icon: 'warning', title: 'Cartão SUS Obrigatório', text: 'Por favor, informe seu Cartão SUS.' });
+                return;
+            }
+        }
+
+        // 3. Validação Passo 4
+        const telEl = document.getElementById('telefone');
+        const telefone = telEl ? telEl.value.trim() : '';
+        const emailEl = document.getElementById('email');
+        const email = emailEl ? emailEl.value.trim() : '';
+
+        if (!telefone) {
+            proximoPassoCadastro(4);
+            Swal.fire({ icon: 'warning', title: 'Celular Obrigatório', text: 'Por favor, informe seu número de Celular.' });
+            return;
+        }
+        if (!email) {
+            proximoPassoCadastro(4);
+            Swal.fire({ icon: 'warning', title: 'E-mail Obrigatório', text: 'Por favor, informe seu endereço de E-mail.' });
+            return;
+        }
+        if (!senha) {
+            proximoPassoCadastro(4);
+            Swal.fire({ icon: 'warning', title: 'Senha Obrigatória', text: 'Por favor, defina uma Senha de acesso.' });
+            return;
+        }
+        if (senha.length < 6) {
+            proximoPassoCadastro(4);
+            Swal.fire({ icon: 'warning', title: 'Senha Fraca', text: 'A senha deve conter no mínimo 6 caracteres.' });
+            return;
+        }
 
         // Validação Admin
         if (tipoCadastro === 'admin') {
