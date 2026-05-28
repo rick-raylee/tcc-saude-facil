@@ -299,9 +299,10 @@ function carregarProximaTeleconsulta() {
     const todosAgendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
     const meuCpf = localStorage.getItem('usuarioCpf') || JSON.parse(localStorage.getItem('usuarioRegistrado') || '{}').cpf;
 
-    const minhasConsultasFallback = todosAgendamentos.filter(a =>
-        (a.pacienteCpf === meuCpf || a.pacienteCpf === '000.000.000-00')
-    );
+    const minhasConsultasFallback = todosAgendamentos.filter(a => {
+        const cpf = a.pacienteCpf || (a.paciente && a.paciente.cpf);
+        return (cpf === meuCpf || cpf === '000.000.000-00');
+    });
 
     renderizarMinhasConsultas(minhasConsultasFallback);
 }
