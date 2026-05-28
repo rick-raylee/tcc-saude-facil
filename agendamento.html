@@ -42,6 +42,62 @@
             <p>Agende sua consulta de forma rápida e prática</p>
         </div>
 
+        <!-- PLANTÃO DE MÉDICOS PRESENCIAIS (REAL-TIME ELITE PANEL) -->
+        <section id="panel-plantao-presencial" style="margin-bottom: 40px; background: rgba(255, 255, 255, 0.9); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,75,130,0.1); display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="margin: 0; color: #004b82; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fi fi-rr-hospital" style="color: #28a745; font-size: 1.6rem;"></i> Médicos de Plantão na Clínica Agora
+                </h2>
+                <span style="background: #e8f5e9; color: #2e7d32; font-size: 0.8rem; font-weight: bold; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px;">
+                    <span class="pulse-green-dot" style="width: 8px; height: 8px; background: #2e7d32; border-radius: 50%; display: inline-block;"></span> Fila de Espera Direta Ativa
+                </span>
+            </div>
+            
+            <p style="color: #555; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">
+                Os médicos listados abaixo estão fisicamente presentes na clínica neste momento. Você pode **Agendar e Entrar na Fila Imediata** com apenas um clique, gerando seu número de chamada automaticamente e **eliminando a necessidade de passar pelo balcão de recepção**.
+            </p>
+            
+            <div id="lista-plantao-presencial" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <!-- Preenchido via JavaScript -->
+                <p style="color: #777; font-style: italic; text-align: center; grid-column: 1/-1;">Nenhum médico presencial de plantão no momento.</p>
+            </div>
+        </section>
+        
+        <style>
+            @keyframes pulseGreen {
+                0% { transform: scale(0.9); opacity: 0.7; }
+                50% { transform: scale(1.1); opacity: 1; }
+                100% { transform: scale(0.9); opacity: 0.7; }
+            }
+            .pulse-green-dot {
+                animation: pulseGreen 1.8s infinite ease-in-out;
+            }
+            .plantao-doc-card {
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                padding: 20px;
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                position: relative;
+                overflow: hidden;
+            }
+            .plantao-doc-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 20px -5px rgba(0,75,130,0.15);
+                border-color: #28a745;
+            }
+            .plantao-doc-card::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; width: 4px; height: 100%;
+                background: #28a745;
+            }
+        </style>
+
         <section class="agendamento-section">
             <div class="agendamento-form">
                 <h3>Dados do Agendamento</h3>
