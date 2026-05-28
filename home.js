@@ -2274,7 +2274,7 @@ async function verificarSessao() {
     // Limpar conteúdo atual da nav-auth
     navAuth.innerHTML = '';
 
-    // Remover link "Meu SUS" se já existir (para evitar duplicatas)
+    // Remover link "Meu Portal Saúde" se já existir (para evitar duplicatas)
     const existingLink = document.getElementById('nav-meu-sus');
     if (existingLink) existingLink.remove();
 
@@ -2293,11 +2293,11 @@ async function verificarSessao() {
     }
 
     if (logado) {
-        // 1. Injetar Link "Meu SUS" na Navbar (Ao lado de Agendamento)
+        // 1. Injetar Link "Meu Portal Saúde" na Navbar (Ao lado de Agendamento)
         if (navLinks) {
             const meuSusLink = `
         <a href="perfil.html" id="nav-meu-sus">
-                    <i class='fi fi-rr-credit-card'></i>  MEU SUS
+                    <i class='fi fi-rr-credit-card'></i>  MEU PORTAL SAÚDE
                 </a>
             `;
             navLinks.insertAdjacentHTML('afterbegin', meuSusLink);
