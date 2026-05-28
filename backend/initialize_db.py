@@ -48,6 +48,7 @@ def setup_database():
       especialidade TEXT,
       atende_telemedicina INTEGER DEFAULT 0,
       tipo_atendimento TEXT DEFAULT 'presencial',
+      presencial_ativo INTEGER DEFAULT 0,
       bio TEXT,
       FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
     );

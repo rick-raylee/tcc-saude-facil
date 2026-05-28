@@ -400,10 +400,12 @@
         // Efeito de scroll na navbar
         window.addEventListener('scroll', function () {
             const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
+            if (navbar) {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
             }
         });
 
@@ -431,8 +433,132 @@
                     const inputs = formContainer.querySelectorAll('input, select, textarea, button:not(.btn-overlay-login)');
                     inputs.forEach(input => input.disabled = true);
                 }
+            } else {
+                // EXCLUSIVO: Mostrar Painel de Plantão Presencial e Carregar Médicos
+                const panelPlantao = document.getElementById('panel-plantao-presencial');
+                if (panelPlantao) {
+                    panelPlantao.style.display = 'block';
+                    carregarPlantaoPresencial();
+                }
             }
         });
+
+        async function carregarPlantaoPresencial() {
+            const container = document.getElementById('lista-plantao-presencial');
+            if (!container) return;
+
+            try {
+                if (typeof API === 'undefined') return;
+
+                const medicos = await API.listarMedicos();
+                const presenciais = medicos.filter(m => m.presencial_ativo);
+
+                if (presenciais.length === 0) {
+                    container.innerHTML = `<p style="color: #777; font-style: italic; text-align: center; grid-column: 1/-1; padding: 20px;">Nenhum médico presencial de plantão no momento.</p>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                presenciais.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'plantao-doc-card';
+                    card.innerHTML = `
+                        <div>
+                            <h3 style="margin: 0 0 5px 0; color: #004b82; font-size: 1.15rem; display: flex; align-items: center; gap: 6px;">
+                                <i class="fi fi-rr-stethoscope"></i> Dr(a). ${m.nome}
+                            </h3>
+                            <span style="background: #e3f2fd; color: #0b5ed7; font-size: 0.8rem; font-weight: 600; padding: 3px 8px; border-radius: 12px; display: inline-block; margin-bottom: 10px;">
+                                ${m.especialidade}
+                            </span>
+                            <p style="margin: 0; font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                <strong>CRM:</strong> ${m.crm || 'N/A'}<br>
+                                <span style="color: #28a745; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+                                    <span class="pulse-green-dot" style="width: 6px; height: 6px; background: #28a745; border-radius: 50%; display: inline-block;"></span> Disponível na Clínica
+                                </span>
+                            </p>
+                        </div>
+                        <button onclick="agendarFilaDireta(${m.id}, '${m.nome.replace(/'/g, "\\'")}', '${m.especialidade.replace(/'/g, "\\'")}')" style="background: #28a745; color: white; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                            <i class="fi fi-rr-ticket"></i> Entrar na Fila Direta
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Erro ao carregar plantão presencial:", err);
+                container.innerHTML = `<p style="color: #ef4444; font-style: italic; text-align: center; grid-column: 1/-1; padding: 20px;">Falha ao carregar médicos de plantão.</p>`;
+            }
+        }
+
+        async function agendarFilaDireta(medicoId, medicoNome, especialidade) {
+            if (typeof API === 'undefined') return;
+
+            const confirm = await Swal.fire({
+                title: 'Confirmar Entrada na Fila?',
+                html: `Você deseja agendar um atendimento presencial **agora** com o(a) **Dr(a). ${medicoNome}** (${especialidade}) e entrar diretamente na fila de espera?<br><br><small style="color: #666;">Você receberá uma senha de chamada e poderá se dirigir à sala de espera imediatamente, sem passar pelo balcão de recepção!</small>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, Entrar na Fila!',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d'
+            });
+
+            if (!confirm.isConfirmed) return;
+
+            try {
+                // Loader visual do SweetAlert
+                Swal.fire({
+                    title: 'Gerando sua senha...',
+                    text: 'Aguarde um momento enquanto te adicionamos à fila.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const agora = new Date();
+                const ano = agora.getFullYear();
+                const mes = String(agora.getMonth() + 1).padStart(2, '0');
+                const dia = String(agora.getDate()).padStart(2, '0');
+                const horas = String(agora.getHours()).padStart(2, '0');
+                const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+                const dataFmt = `${ano}-${mes}-${dia}`;
+                const horaFmt = `${horas}:${minutos}`;
+
+                const resp = await API.agendar({
+                    medico_id: medicoId,
+                    especialidade: especialidade,
+                    data: dataFmt,
+                    hora: horaFmt,
+                    tipo: 'presencial',
+                    auto_checkin: true,
+                    queixa: 'Agendamento direto pelo Painel de Plantão'
+                });
+
+                if (resp && resp.sucesso) {
+                    const senha = resp.senha_fila || 'P-001';
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Confirmado na Fila!',
+                        html: `Sua consulta presencial foi agendada!<br><br>Sua senha de atendimento é:<br><strong style="font-size: 2.8rem; color: #2e7d32; display:block; margin: 15px 0; letter-spacing: 1px;">${senha}</strong><br>O médico já foi notificado. Dirija-se diretamente à sala de espera presencial.`,
+                        confirmButtonText: 'Entendido, ir para meu perfil',
+                        confirmButtonColor: '#004b82'
+                    });
+                    
+                    window.location.href = 'perfil.html';
+                } else {
+                    throw new Error(resp.erro || 'Falha ao agendar na fila.');
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao Agendar',
+                    text: err.message || 'Não foi possível entrar na fila presencial. Tente novamente ou dirija-se à recepção.'
+                });
+            }
+        }
 
         // Bloquear datas retroativas
         const dataInput = document.getElementById('data-agendamento');

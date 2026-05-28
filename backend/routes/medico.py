@@ -63,9 +63,15 @@ def resumo():
         hoje = datetime.now().strftime('%Y-%m-%d')
 
         # Tipo de Atendimento do Médico
-        cur.execute("SELECT tipo_atendimento FROM medico_info WHERE usuario_id = ?", (medico_id,))
+        cur.execute("SELECT tipo_atendimento, presencial_ativo FROM medico_info WHERE usuario_id = ?", (medico_id,))
         medInfo = cur.fetchone()
         tipo_atendimento = medInfo['tipo_atendimento'] if medInfo else 'presencial'
+        presencial_ativo = False
+        if medInfo:
+            try:
+                presencial_ativo = bool(medInfo['presencial_ativo'])
+            except Exception:
+                pass
 
         # Consultas Hoje
         cur.execute("SELECT COUNT(*) FROM consultas WHERE medico_id = ? AND data = ?", (medico_id, hoje))
@@ -109,6 +115,7 @@ def resumo():
 
         return jsonify({
             'tipo_atendimento': tipo_atendimento,
+            'presencial_ativo': presencial_ativo,
             'consultasHoje': hoje_count,
             'confirmadas': total_confirmadas,
             'aguardando': aguardando,
@@ -441,14 +448,14 @@ def listar_medicos():
         cur = db.cursor()
         if especialidade:
             cur.execute("""
-                SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina
+                SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
                 FROM usuarios u
                 JOIN medico_info m ON m.usuario_id = u.id
                 WHERE u.tipo = 'medico' AND m.especialidade = ?
             """, (especialidade,))
         else:
             cur.execute("""
-                SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina
+                SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
                 FROM usuarios u
                 JOIN medico_info m ON m.usuario_id = u.id
                 WHERE u.tipo = 'medico'
@@ -458,9 +465,14 @@ def listar_medicos():
 
         lista_medicos = []
         for r in rows:
+            # Safe column check
+            pres_ativo = False
+            if 'presencial_ativo' in r.keys():
+                pres_ativo = bool(r['presencial_ativo'])
             lista_medicos.append({
                 'id': r['id'], 'nome': r['nome'], 'crm': r['crm'],
-                'especialidade': r['especialidade'], 'telemedicina': bool(r['atende_telemedicina'])
+                'especialidade': r['especialidade'], 'telemedicina': bool(r['atende_telemedicina']),
+                'presencial_ativo': pres_ativo
             })
         return jsonify(lista_medicos)
     except Exception as e:
@@ -480,3 +492,46 @@ def listar_especialidades():
         return jsonify([r['especialidade'] for r in rows])
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+
+# ── ALTERAR PRESENÇA PRESENCIAL DO MÉDICO (AUTO CHECK-IN) ────────
+@medico_bp.route('/api/medico/presenca', methods=['POST'])
+def alterar_presenca():
+    from app import get_db_connection
+    medico_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not medico_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    data = request.get_json() or {}
+    presencial_ativo = data.get('presencial_ativo')
+
+    if presencial_ativo is None:
+        return jsonify({'erro': 'Status de presença não informado'}), 400
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+
+        # Garantir que a linha de medico_info existe
+        cur.execute("SELECT id FROM medico_info WHERE usuario_id = ?", (medico_id,))
+        row = cur.fetchone()
+        
+        status_num = 1 if presencial_ativo else 0
+        if not row:
+            cur.execute("""
+                INSERT INTO medico_info (usuario_id, presencial_ativo, tipo_atendimento) 
+                VALUES (?, ?, 'presencial')
+            """, (medico_id, status_num))
+        else:
+            cur.execute("""
+                UPDATE medico_info 
+                SET presencial_ativo = ? 
+                WHERE usuario_id = ?
+            """, (status_num, medico_id))
+
+        db.commit()
+        db.close()
+        return jsonify({'sucesso': True, 'presencial_ativo': bool(presencial_ativo)})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+

@@ -224,7 +224,44 @@ function renderizarMinhasConsultas(consultas) {
                     }
                 }
             } else {
-                actionHtml = `<div style="margin-top:10px; padding:10px; background:#e3f2fd; color:#004b82; border-radius:6px; text-align:center; font-size:0.9rem;">📍 Atendimento Presencial</div>`;
+                // Atendimento Presencial
+                let isToday = false;
+                if (c.data) {
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const yyyy = today.getFullYear();
+                    const todayISO = `${yyyy}-${mm}-${dd}`;
+                    const todayBR = `${dd}/${mm}/${yyyy}`;
+                    
+                    if (c.data === todayISO || c.data === todayBR) {
+                        isToday = true;
+                    }
+                }
+                
+                const cStatus = (c.status || '').toLowerCase();
+                
+                if (isToday && (cStatus === 'confirmada' || cStatus === 'confirmado' || cStatus === 'agendada' || cStatus === 'agendado')) {
+                    actionHtml = `
+                        <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+                            <div style="padding:10px; background:#e3f2fd; color:#004b82; border-radius:6px; text-align:center; font-size:0.9rem;"><i class="fi fi-rr-hospital"></i>📍 Atendimento Presencial</div>
+                            <button id="btn-checkin-${c.id}" onclick="realizarAutoCheckin(${c.id})" style="width:100%; padding:12px; background:#28a745; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.95rem; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); transition: all 0.3s; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                🎫 Ativar Fila (Auto Check-in)
+                            </button>
+                        </div>
+                    `;
+                } else if (cStatus === 'aguardando') {
+                    const senhaFila = c.senha_fila || '---';
+                    actionHtml = `
+                        <div style="margin-top:10px; padding:12px; background:#e8f5e9; border: 1px solid #c8e6c9; border-radius:8px; text-align:center;">
+                            <div style="font-size:0.85rem; color:#2e7d32; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fi fi-rr-check"></i>📍 PRESENÇA CONFIRMADA</div>
+                            <div style="font-size:1.8rem; font-weight:900; color:#2e7d32; margin: 5px 0; letter-spacing:1px;">${senhaFila}</div>
+                            <div style="font-size:0.8rem; color:#555;">Sua senha na fila do médico. Aguarde ser chamado no painel!</div>
+                        </div>
+                    `;
+                } else {
+                    actionHtml = `<div style="margin-top:10px; padding:10px; background:#e3f2fd; color:#004b82; border-radius:6px; text-align:center; font-size:0.9rem;">📍 Atendimento Presencial</div>`;
+                }
             }
 
             // Normalizando formato de data caso venha algo como yyyy-mm-dd
@@ -761,3 +798,44 @@ window.solicitarRegistroTelemedicina = async function() {
         btn.innerHTML = originalHtml;
     }
 }
+
+
+// ── AUTO CHECK-IN PRESENCIAL ─────────────────────────────────────
+window.realizarAutoCheckin = async function(id) {
+    if (typeof API === 'undefined') return;
+    
+    try {
+        const btn = document.getElementById(`btn-checkin-${id}`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Processando...';
+        }
+        
+        const resp = await API.checkinPresencialConsulta(id);
+        if (resp && resp.sucesso) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Check-in Realizado!',
+                html: `Sua presença foi confirmada com sucesso!<br>Sua senha na fila é:<br><strong style="font-size: 2.2rem; color: #2e7d32; display:block; margin: 10px 0;">${resp.senha_fila}</strong><br>Acompanhe o painel de chamadas do consultório.`,
+                confirmButtonText: 'Entendido'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao realizar check-in.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro no Check-in',
+            text: err.message || 'Não foi possível realizar o auto check-in. Tente novamente mais tarde ou passe no balcão.'
+        });
+        const btn = document.getElementById(`btn-checkin-${id}`);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '🎫 Ativar Fila (Auto Check-in)';
+        }
+    }
+};
+

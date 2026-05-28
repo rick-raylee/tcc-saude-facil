@@ -250,6 +250,12 @@ def migrar_schema_admin():
     if 'destaque_carrossel' not in colunas_noticias:
         cur.execute("ALTER TABLE noticias ADD COLUMN destaque_carrossel INTEGER DEFAULT 0")
 
+    # Migração para a tabela medico_info
+    cur.execute("PRAGMA table_info(medico_info)")
+    colunas_medico = {row[1] for row in cur.fetchall()}
+    if 'presencial_ativo' not in colunas_medico:
+        cur.execute("ALTER TABLE medico_info ADD COLUMN presencial_ativo INTEGER DEFAULT 0")
+
     # Migração para a tabela carrossel
     cur.execute("PRAGMA table_info(carrossel)")
     colunas_carrossel = {row[1] for row in cur.fetchall()}

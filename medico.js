@@ -464,6 +464,22 @@ async function carregarDashboard() {
     const triagensEl = document.getElementById('dash-triagens');
     if (triagensEl) triagensEl.textContent = dados.triagens_hoje || 0;
 
+    // Atualizar Switch de Presença
+    const checkPresenca = document.getElementById('check-presenca-presencial');
+    const labelPresenca = document.getElementById('label-presenca-status');
+    if (checkPresenca) {
+        checkPresenca.checked = !!dados.presencial_ativo;
+        if (labelPresenca) {
+            if (dados.presencial_ativo) {
+                labelPresenca.textContent = 'PRESENTE';
+                labelPresenca.style.color = '#28a745';
+            } else {
+                labelPresenca.textContent = 'AUSENTE';
+                labelPresenca.style.color = '#dc3545';
+            }
+        }
+    }
+
     // Atualizar Doenças
     const listaDoencas = document.getElementById('dash-doencas-lista');
     if (listaDoencas && dados.doencas_frequentes) {
@@ -1549,4 +1565,51 @@ window.salvarConfigTeleMini = async function() {
         const resp = await API.teleConfigPerfil({ tipo_atendimento: isAtivo ? 'ambos' : 'presencial', link_sala_padrao: link });
         if(resp && resp.sucesso) { console.log('Configurações de telemedicina salvas com sucesso!'); }
     } catch(err) { console.error(err); }
+};
+
+// ── CONTROLE DE PRESENÇA PRESENCIAL REAL-TIME ────────────────────
+window.togglePresencaPresencial = async function(checkbox) {
+    const label = document.getElementById('label-presenca-status');
+    const isChecked = checkbox.checked;
+    
+    if (label) {
+        if (isChecked) {
+            label.textContent = 'PRESENTE';
+            label.style.color = '#28a745';
+        } else {
+            label.textContent = 'AUSENTE';
+            label.style.color = '#dc3545';
+        }
+    }
+    
+    if (typeof API !== 'undefined') {
+        try {
+            const resp = await API.atualizarPresencaMedico(isChecked);
+            if (resp && resp.sucesso) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: isChecked ? 'Presença confirmada na clínica!' : 'Status alterado para Ausente.',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            } else {
+                throw new Error(resp.erro || 'Falha ao atualizar.');
+            }
+        } catch (err) {
+            console.error(err);
+            // Reverter em caso de falha
+            checkbox.checked = !isChecked;
+            if (label) {
+                label.textContent = !isChecked ? 'PRESENTE' : 'AUSENTE';
+                label.style.color = !isChecked ? '#28a745' : '#dc3545';
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro de Conexão',
+                text: 'Não foi possível atualizar seu status de presença no servidor.'
+            });
+        }
+    }
 };

@@ -47,10 +47,22 @@ def agendar():
             if not med_tele or not med_tele['atende_telemedicina']:
                 db.close()
                 return jsonify({'erro': 'Este médico não realiza atendimentos por Telemedicina no momento.'}), 403
+        auto_checkin = data.get('auto_checkin', False)
+        status_consulta = 'confirmada'
+        senha_fila = None
+        
+        if tipo == 'presencial' and auto_checkin:
+            status_consulta = 'aguardando'
+            from datetime import datetime
+            hoje = datetime.now().strftime('%Y-%m-%d')
+            cur.execute("SELECT COUNT(*) FROM consultas WHERE medico_id = ? AND data = ?", (medico_id, hoje))
+            count_hoje = cur.fetchone()[0] + 1
+            senha_fila = f"P-{count_hoje:03d}"
+
         cur.execute("""
-            INSERT INTO consultas (paciente_id, medico_id, especialidade, data, hora, tipo, status, queixa)
-            VALUES (?, ?, ?, ?, ?, ?, 'confirmada', ?)
-        """, (paciente_id, medico_id, especialidade, data_consulta, hora, tipo, queixa))
+            INSERT INTO consultas (paciente_id, medico_id, especialidade, data, hora, tipo, status, senha_fila, queixa)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (paciente_id, medico_id, especialidade, data_consulta, hora, tipo, status_consulta, senha_fila, queixa))
         db.commit()
         consulta_id = cur.lastrowid
 
@@ -74,7 +86,8 @@ def agendar():
             'data': data_consulta,
             'hora': hora,
             'tipo': tipo,
-            'especialidade': especialidade
+            'especialidade': especialidade,
+            'senha_fila': senha_fila
         }), 201
 
     except Exception as e:
@@ -93,7 +106,7 @@ def minhas_consultas():
         db = get_db_connection()
         cur = db.cursor()
         cur.execute("""
-            SELECT c.id, c.data, c.hora, c.especialidade, c.tipo, c.status, c.link_video,
+            SELECT c.id, c.data, c.hora, c.especialidade, c.tipo, c.status, c.link_video, c.senha_fila,
                    med.nome AS medico_nome,
                    pac.nome AS paciente_nome
             FROM consultas c
@@ -115,6 +128,7 @@ def minhas_consultas():
                 'tipo': r['tipo'],
                 'status': r['status'],
                 'link_video': r['link_video'],
+                'senha_fila': r['senha_fila'] if 'senha_fila' in r.keys() else None,
                 'medico': r['medico_nome'],
                 'paciente': r['paciente_nome']
             })
@@ -236,3 +250,88 @@ def marcar_lida(notif_id):
         return jsonify({'sucesso': True})
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+
+# ── AUTO CHECK-IN PRESENCIAL ─────────────────────────────────────
+@consultas_bp.route('/api/consultas/<int:consulta_id>/checkin-presencial', methods=['POST'])
+def checkin_presencial(consulta_id):
+    from app import get_db_connection
+    from datetime import datetime
+
+    paciente_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not paciente_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+
+        # Buscar a consulta
+        cur.execute("""
+            SELECT id, paciente_id, medico_id, tipo, status, data
+            FROM consultas WHERE id = ?
+        """, (consulta_id,))
+        consulta = cur.fetchone()
+
+        if not consulta:
+            db.close()
+            return jsonify({'erro': 'Consulta não encontrada'}), 404
+
+        # Verificar se pertence ao paciente logado
+        if str(consulta['paciente_id']) != str(paciente_id):
+            db.close()
+            return jsonify({'erro': 'Acesso negado'}), 403
+
+        # Verificar se é presencial
+        if consulta['tipo'] != 'presencial':
+            db.close()
+            return jsonify({'erro': 'Check-in só é permitido para atendimentos presenciais.'}), 400
+
+        # Verificar se já foi realizado ou cancelado
+        if consulta['status'] == 'aguardando':
+            db.close()
+            return jsonify({'erro': 'Você já realizou o check-in e está na fila.'}), 400
+        elif consulta['status'] in ('finalizada', 'em_andamento'):
+            db.close()
+            return jsonify({'erro': 'Esta consulta já foi iniciada ou finalizada.'}), 400
+        elif consulta['status'] == 'cancelada':
+            db.close()
+            return jsonify({'erro': 'Esta consulta foi cancelada.'}), 400
+
+        # Verificar se a consulta é para hoje
+        hoje = datetime.now().strftime('%Y-%m-%d')
+        if consulta['data'] != hoje:
+            db.close()
+            return jsonify({'erro': 'O check-in presencial só pode ser realizado no dia agendado para o atendimento.'}), 400
+
+        # Gerar a senha da fila
+        cur.execute("SELECT COUNT(*) FROM consultas WHERE medico_id = ? AND data = ?", (consulta['medico_id'], hoje))
+        count_hoje = cur.fetchone()[0] + 1
+        senha_fila = f"P-{count_hoje:03d}"
+
+        # Atualizar status e senha_fila
+        cur.execute("""
+            UPDATE consultas 
+            SET status = 'aguardando', senha_fila = ? 
+            WHERE id = ?
+        """, (senha_fila, consulta_id))
+
+        # Criar notificação para o paciente
+        cur.execute("""
+            INSERT INTO notificacoes (usuario_id, mensagem)
+            VALUES (?, ?)
+        """, (paciente_id, f'Check-in presencial realizado com sucesso! Sua senha na fila é {senha_fila}. Aguarde a chamada do médico.'))
+
+        db.commit()
+        db.close()
+
+        return jsonify({
+            'sucesso': True,
+            'senha_fila': senha_fila,
+            'status': 'aguardando',
+            'msg': 'Check-in presencial realizado com sucesso!'
+        })
+
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
