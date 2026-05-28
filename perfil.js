@@ -189,7 +189,10 @@ async function carregarDadosPerfilAPI() {
 // ── ANTIGA LÓGICA (MANTIDA COMO FALLBACK) ───────────────────────
 
 function renderizarMinhasConsultas(consultas) {
-    const pendentes = consultas.filter(c => (c.status === 'Agendado' || c.status === 'Confirmado' || c.status === 'confirmada' || c.status === 'em_atendimento'));
+    const pendentes = consultas.filter(c => {
+        const s = (c.status || '').toLowerCase();
+        return s === 'agendado' || s === 'confirmado' || s === 'confirmada' || s === 'em_atendimento' || s === 'aguardando';
+    });
     const card = document.getElementById('card-minhas-consultas');
     const container = document.getElementById('lista-minhas-consultas');
 
