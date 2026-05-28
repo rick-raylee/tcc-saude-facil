@@ -173,8 +173,56 @@ async function carregarDadosPerfilAPI() {
         }
     }
 
-    // 5. Minhas Consultas Agendadas
-    const consultas = await API.minhasConsultas();
+    // 5. Minhas Consultas Agendadas (Mesclar API com LocalStorage para exibir mockups locais)
+    let consultas = [];
+    try {
+        const resp = await API.minhasConsultas();
+        if (resp && !resp.erro) {
+            consultas = resp;
+        }
+    } catch (apiErr) {
+        console.warn("Erro ao buscar consultas na API:", apiErr);
+    }
+
+    try {
+        const localS = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+        const meuCpf = perfil.cpf || localStorage.getItem('usuarioCpf') || '';
+        const cpfLimpo = meuCpf.replace(/\D/g, '');
+
+        if (cpfLimpo) {
+            const locaisFiltradas = localS.filter(a => {
+                const cpf = a.pacienteCpf || (a.paciente && a.paciente.cpf) || '';
+                return cpf.replace(/\D/g, '') === cpfLimpo;
+            }).map(a => {
+                // Obter médico name de forma amigável
+                let medName = a.medico || 'Médico Geral';
+                if (a.paciente && a.paciente.nome && !a.medico) {
+                    medName = 'Dr(a). Sem Especialista (Simulação)';
+                }
+                return {
+                    id: a.id || Date.now(),
+                    data: a.dataRaw || a.dataAgendamento || '',
+                    hora: a.horario || '',
+                    especialidade: a.especialidade || 'Consulta Médica',
+                    tipo: a.tipo || 'presencial',
+                    status: a.status || 'Agendado',
+                    medico: medName,
+                    senha_fila: a.senha_fila || null
+                };
+            });
+
+            // Evitar duplicar
+            const idsAPI = new Set(consultas.map(c => c.id));
+            locaisFiltradas.forEach(loc => {
+                if (!idsAPI.has(loc.id)) {
+                    consultas.push(loc);
+                }
+            });
+        }
+    } catch (e) {
+        console.warn("Erro ao mesclar consultas locais:", e);
+    }
+
     if (consultas) {
         renderizarMinhasConsultas(consultas);
     }
