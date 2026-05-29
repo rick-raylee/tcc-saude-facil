@@ -371,10 +371,10 @@ function injetarModalEdicaoPerfil() {
 
     const modalHTML = `
     <div id="modalEditarPerfil" class="modal-wrapper" style="display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s ease;">
-        <div class="modal-auth-card" style="padding: 0 !important; background: white; width: 92%; max-width: 460px; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div class="modal-auth-card" style="display: flex !important; flex-direction: column !important; align-items: stretch !important; padding: 0 !important; background: white; width: 92%; max-width: 460px; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             
             <!-- CABEÇALHO DO MODAL -->
-            <div style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 25px 30px; text-align: left; position: relative;">
+            <div style="width: 100%; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 25px 30px; text-align: left; position: relative;">
                 <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px;">
                     <i class="fi fi-rr-edit" style="font-size: 1.35rem; color: #e0f2fe;"></i> Editar Dados Pessoais
                 </h3>
@@ -383,7 +383,7 @@ function injetarModalEdicaoPerfil() {
             </div>
             
             <!-- CORPO DO MODAL -->
-            <div style="padding: 25px 30px 30px 30px; text-align: left;">
+            <div style="width: 100%; padding: 25px 30px 30px 30px; text-align: left;">
                 <form id="formEditarPerfil" onsubmit="salvarEdicaoPerfil(event)">
                     
                     <!-- CPF (Somente Leitura) -->
