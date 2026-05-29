@@ -545,7 +545,7 @@ async function carregarStatsEditor() {
     stats.forEach((stat, index) => {
         const div = document.createElement('div');
         div.className = 'form-group-stats-item';
-        div.style = 'background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; display:grid; grid-template-columns:50px 1.2fr 1fr 1fr 1.5fr 60px 60px 80px auto; gap:10px; align-items:end; margin-bottom:10px;';
+        div.style = 'background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; display:grid; grid-template-columns:120px 1.2fr 1fr 1fr 1.5fr 60px 60px 80px auto; gap:10px; align-items:end; margin-bottom:10px;';
 
         const iconOptions = [
             { value: "<i class='fi fi-rr-chart-histogram'></i> ", label: "📊 Gráfico / Histograma" },
