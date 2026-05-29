@@ -581,7 +581,8 @@ if (document.readyState === 'loading') {
 // ==========================================================================
 // SUPORTE E CHAMADOS DE TI (MODAL GLOBAL PROFISSIONAL)
 // ==========================================================================
-window.abrirChamadoTI = async function() {
+window.abrirChamadoTI = async function(event) {
+    if (event) event.preventDefault();
     if (typeof Swal === 'undefined') {
         alert("O serviço de alertas visuais (SweetAlert2) não está disponível nesta página.");
         return;
