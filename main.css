@@ -5804,8 +5804,10 @@ i[class^='fi'] {
 
 .swal2-icon.swal2-success::before,
 .swal2-icon.swal2-success::after,
-.swal2-icon.swal2-success .swal2-success-fix {
+.swal2-icon.swal2-success .swal2-success-fix,
+.swal2-icon.swal2-success [class^='swal2-success-circular-line'] {
     background: transparent !important;
+    background-color: transparent !important;
 }
 
 .swal2-icon.swal2-error {
