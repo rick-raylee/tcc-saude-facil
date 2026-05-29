@@ -371,7 +371,7 @@ function injetarModalEdicaoPerfil() {
 
     const modalHTML = `
     <div id="modalEditarPerfil" class="modal-wrapper" style="display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s ease;">
-        <div class="modal-auth-card" style="background: white; width: 92%; max-width: 460px; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div class="modal-auth-card" style="padding: 0 !important; background: white; width: 92%; max-width: 460px; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
             
             <!-- CABEÇALHO DO MODAL -->
             <div style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 25px 30px; text-align: left; position: relative;">
