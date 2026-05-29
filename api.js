@@ -370,42 +370,73 @@ function injetarModalEdicaoPerfil() {
     if (document.getElementById('modalEditarPerfil')) return;
 
     const modalHTML = `
-    <div id="modalEditarPerfil" class="modal-wrapper" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;">
-        <div class="modal-auth-card" style="background: white; width: 90%; max-width: 450px; border-radius: 12px; overflow: hidden; position: relative;">
-            <div style="background: var(--sus-blue-dark, #004b82); color: white; padding: 20px; text-align: center; position: relative;">
-                <h3 style="margin: 0; font-size: 1.2rem;"><i class="fi fi-rr-edit"></i> Editar Dados Pessoais</h3>
-                <button type="button" onclick="fecharModalEditarPerfil()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: white; cursor: pointer; font-size: 1.8rem; line-height: 1;">&times;</button>
+    <div id="modalEditarPerfil" class="modal-wrapper" style="display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s ease;">
+        <div class="modal-auth-card" style="background: white; width: 92%; max-width: 460px; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: modalPulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            
+            <!-- CABEÇALHO DO MODAL -->
+            <div style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 25px 30px; text-align: left; position: relative;">
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px;">
+                    <i class="fi fi-rr-edit" style="font-size: 1.35rem; color: #e0f2fe;"></i> Editar Dados Pessoais
+                </h3>
+                <p style="margin: 5px 0 0 0; font-size: 0.72rem; color: rgba(224, 242, 254, 0.8); font-weight: 500;">Mantenha suas informações sempre atualizadas no portal</p>
+                <button type="button" onclick="fecharModalEditarPerfil()" style="position: absolute; top: 22px; right: 22px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; line-height: 1; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'; this.style.transform='rotate(90deg)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.transform='none';">&times;</button>
             </div>
-            <div style="padding: 20px; text-align: left;">
+            
+            <!-- CORPO DO MODAL -->
+            <div style="padding: 25px 30px 30px 30px; text-align: left;">
                 <form id="formEditarPerfil" onsubmit="salvarEdicaoPerfil(event)">
-                    <div class="input-group" style="margin-bottom: 15px;">
-                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">CPF (Não alterável)</label>
-                        <input type="text" id="edit-perfil-cpf" readonly style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; background: #f5f5f5; color: #999; cursor: not-allowed;">
+                    
+                    <!-- CPF (Somente Leitura) -->
+                    <div class="input-group" style="margin-bottom: 18px;">
+                        <label style="text-transform: uppercase; font-size: 0.7rem; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">CPF (Não alterável)</label>
+                        <input type="text" id="edit-perfil-cpf" readonly style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; background: #f1f5f9; color: #94a3b8; font-size: 0.9rem; cursor: not-allowed; font-weight: 500;">
                     </div>
-                    <div class="input-group" style="margin-bottom: 15px;">
-                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Nome Completo</label>
-                        <input type="text" id="edit-perfil-nome" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    
+                    <!-- Nome Completo -->
+                    <div class="input-group" style="margin-bottom: 18px;">
+                        <label style="text-transform: uppercase; font-size: 0.7rem; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Nome Completo</label>
+                        <input type="text" id="edit-perfil-nome" required style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #1e293b; font-size: 0.9rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); outline: none; font-weight: 500;" onfocus="this.style.borderColor='#0284c7'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(2, 132, 199, 0.12)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
                     </div>
-                    <div class="input-group" style="margin-bottom: 15px;">
-                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Data de Nascimento</label>
-                        <input type="date" id="edit-perfil-nasc" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    
+                    <!-- Data de Nascimento -->
+                    <div class="input-group" style="margin-bottom: 18px;">
+                        <label style="text-transform: uppercase; font-size: 0.7rem; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Data de Nascimento</label>
+                        <input type="date" id="edit-perfil-nasc" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #1e293b; font-size: 0.9rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); outline: none; font-weight: 500;" onfocus="this.style.borderColor='#0284c7'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(2, 132, 199, 0.12)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
                     </div>
-                    <div class="input-group" style="margin-bottom: 15px;">
-                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Número do Cartão SUS</label>
-                        <input type="text" id="edit-perfil-sus" placeholder="Se não possuir, deixe em branco" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    
+                    <!-- Cartão SUS -->
+                    <div class="input-group" style="margin-bottom: 18px;">
+                        <label style="text-transform: uppercase; font-size: 0.7rem; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Número do Cartão SUS</label>
+                        <input type="text" id="edit-perfil-sus" placeholder="Se não possuir, deixe em branco" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #1e293b; font-size: 0.9rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); outline: none; font-weight: 500;" onfocus="this.style.borderColor='#0284c7'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(2, 132, 199, 0.12)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
                     </div>
-                    <div class="input-group" style="margin-bottom: 15px;">
-                        <label style="display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px;">Nova Senha (Opcional)</label>
-                        <input type="password" id="edit-perfil-senha" placeholder="Deixe em branco para manter atual" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                    
+                    <!-- Senha -->
+                    <div class="input-group" style="margin-bottom: 24px;">
+                        <label style="text-transform: uppercase; font-size: 0.7rem; font-weight: 700; color: #475569; letter-spacing: 0.5px; margin-bottom: 6px; display: block;">Nova Senha (Opcional)</label>
+                        <input type="password" id="edit-perfil-senha" placeholder="Deixe em branco para manter a atual" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #1e293b; font-size: 0.9rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); outline: none; font-weight: 500;" onfocus="this.style.borderColor='#0284c7'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(2, 132, 199, 0.12)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="button" onclick="fecharModalEditarPerfil()" style="flex: 1; background: #ef4444; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">Cancelar</button>
-                        <button type="submit" style="flex: 1; background: var(--sus-blue-dark, #004b82); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#003c66'" onmouseout="this.style.background='var(--sus-blue-dark, #004b82)'">Salvar Alterações</button>
+                    
+                    <!-- BOTÕES -->
+                    <div style="display: flex; gap: 12px; margin-top: 24px;">
+                        <button type="button" onclick="fecharModalEditarPerfil()" style="flex: 1; background: rgba(239, 68, 68, 0.08); border: 1.5px solid rgba(239, 68, 68, 0.2); color: #ef4444; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 0.92rem; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onmouseover="this.style.background='#ef4444'; this.style.color='white'; this.style.boxShadow='0 8px 20px rgba(239, 68, 68, 0.15)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.08)'; this.style.color='#ef4444'; this.style.boxShadow='none';">
+                            Cancelar
+                        </button>
+                        <button type="submit" style="flex: 1; background: #0284c7; border: none; color: white; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onmouseover="this.style.background='#0369a1'; this.style.boxShadow='0 8px 24px rgba(2, 132, 199, 0.25)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#0284c7'; this.style.boxShadow='none'; this.style.transform='none';" onmousedown="this.style.transform='translateY(1px)';" onmouseup="this.style.transform='translateY(-1px)';">
+                            Salvar Alterações
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+    
+    <!-- Animação do surgimento do modal -->
+    <style>
+    @keyframes modalPulse {
+        from { transform: scale(0.9) translateY(20px); opacity: 0; }
+        to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    </style>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
