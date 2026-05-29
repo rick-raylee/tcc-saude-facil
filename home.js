@@ -187,59 +187,97 @@ function atualizarDots3D() {
 
 // --- VERIFICAR AGENDAMENTOS ---
 async function checkAppointments() {
-    const container = document.getElementById('home-appointment-alert');
+    const container = document.getElementById('patient-appointment-alert');
     if (!container) return;
 
     let agendamentos = [];
     if (typeof API !== 'undefined') {
-        agendamentos = await API.minhasConsultas();
+        try {
+            agendamentos = await API.minhasConsultas();
+        } catch (apiErr) {
+            console.warn("Erro ao buscar consultas na API em checkAppointments:", apiErr);
+        }
     }
 
-    if (!agendamentos || agendamentos.length === 0) {
+    if (!agendamentos || agendamentos.length === 0 || agendamentos.erro) {
         agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
     }
 
-    if (agendamentos.length === 0) return;
+    if (!agendamentos || agendamentos.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
 
-    const meuCpf = localStorage.getItem('usuarioCpf') || JSON.parse(localStorage.getItem('usuarioRegistrado') || '{}').cpf;
+    // Filtrar pendentes ou ativos
+    let pendentes = agendamentos.filter(a => {
+        const s = (a.status || '').toLowerCase();
+        return s === 'agendado' || s === 'confirmado' || s === 'confirmada' || s === 'em_atendimento' || s === 'aguardando';
+    });
+    if (pendentes.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    // Pegar o próximo agendamento mais recente
+    const rawUltimo = pendentes[0];
+
+    // Normalizar propriedades para garantir suporte a API e LocalStorage sem 'undefined'
+    const ultimo = {
+        id: rawUltimo.id,
+        medico: rawUltimo.medico || rawUltimo.medicoNome || 'Médico Geral',
+        especialidade: rawUltimo.especialidade || 'Consulta Médica',
+        data: rawUltimo.data || rawUltimo.dataRaw || rawUltimo.dataAgendamento || '',
+        hora: rawUltimo.hora || rawUltimo.horario || '',
+        tipo: rawUltimo.tipo || 'presencial',
+        status: rawUltimo.status
+    };
+
+    // Formatar exibição de data se for AAAA-MM-DD
+    let diaExibicao = ultimo.data;
+    if (diaExibicao && diaExibicao.includes('-')) {
+        diaExibicao = diaExibicao.split('-').reverse().join('/');
+    }
+
+    // Preparar data de comparação
+    let dataParaComparar = ultimo.data;
+    if (dataParaComparar && dataParaComparar.includes('/') && !dataParaComparar.includes('-')) {
+        const parts = dataParaComparar.split('/');
+        dataParaComparar = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
     const isLogged = localStorage.getItem('usuarioLogado') === 'true';
-
-    // Pegar o mais recente pendente
-    let pendentes = agendamentos.filter(a => (a.status === 'Agendado' || a.status === 'Confirmado' || a.status === 'confirmada'));
-    if (pendentes.length === 0) return;
-
-    // Para o alerta da home, pegamos o proximo
-    const ultimo = pendentes[0];
-
-    // Calcular se esta no horario (30 min antes ate 1h depois)
     let isTime = false;
     let buttonHtml = '';
 
-    if (ultimo.data && ultimo.hora) {
-        const appointmentTime = new Date(`${ultimo.data}T${ultimo.hora}:00`);
+    if (dataParaComparar && ultimo.hora) {
+        const appointmentTime = new Date(`${dataParaComparar}T${ultimo.hora}:00`);
         const now = new Date();
         const diffMin = (appointmentTime - now) / (1000 * 60);
 
+        // Se está no período da teleconsulta (30 minutos antes até 1 hora depois)
         if (diffMin <= 30 && diffMin >= -60) {
             isTime = true;
         }
 
         if (!isLogged) {
             buttonHtml = `<button onclick="abrirModalLogin()" class="btn-enter-video" style="background:var(--primary-color); border:none; cursor:pointer;">Faça LOGIN para entrar</button>`;
-        } else if (isTime) {
+        } else if (isTime && (ultimo.tipo || '').toLowerCase() === 'telemedicina') {
             buttonHtml = `<a href="telemedicina.html?sala=ativa&id=${ultimo.id}" class="btn-enter-video">ENTRAR NA SALA DE ESPERA</a>`;
+        } else if ((ultimo.tipo || '').toLowerCase() === 'telemedicina') {
+            buttonHtml = `<button class="btn-enter-video" disabled style="background:#ccc; cursor:not-allowed; border:none; color:#666;">Aguarde ${diaExibicao} às ${ultimo.hora}</button>`;
         } else {
-            const diaFmt = appointmentTime.toLocaleDateString('pt-BR');
-            buttonHtml = `<button class="btn-enter-video" disabled style="background:#ccc; cursor:not-allowed; border:none; color:#666;">Aguarde ${diaFmt} às ${ultimo.hora}</button>`;
+            // Presencial
+            buttonHtml = `<span style="padding: 10px 20px; background: rgba(0,75,130,0.1); color: var(--primary-color); font-weight: bold; border-radius: 20px; font-size: 0.9rem;"><i class="fi fi-rr-hospital"></i> Presencial</span>`;
         }
     }
 
+    container.style.display = 'block';
     container.innerHTML = `
-        <div class="appointment-alert-card">
+        <div class="appointment-alert-card" style="margin-top: 10px; margin-bottom: 10px;">
             <div class="appointment-info">
-                <h3><i class='fi fi-rr-calendar'></i>  Próxima Consulta: ${ultimo.medico || ultimo.medicoNome || 'Médico'}</h3>
-                <p>${ultimo.especialidade} • ${ultimo.data} às ${ultimo.hora}</p>
-                <small>Realize sua consulta de onde estiver.</small>
+                <h3><i class='fi fi-rr-calendar'></i> Próxima Consulta: ${ultimo.medico}</h3>
+                <p>${ultimo.especialidade} • ${diaExibicao || 'Data pendente'} às ${ultimo.hora || 'Horário pendente'}</p>
+                <small>${(ultimo.tipo || '').toLowerCase() === 'telemedicina' ? 'Realize sua consulta de onde estiver.' : 'Compareça à unidade de saúde com antecedência.'}</small>
             </div>
             ${buttonHtml}
         </div>
