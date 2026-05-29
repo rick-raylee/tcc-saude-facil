@@ -2311,31 +2311,105 @@ async function verificarSessao() {
         else if (tipoUser === 'enfermeiro') linkPainelHTML = `<a href="enfermeiro.html" style="font-size: 0.65rem; color: #81c784; text-decoration: underline; margin-top: 2px;"><i class="fi fi-rr-apps"></i> Ir para Meu Painel</a>`;
         else if (tipoUser === 'ti') linkPainelHTML = `<a href="ti.html" style="font-size: 0.65rem; color: #ce93d8; text-decoration: underline; margin-top: 2px;"><i class="fi fi-rr-apps"></i> Ir para Painel TI</a>`;
 
-        // 2. Simplificar Perfil no Canto Direito (Apenas Saudação + Logout)
+        // 2. Simplificar Perfil no Canto Direito (Apenas Saudação + Logout com Modernização Premium e Dropdown)
         const profileHTML = `
-            <div class="user-profile active" style="padding: 5px 12px;">
-                <div class="user-avatar" style="width: 32px; height: 32px;"><i class='fi fi-rr-user'></i> </div>
-                <div class="user-info" style="display: flex; flex-direction: column; justify-content: center;">
-                    <span class="user-welcome" style="margin: 0; font-size: 0.8rem; line-height: 1.2;">Olá, ${nome.split(' ')[0]}</span>
-                    <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
-                    ${linkPainelHTML}
+        <div class="profile-dropdown-container">
+            <!-- TRIGGER (Pílula que ativa o menu) -->
+            <div class="user-profile active">
+                <!-- Avatar com Gradiente Premium -->
+                <div class="user-avatar-modern">
+                    ${nome.charAt(0).toUpperCase()}
                 </div>
-                <button class="btn-logout" onclick="logout()" title="Sair">
-                    <span class="button-text">Log Out</span>
-                    <div class="icon-container">
-                        <!-- Ícone da Porta -->
-                        <svg class="door" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 21V5C5 3.89543 5.89543 3 7 3H15C16.1046 3 17 3.89543 17 5V21H5ZM7 21H15V5H7V21ZM13 12.5C13 13.3284 12.3284 14 11.5 14C10.6716 14 10 13.3284 10 12.5C10 11.6716 10.6716 11 11.5 11C12.3284 11 13 11.6716 13 12.5Z" fill="#1f2335"/>
-                        </svg>
-                        <!-- Ícone do Boneco (Figure) -->
-                        <svg class="figure" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14.5 5.5C14.5 6.88071 13.3807 8 12 8C10.6193 8 9.5 6.88071 9.5 5.5C9.5 4.11929 10.6193 3 12 3C13.3807 3 14.5 4.11929 14.5 5.5ZM19 12.5V10.5C19 9.67157 18.3284 9 17.5 9H16.29C15.8202 7.82869 14.6596 7 13.3725 7H10.6275C9.34045 7 8.17978 7.82869 7.71004 9H6.5C5.67157 9 5 9.67157 5 10.5V12.5H7.07065L8.51466 21.0503C8.65349 21.8722 9.43128 22.4248 10.2531 22.286L12.5 21.9056L14.7469 22.286C15.5687 22.4248 16.3465 21.8722 16.4853 21.0503L17.9293 12.5H19ZM11 20L10.1554 15H13.8446L13 20H11ZM15.8396 11.5L14.8252 17.5H16.1423L17 12.316V11H15.8396ZM8.16035 11.5V11H7V12.316L7.85768 17.5H9.1748L8.16035 11.5Z" fill="#2b5cff"/>
-                        </svg>
-                    </div>
-                </button>
+                <!-- Infos Rápidas -->
+                <div class="user-info-modern">
+                    <span class="user-welcome-modern">Olá, ${nome.split(' ')[0]}</span>
+                    <span class="user-role-badge">${tipoUser === 'paciente' ? 'Paciente' : tipoUser}</span>
+                </div>
+                <!-- Chevron Animado -->
+                <div class="dropdown-chevron-modern">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </div>
             </div>
-            `;
+
+            <!-- MENU FLUTUANTE (Dropdown) -->
+            <div class="profile-dropdown-menu">
+                <!-- Detalhes do Usuário no Cabeçalho do Menu -->
+                <div class="dropdown-menu-header">
+                    <div class="user-avatar-large">
+                        ${nome.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="user-details-large">
+                        <span class="user-name-full">${nome}</span>
+                        <span class="user-role-text">
+                            <i class="fi fi-rr-shield"></i> ${tipoUser === 'paciente' ? 'Paciente' : tipoUser}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Links e Ações do Menu -->
+                <div class="dropdown-menu-body">
+                    <!-- Meu Portal Saúde -->
+                    <a href="perfil.html" class="dropdown-menu-item">
+                        <i class="fi fi-rr-credit-card"></i>
+                        <span>Meu Portal Saúde</span>
+                    </a>
+
+                    <!-- Editar Dados Pessoais -->
+                    <a href="#" onclick="abrirModalEditarPerfil(event)" class="dropdown-menu-item">
+                        <i class="fi fi-rr-edit"></i>
+                        <span>Editar Dados Pessoais</span>
+                    </a>
+
+                    <!-- Painéis de Acesso Condicional (Profissionais) -->
+                    ${linkPainelHTML ? `
+                    <div class="dropdown-divider"></div>
+                    ${linkPainelHTML}
+                    ` : ''}
+                </div>
+
+                <!-- Rodapé com Logout Premium -->
+                <div class="dropdown-menu-footer">
+                    <button onclick="logout()" class="btn-logout-premium">
+                        <span class="btn-logout-label">
+                            <i class="fi fi-rr-exit"></i>
+                            <span>Sair da Conta</span>
+                        </span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        `;
         navAuth.insertAdjacentHTML('beforeend', profileHTML);
+
+        // Configurar toggle interativo do dropdown de perfil para dispositivos móveis e cliques
+        const dropdownContainer = document.querySelector('.profile-dropdown-container');
+        if (dropdownContainer) {
+            const trigger = dropdownContainer.querySelector('.user-profile');
+            if (trigger) {
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownContainer.classList.toggle('show');
+                });
+            }
+            // Fechar ao clicar fora
+            document.addEventListener('click', function() {
+                dropdownContainer.classList.remove('show');
+            });
+            // Evitar fechar se clicar dentro do menu, a não ser que seja um link ou botão
+            const menu = dropdownContainer.querySelector('.profile-dropdown-menu');
+            if (menu) {
+                menu.addEventListener('click', function(e) {
+                    if (!e.target.closest('a') && !e.target.closest('button')) {
+                        e.stopPropagation();
+                    }
+                });
+            }
+        }
         
         // Carregar alertas/campanhas apenas após login
         carregarCampanhasHome();

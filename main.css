@@ -5467,3 +5467,276 @@ i[class^='fi'] {
     color: #64748b;
     font-size: 0.85rem;
 }
+
+/* ==========================================================================
+   DROPDOWN DE PERFIL PREMIUM E INTERATIVO (Glassmorphism & Micro-animations)
+   ========================================================================== */
+.profile-dropdown-container {
+    position: relative;
+    display: inline-block;
+    z-index: 1000;
+}
+
+/* Container do perfil pós-login adaptado para gatilho */
+.profile-dropdown-container .user-profile.active {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 16px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-dropdown-container:hover .user-profile.active {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Avatar do gatilho */
+.user-avatar-modern {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+.profile-dropdown-container:hover .user-avatar-modern {
+    transform: scale(1.08);
+}
+
+/* Texto do gatilho */
+.user-info-modern {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.user-welcome-modern {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    line-height: 1.2;
+}
+
+.user-role-badge {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+/* Seta indicativa */
+.dropdown-chevron-modern {
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-dropdown-container:hover .dropdown-chevron-modern {
+    transform: rotate(180deg);
+    color: white;
+}
+
+/* Menu flutuante do dropdown */
+.profile-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 270px;
+    background: rgba(21, 26, 43, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.96);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+    padding: 12px;
+}
+
+.profile-dropdown-container:hover .profile-dropdown-menu,
+.profile-dropdown-container.show .profile-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* Detalhes do usuário dentro do menu */
+.dropdown-menu-header {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 8px;
+}
+
+.user-avatar-large {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+    font-weight: 700;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-details-large {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-name-full {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role-text {
+    font-size: 0.68rem;
+    color: #38bdf8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Links do menu */
+.dropdown-menu-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dropdown-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none !important;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-menu-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: white !important;
+    padding-left: 16px;
+}
+
+.dropdown-menu-item i {
+    font-size: 0.95rem;
+    transition: transform 0.2s ease;
+}
+
+.dropdown-menu-item:hover i {
+    transform: scale(1.1);
+}
+
+.dropdown-menu-item:nth-child(1) i { color: #38bdf8; }
+.dropdown-menu-item:nth-child(2) i { color: #a78bfa; }
+
+/* Links profissionais (se existirem) formatados como itens do menu */
+.dropdown-menu-body a:not(.dropdown-menu-item) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    text-decoration: none !important;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dropdown-menu-body a:not(.dropdown-menu-item):hover {
+    background: rgba(255, 255, 255, 0.07);
+    padding-left: 16px;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 4px 0;
+}
+
+/* Base e Botão Logout Premium */
+.dropdown-menu-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+.btn-logout-premium {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.18);
+    color: #f87171 !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-logout-premium:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white !important;
+    box-shadow: 0 8px 16px rgba(239, 68, 68, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-logout-premium .btn-logout-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-logout-premium svg {
+    transition: transform 0.2s ease;
+}
+
+.btn-logout-premium:hover svg {
+    transform: translateX(2px);
+}
+
