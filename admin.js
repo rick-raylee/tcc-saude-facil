@@ -547,8 +547,26 @@ async function carregarStatsEditor() {
         div.className = 'form-group-stats-item';
         div.style = 'background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ddd; display:grid; grid-template-columns:50px 1.2fr 1fr 1fr 1.5fr 60px 60px 80px auto; gap:10px; align-items:end; margin-bottom:10px;';
 
-        const iconOptions = ['<i class=\"fi fi-rr-chart-histogram\"></i> ', '<i class=\"fi fi-rr-syringe\"></i> ', '<i class=\"fi fi-rr-heart\"></i> ', '<i class=\"fi fi-rr-bug\"></i> ', '<i class=\"fi fi-rr-brain\"></i> ', '<i class=\"fi fi-rr-lungs\"></i> ', '<i class=\"fi fi-rr-medicine\"></i> ', '<i class=\"fi fi-rr-hospital\"></i> ', '<i class=\"fi fi-rr-stethoscope\"></i> ', '🔬', '🚑', '🩸'];
-        let optionsHtml = iconOptions.map(i => `<option value="${i}" ${stat.icone === i ? 'selected' : ''}>${i}</option>`).join('');
+        const iconOptions = [
+            { value: "<i class='fi fi-rr-chart-histogram'></i> ", label: "📊 Gráfico / Histograma" },
+            { value: "<i class='fi fi-rr-syringe'></i> ", label: "💉 Seringa (Vacinação)" },
+            { value: "<i class='fi fi-rr-heart'></i> ", label: "❤️ Coração (Cardio/Saúde)" },
+            { value: "<i class='fi fi-rr-bug'></i> ", label: "🦟 Inseto (Vetor/Dengue)" },
+            { value: "<i class='fi fi-rr-brain'></i> ", label: "🧠 Cérebro (Saúde Mental)" },
+            { value: "<i class='fi fi-rr-lungs'></i> ", label: "🫁 Pulmões (Respiratório)" },
+            { value: "<i class='fi fi-rr-medicine'></i> ", label: "💊 Remédio (Medicamentos)" },
+            { value: "<i class='fi fi-rr-hospital'></i> ", label: "🏥 Hospital (Estrutura)" },
+            { value: "<i class='fi fi-rr-stethoscope'></i> ", label: "🩺 Estetoscópio (Consultas)" },
+            { value: "🔬", label: "🔬 Microscópio (Análises)" },
+            { value: "🚑", label: "🚑 Ambulância (Urgência)" },
+            { value: "🩸", label: "🩸 Gota de Sangue (Doação)" }
+        ];
+        const cleanIcon = (str) => str ? str.replace(/"/g, "'").trim() : '';
+        const optionsHtml = iconOptions.map(op => {
+            const sel = cleanIcon(stat.icone) === cleanIcon(op.value) ? 'selected' : '';
+            const valEscaped = op.value.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            return `<option value="${valEscaped}" ${sel}>${op.label}</option>`;
+        }).join('');
 
         div.innerHTML = `
             <div><label style="font-size:0.75rem; font-weight:bold;">Ícone</label><select id="stat-icon-${index}" onchange="atualizarPreviewStat(${index})" style="padding:5px; width:100%;">${optionsHtml}</select></div>
