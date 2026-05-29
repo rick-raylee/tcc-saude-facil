@@ -8,6 +8,9 @@ async function initEnf() {
             viaAPI = true;
             localStorage.setItem('usuarioLogado', 'true');
             localStorage.setItem('tipoUsuario', sessao.usuario?.tipo || sessao.tipo);
+            if (sessao.usuario?.nome || sessao.nome) {
+                localStorage.setItem('usuarioNome', sessao.usuario?.nome || sessao.nome);
+            }
             const nomeNav = document.getElementById('enf-nome-navbar');
             if (nomeNav) nomeNav.textContent = sessao.usuario?.nome || sessao.nome;
         } else if (sessao && !sessao.logado && localStorage.getItem('usuarioLogado') === 'true') {
@@ -65,10 +68,38 @@ function verificarAcessoEnf() {
 
     const enf = JSON.parse(localStorage.getItem('enfermeiroRegistrado') || 'null');
     const nome = localStorage.getItem('usuarioNome') || 'Enfermeiro(a)';
-    document.getElementById('enf-nome-navbar').textContent = nome;
-    if (enf && document.getElementById('enf-coren-navbar')) {
-        document.getElementById('enf-coren-navbar').textContent = 'COREN: ' + (enf.coren || '---');
+
+    // Suporte ao novo layout de perfil dropdown premium com iniciais
+    const cleanName = nome.replace(/^(Enfermeiro\(a\)\.\s+|Enf\.\s+)/i, '');
+    const initials = (function(name) {
+        if (!name) return 'EN';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    })(cleanName);
+
+    const triggerAvatar = document.getElementById('enf-avatar-trigger');
+    const largeAvatar = document.getElementById('enf-avatar-large');
+    const welcomeModern = document.getElementById('enf-welcome-message-modern');
+    const nameFull = document.getElementById('enf-name-full');
+    const roleBadge = document.getElementById('enf-role-badge');
+
+    if (triggerAvatar) triggerAvatar.textContent = initials;
+    if (largeAvatar) largeAvatar.textContent = initials;
+    if (welcomeModern) {
+        const first = cleanName.trim().split(/\s+/)[0];
+        welcomeModern.textContent = `Olá, ${first}`;
     }
+    if (nameFull) nameFull.textContent = nome;
+    if (roleBadge) {
+        roleBadge.innerHTML = `<i class="fi fi-rr-envelope"></i> COREN: ${enf ? (enf.coren || '---') : '---'}`;
+    }
+
+    // Fallback para o caso de elementos antigos
+    const oldNome = document.getElementById('enf-nome-navbar');
+    if (oldNome) oldNome.textContent = nome;
+    const oldCoren = document.getElementById('enf-coren-navbar');
+    if (oldCoren) oldCoren.textContent = 'COREN: ' + (enf ? (enf.coren || '---') : '---');
 }
 
 function carregarDadosEnfermeiro() {

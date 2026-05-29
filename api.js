@@ -674,3 +674,35 @@ window.abrirChamadoTI = async function() {
         }
     }
 };
+
+// ==========================================================================
+// INICIALIZAÇÃO DINÂMICA DE DROPDOWNS DE PERFIL (PAINEIS)
+// ==========================================================================
+function initGlobalProfileDropdown() {
+    const dropdownContainer = document.querySelector('.profile-dropdown-container');
+    if (dropdownContainer) {
+        const trigger = dropdownContainer.querySelector('.user-profile');
+        if (trigger) {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownContainer.classList.toggle('show');
+            });
+        }
+        document.addEventListener('click', function() {
+            dropdownContainer.classList.remove('show');
+        });
+        const menu = dropdownContainer.querySelector('.profile-dropdown-menu');
+        if (menu) {
+            menu.addEventListener('click', function(e) {
+                if (!e.target.closest('a') && !e.target.closest('button')) {
+                    e.stopPropagation();
+                }
+            });
+        }
+    }
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGlobalProfileDropdown);
+} else {
+    initGlobalProfileDropdown();
+}

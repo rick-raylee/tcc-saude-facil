@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Enfermagem | SUS Digital</title>
-    <link rel="stylesheet" href="main.css?v=20260529-5003">
-    <link rel="stylesheet" href="enfermeiro.css?v=20260529-5003">
-    <link rel="stylesheet" href="responsive.css?v=20260529-5003">
+    <link rel="stylesheet" href="main.css?v=20260529-5004">
+    <link rel="stylesheet" href="enfermeiro.css?v=20260529-5004">
+    <link rel="stylesheet" href="responsive.css?v=20260529-5004">
 
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,19 +16,45 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav class="enf-navbar">
-        <div class="enf-navbar-brand">
+    <nav class="enf-navbar" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="enf-navbar-brand" style="display: flex; align-items: center; gap: 10px;">
             <span class="enf-logo"><i class="fi fi-rr-hospital"></i> </span>
-            <div style="display: flex; flex-direction: column;">
-                <h1 class="enf-navbar-title">Painel de Enfermagem</h1>
-                <small id="enf-nome-navbar">Enfermeiro(a)</small>
-                <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
-            </div>
+            <h1 class="enf-navbar-title" style="margin: 0;">Painel de Enfermagem</h1>
         </div>
-        <div class="enf-navbar-actions">
-            <span id="enf-coren-navbar" class="enf-badge">COREN: ---</span>
-            <button class="enf-btn-suporte-ti" style="background:#0288d1; color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin-right:10px; font-size:0.8rem; display:inline-flex; align-items:center; gap:5px;" onclick="abrirChamadoTI()"><i class="fas fa-headset"></i> Suporte TI</button>
-            <button class="enf-btn-logout" onclick="sairPainel()">Sair</button>
+        <div class="profile-dropdown-container">
+            <div class="user-profile active">
+                <div class="user-avatar-modern" id="enf-avatar-trigger">--</div>
+                <div class="user-info-modern">
+                    <span id="enf-welcome-message-modern" class="user-welcome-modern">Carregando...</span>
+                    <span class="user-role-badge">Enfermagem</span>
+                </div>
+                <div class="dropdown-chevron-modern">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+            <div class="profile-dropdown-menu">
+                <div class="dropdown-menu-header">
+                    <div class="user-avatar-large" id="enf-avatar-large">--</div>
+                    <div class="user-details-large">
+                        <span id="enf-name-full" style="font-size: 0.88rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Carregando...</span>
+                        <span class="user-role-text" id="enf-role-badge"><i class="fi fi-rr-envelope"></i> COREN: ---</span>
+                    </div>
+                </div>
+                <div class="dropdown-menu-body">
+                    <a href="#" onclick="abrirModalEditarPerfil(event)" class="dropdown-menu-item">
+                        <i class="fi fi-rr-edit" style="color: #38bdf8;"></i><span>Editar Dados Pessoais</span>
+                    </a>
+                    <a href="#" onclick="abrirChamadoTI()" class="dropdown-menu-item">
+                        <i class="fas fa-headset" style="color: #10b981;"></i><span>Suporte TI</span>
+                    </a>
+                </div>
+                <div class="dropdown-menu-footer">
+                    <button onclick="sairPainel()" class="btn-logout-premium">
+                        <span class="btn-logout-label"><i class="fi fi-rr-exit"></i><span>Sair da Conta</span></span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -284,8 +310,8 @@
         </main>
     </div>
 
-    <script src="api.js?v=20260529-5003"></script>
-    <script src="enfermeiro.js?v=20260529-5003"></script>
+    <script src="api.js?v=20260529-5004"></script>
+    <script src="enfermeiro.js?v=20260529-5004"></script>
 </body>
 
 </html>

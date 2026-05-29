@@ -103,11 +103,46 @@ function verificarAcessoMedico() {
         return;
     }
 
-    const nome = localStorage.getItem('usuarioNome');
+    const nome = localStorage.getItem('usuarioNome') || 'Médico';
     const medicoData = JSON.parse(localStorage.getItem('medicoRegistrado') || '{}');
 
-    document.getElementById('nome-medico').textContent = nome;
-    document.getElementById('crm-medico').textContent = `CRM: ${medicoData.crm} | ${medicoData.especialidade}`;
+    // Suporte ao novo layout de perfil dropdown premium com iniciais
+    const cleanName = nome.replace(/^(Dr\(a\)\.\s+|Dr\.\s+|Dra\.\s+)/i, '');
+    const initials = (function(name) {
+        if (!name) return 'MD';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    })(cleanName);
+
+    const triggerAvatar = document.getElementById('medico-avatar-trigger');
+    const largeAvatar = document.getElementById('medico-avatar-large');
+    const welcomeModern = document.getElementById('medico-welcome-message-modern');
+    const nameFull = document.getElementById('medico-name-full');
+    const roleBadge = document.getElementById('medico-role-badge');
+    const roleBadgeSmall = document.getElementById('medico-role-badge-small');
+
+    if (triggerAvatar) triggerAvatar.textContent = initials;
+    if (largeAvatar) largeAvatar.textContent = initials;
+    if (welcomeModern) {
+        const first = cleanName.trim().split(/\s+/)[0];
+        welcomeModern.textContent = `Dr(a). ${first}`;
+    }
+    if (nameFull) {
+        nameFull.textContent = nome.startsWith('Dr') ? nome : `Dr(a). ${nome}`;
+    }
+    if (roleBadge) {
+        roleBadge.innerHTML = `<i class="fi fi-rr-doctor"></i> CRM: ${medicoData.crm || '---'}`;
+    }
+    if (roleBadgeSmall) {
+        roleBadgeSmall.textContent = medicoData.especialidade || 'Médico';
+    }
+
+    // Fallback para o caso de elementos antigos
+    const oldNome = document.getElementById('nome-medico');
+    if (oldNome) oldNome.textContent = nome;
+    const oldCrm = document.getElementById('crm-medico');
+    if (oldCrm) oldCrm.textContent = `CRM: ${medicoData.crm || '---'} | ${medicoData.especialidade || ''}`;
 }
 
 async function buscarPaciente() {

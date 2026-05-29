@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Saúde Digital | Acesso Médico</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="main.css?v=20260529-5003"> <!-- Reutiliza base -->
-    <link rel="stylesheet" href="medico.css?v=20260529-5003"> <!-- Estilos específicos -->
-    <link rel="stylesheet" href="responsive.css?v=20260529-5003">
+    <link rel="stylesheet" href="main.css?v=20260529-5004"> <!-- Reutiliza base -->
+    <link rel="stylesheet" href="medico.css?v=20260529-5004"> <!-- Estilos específicos -->
+    <link rel="stylesheet" href="responsive.css?v=20260529-5004">
     <style>
         /* ESTILOS DE IMPRESSÃO (PDF DO DOCUMENTO MÉDICO) */
         @media print {
@@ -121,14 +121,40 @@
                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'">
             <span>Área Profissional</span>
         </div>
-        <div class="user-medico">
-            <div class="medico-info" style="display: flex; flex-direction: column; justify-content: center;">
-                <span id="nome-medico">Dr(a). Carregando...</span>
-                <small id="crm-medico">CRM: ...</small>
-                <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+        <div class="profile-dropdown-container">
+            <div class="user-profile active">
+                <div class="user-avatar-modern" id="medico-avatar-trigger">--</div>
+                <div class="user-info-modern">
+                    <span id="medico-welcome-message-modern" class="user-welcome-modern">Carregando...</span>
+                    <span class="user-role-badge" id="medico-role-badge-small">Médico</span>
+                </div>
+                <div class="dropdown-chevron-modern">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
             </div>
-            <button class="btn-suporte-ti" style="background:#0288d1; color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin-right:10px; font-size:0.8rem; display:inline-flex; align-items:center; gap:5px;" onclick="abrirChamadoTI()"><i class="fas fa-headset"></i> Suporte TI</button>
-            <button class="btn-logout-medico" onclick="logoutMedico()">Sair</button>
+            <div class="profile-dropdown-menu">
+                <div class="dropdown-menu-header">
+                    <div class="user-avatar-large" id="medico-avatar-large">--</div>
+                    <div class="user-details-large">
+                        <span id="medico-name-full" style="font-size: 0.88rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Carregando...</span>
+                        <span class="user-role-text" id="medico-role-badge"><i class="fi fi-rr-doctor"></i> CRM: ...</span>
+                    </div>
+                </div>
+                <div class="dropdown-menu-body">
+                    <a href="#" onclick="abrirModalEditarPerfil(event)" class="dropdown-menu-item">
+                        <i class="fi fi-rr-edit" style="color: #38bdf8;"></i><span>Editar Dados Pessoais</span>
+                    </a>
+                    <a href="#" onclick="abrirChamadoTI()" class="dropdown-menu-item">
+                        <i class="fas fa-headset" style="color: #10b981;"></i><span>Suporte TI</span>
+                    </a>
+                </div>
+                <div class="dropdown-menu-footer">
+                    <button onclick="logoutMedico()" class="btn-logout-premium">
+                        <span class="btn-logout-label"><i class="fi fi-rr-exit"></i><span>Sair da Conta</span></span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -810,8 +836,8 @@
     <div id="area-impressao-documento" class="print-area doc-oficial" style="display: none;"></div>
 
     <!-- SCRIPT DO DASHBOARD -->
-    <script src="api.js?v=20260529-5003"></script>
-    <script src="medico.js?v=20260529-5003"></script>
+    <script src="api.js?v=20260529-5004"></script>
+    <script src="medico.js?v=20260529-5004"></script>
 
 </body>
 

@@ -62,6 +62,30 @@ async function initAdmin() {
     mudarSecao(sectionToLoad, false); // false = dont push state on initial load
 
     const nome = localStorage.getItem('usuarioNome') || 'Administrador';
+    
+    // Suporte ao novo layout de perfil dropdown premium com iniciais
+    function getInitials(name) {
+        if (!name) return 'AD';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    
+    const initials = getInitials(nome);
+    const triggerAvatar = document.getElementById('admin-avatar-trigger');
+    const largeAvatar = document.getElementById('admin-avatar-large');
+    const welcomeModern = document.getElementById('admin-welcome-message-modern');
+    const nameFull = document.getElementById('admin-name-full');
+    
+    if (triggerAvatar) triggerAvatar.textContent = initials;
+    if (largeAvatar) largeAvatar.textContent = initials;
+    if (welcomeModern) {
+        const first = nome.trim().split(/\s+/)[0];
+        welcomeModern.textContent = `Olá, ${first}`;
+    }
+    if (nameFull) nameFull.textContent = nome;
+
+    // Fallback para o caso de elementos antigos
     const welcomeMsg = document.getElementById('admin-welcome-message');
     if (welcomeMsg) welcomeMsg.textContent = `Olá, ${nome}`;
 

@@ -14,9 +14,9 @@
 
             const base = window.ADMIN_ASSET_BASE;
             document.write(
-                '<link rel="stylesheet" href="' + base + 'main.css?v=20260529-5003">' +
-                '<link rel="stylesheet" href="' + base + 'admin.css?v=20260529-5003">' +
-                '<link rel="stylesheet" href="' + base + 'responsive.css?v=20260529-5003">'
+                '<link rel="stylesheet" href="' + base + 'main.css?v=20260529-5004">' +
+                '<link rel="stylesheet" href="' + base + 'admin.css?v=20260529-5004">' +
+                '<link rel="stylesheet" href="' + base + 'responsive.css?v=20260529-5004">'
             );
         })();
     </script>
@@ -41,13 +41,40 @@
                 <span>PAINEL ADMIN</span>
             </a>
         </div>
-        <div class="user-admin">
-            <div class="user-admin-info">
-                <span id="admin-welcome-message">Aguarde...</span>
-                <a href="#" onclick="abrirModalEditarPerfil(event)"><i class="fi fi-rr-user-edition"></i> Editar Perfil</a>
+        <div class="profile-dropdown-container">
+            <div class="user-profile active">
+                <div class="user-avatar-modern" id="admin-avatar-trigger">--</div>
+                <div class="user-info-modern">
+                    <span id="admin-welcome-message-modern" class="user-welcome-modern">Carregando...</span>
+                    <span class="user-role-badge">Administrador</span>
+                </div>
+                <div class="dropdown-chevron-modern">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
             </div>
-            <button class="btn-suporte-ti" style="background:#0288d1; color:white; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin-right:10px; font-size:0.8rem; display:inline-flex; align-items:center; gap:5px;" onclick="abrirChamadoTI()"><i class="fas fa-headset"></i> Suporte TI</button>
-            <button class="btn-logout-admin" onclick="logoutAdmin()">Sair</button>
+            <div class="profile-dropdown-menu">
+                <div class="dropdown-menu-header">
+                    <div class="user-avatar-large" id="admin-avatar-large">--</div>
+                    <div class="user-details-large">
+                        <span id="admin-name-full" style="font-size: 0.88rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Carregando...</span>
+                        <span class="user-role-text"><i class="fi fi-rr-key"></i> Acesso Total</span>
+                    </div>
+                </div>
+                <div class="dropdown-menu-body">
+                    <a href="#" onclick="abrirModalEditarPerfil(event)" class="dropdown-menu-item">
+                        <i class="fi fi-rr-edit" style="color: #38bdf8;"></i><span>Editar Dados Pessoais</span>
+                    </a>
+                    <a href="#" onclick="abrirChamadoTI()" class="dropdown-menu-item">
+                        <i class="fas fa-headset" style="color: #10b981;"></i><span>Suporte TI</span>
+                    </a>
+                </div>
+                <div class="dropdown-menu-footer">
+                    <button onclick="logoutAdmin()" class="btn-logout-premium">
+                        <span class="btn-logout-label"><i class="fi fi-rr-exit"></i><span>Sair da Conta</span></span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -348,12 +375,12 @@
             }
 
             loadScript([
-                base + 'api.js?v=20260529-5003',
-                altBase + 'api.js?v=20260529-5003'
+                base + 'api.js?v=20260529-5004',
+                altBase + 'api.js?v=20260529-5004'
             ], 0, function () {
                 loadScript([
-                    base + 'admin.js?v=20260529-5003',
-                    altBase + 'admin.js?v=20260529-5003'
+                    base + 'admin.js?v=20260529-5004',
+                    altBase + 'admin.js?v=20260529-5004'
                 ], 0);
             });
         })();
