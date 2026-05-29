@@ -5782,3 +5782,41 @@ i[class^='fi'] {
     color: #1e293b !important;
 }
 
+/* ==========================================================================
+   BLINDAGEM CRÍTICA DE ÍCONES DO SWEETALERT2
+   Garante que o ícone de visto (checkmark) e outros ícones sejam renderizados
+   corretamente, mesmo com colisões de pseudo-elementos ou animações.
+   ========================================================================== */
+.swal2-icon.swal2-success {
+    border-color: #28a745 !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+    background-color: #28a745 !important;
+    z-index: 100 !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+    border: 4px solid rgba(40, 167, 69, 0.3) !important;
+}
+
+.swal2-icon.swal2-success::before,
+.swal2-icon.swal2-success::after,
+.swal2-icon.swal2-success .swal2-success-fix {
+    background: transparent !important;
+}
+
+.swal2-icon.swal2-error {
+    border-color: #dc3545 !important;
+}
+
+.swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+    background-color: #dc3545 !important;
+    z-index: 100 !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+
