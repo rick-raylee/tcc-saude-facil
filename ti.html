@@ -36,12 +36,75 @@
                     <span id="backend-status" class="status-badge" style="background:#475569; color:white">Status: Verificando...</span>
                 </div>
             </div>
-            <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
-                <div style="display: flex; flex-direction: column; text-align: right;">
-                    <span id="user-name">Carregando...</span>
-                    <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+            <div class="profile-dropdown-container">
+                <!-- TRIGGER (Pílula que ativa o menu) -->
+                <div class="user-profile active">
+                    <!-- Avatar com Letra-Inicial e Gradiente de Tecnologia -->
+                    <div class="user-avatar-modern" id="ti-avatar-trigger">
+                        TI
+                    </div>
+                    <!-- Infos Rápidas -->
+                    <div class="user-info-modern">
+                        <span id="user-name" class="user-welcome-modern">Carregando...</span>
+                        <span class="user-role-badge">Console Operator</span>
+                    </div>
+                    <!-- Chevron Animado -->
+                    <div class="dropdown-chevron-modern">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </div>
                 </div>
-                <img id="user-avatar" src="assets/default-avatar.png" alt="Avatar">
+
+                <!-- MENU FLUTUANTE (Dropdown) -->
+                <div class="profile-dropdown-menu">
+                    <!-- Detalhes do Usuário no Cabeçalho do Menu -->
+                    <div class="dropdown-menu-header">
+                        <div class="user-avatar-large" id="ti-avatar-large">
+                            TI
+                        </div>
+                        <div class="user-details-large">
+                            <span id="user-name-full" style="font-size: 0.88rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Console Operator</span>
+                            <span class="user-role-text">
+                                <i class="fas fa-terminal"></i> TI Administrator
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Links e Ações do Menu -->
+                    <div class="dropdown-menu-body">
+                        <!-- Editar Dados Pessoais -->
+                        <a href="#" onclick="abrirModalEditarPerfil(event)" class="dropdown-menu-item">
+                            <i class="fi fi-rr-edit" style="color: #c084fc;"></i>
+                            <span>Editar Dados Pessoais</span>
+                        </a>
+
+                        <!-- Atalho: Database View -->
+                        <a href="#" onclick="showSection('database')" class="dropdown-menu-item">
+                            <i class="fas fa-database" style="color: #60a5fa; font-size: 0.9rem;"></i>
+                            <span>Ver Visão do Banco</span>
+                        </a>
+
+                        <!-- Atalho: Chamados -->
+                        <a href="#" onclick="showSection('tickets')" class="dropdown-menu-item">
+                            <i class="fas fa-ticket-alt" style="color: #fbbf24; font-size: 0.9rem;"></i>
+                            <span>Chamados de Suporte</span>
+                        </a>
+                    </div>
+
+                    <!-- Rodapé com Logout -->
+                    <div class="dropdown-menu-footer">
+                        <button onclick="logout()" class="btn-logout-premium">
+                            <span class="btn-logout-label">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sair do Console</span>
+                            </span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 

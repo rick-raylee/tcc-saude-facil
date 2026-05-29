@@ -10,13 +10,23 @@ async function initTI() {
     const nomeLocalStorage = localStorage.getItem('usuarioNome');
 
     if (!sessao || !sessao.logado) {
-        console.warn('TI Dashboard: API não detectou sessão ativa. Tentando fallback para localStorage...');
+        console.warn('TI Dashboard: API não detectou sessão activa. Tentando fallback para localStorage...');
         
         if (tiLogadoJS && nomeLocalStorage) {
             console.log('TI Dashboard: Fallback bem-sucedido via localStorage para', nomeLocalStorage);
             // Permitir continuar, mas as chamadas de API subsequentes podem falhar se o backend exigir sessão
             const userEl = document.getElementById('user-name');
             if (userEl) userEl.innerText = nomeLocalStorage;
+            const userFullEl = document.getElementById('user-name-full');
+            if (userFullEl) userFullEl.innerText = nomeLocalStorage;
+            
+            // Iniciais do Avatar
+            const iniciais = nomeLocalStorage.charAt(0).toUpperCase();
+            const avatarTrigger = document.getElementById('ti-avatar-trigger');
+            if (avatarTrigger) avatarTrigger.innerText = iniciais;
+            const avatarLarge = document.getElementById('ti-avatar-large');
+            if (avatarLarge) avatarLarge.innerText = iniciais;
+
             const statusEl = document.getElementById('backend-status');
             if (statusEl) {
                 statusEl.innerText = 'Online (Fallback)';
@@ -30,15 +40,24 @@ async function initTI() {
     } else {
         // Sessão API OK
         console.log('TI Dashboard: Sessão validada via API para', sessao.usuario.nome);
+        const nomeUsuario = sessao.usuario.nome;
         const userEl = document.getElementById('user-name');
-        if (userEl) userEl.innerText = sessao.usuario.nome;
+        if (userEl) userEl.innerText = nomeUsuario;
+        const userFullEl = document.getElementById('user-name-full');
+        if (userFullEl) userFullEl.innerText = nomeUsuario;
+        
+        // Iniciais do Avatar
+        const iniciais = nomeUsuario.charAt(0).toUpperCase();
+        const avatarTrigger = document.getElementById('ti-avatar-trigger');
+        if (avatarTrigger) avatarTrigger.innerText = iniciais;
+        const avatarLarge = document.getElementById('ti-avatar-large');
+        if (avatarLarge) avatarLarge.innerText = iniciais;
+
         const statusEl = document.getElementById('backend-status');
         if (statusEl) {
             statusEl.innerText = 'Online';
             statusEl.style.background = '#10b981';
         }
-        const avatarEl = document.getElementById('user-avatar');
-        if (avatarEl && sessao.usuario.imagem) avatarEl.src = sessao.usuario.imagem;
     }
 
     // Inicializar dados
@@ -53,6 +72,31 @@ async function initTI() {
 
     loadTableList();
     initCharts();
+
+    // Configurar toggle interativo do dropdown de perfil (Suporte TI)
+    const dropdownContainer = document.querySelector('.profile-dropdown-container');
+    if (dropdownContainer) {
+        const trigger = dropdownContainer.querySelector('.user-profile');
+        if (trigger) {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownContainer.classList.toggle('show');
+            });
+        }
+        // Fechar ao clicar fora
+        document.addEventListener('click', function() {
+            dropdownContainer.classList.remove('show');
+        });
+        // Evitar fechar se clicar dentro do menu, a não ser que seja um link ou botão
+        const menu = dropdownContainer.querySelector('.profile-dropdown-menu');
+        if (menu) {
+            menu.addEventListener('click', function(e) {
+                if (!e.target.closest('a') && !e.target.closest('button')) {
+                    e.stopPropagation();
+                }
+            });
+        }
+    }
 }
 
 // Inicialização robusta
