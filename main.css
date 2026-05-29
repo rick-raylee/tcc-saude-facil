@@ -5748,3 +5748,37 @@ i[class^='fi'] {
     align-items: stretch !important;
 }
 
+/* Adaptação do Dropdown de Perfil para headers claros (Admin e Médico) */
+.navbar-admin .profile-dropdown-container .user-profile.active,
+.navbar-medica .profile-dropdown-container .user-profile.active {
+    background: rgba(0, 75, 130, 0.05) !important;
+    border-color: rgba(0, 75, 130, 0.12) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
+}
+
+.navbar-admin .profile-dropdown-container:hover .user-profile.active,
+.navbar-medica .profile-dropdown-container:hover .user-profile.active {
+    background: rgba(0, 75, 130, 0.09) !important;
+    border-color: rgba(0, 75, 130, 0.2) !important;
+}
+
+.navbar-admin .user-welcome-modern,
+.navbar-medica .user-welcome-modern {
+    color: #1e293b !important;
+}
+
+.navbar-admin .user-role-badge,
+.navbar-medica .user-role-badge {
+    color: #64748b !important;
+}
+
+.navbar-admin .dropdown-chevron-modern,
+.navbar-medica .dropdown-chevron-modern {
+    color: #64748b !important;
+}
+
+.navbar-admin .profile-dropdown-container:hover .dropdown-chevron-modern,
+.navbar-medica .profile-dropdown-container:hover .dropdown-chevron-modern {
+    color: #1e293b !important;
+}
+
