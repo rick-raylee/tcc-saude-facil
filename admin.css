@@ -370,56 +370,79 @@ body {
     text-transform: uppercase;
 }
 
-/* Ações com Botões Circulares Premium */
+/* Ações com Botões Premium e Profissionais */
 .item-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
 }
 
-.item-actions button {
-    width: 38px;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+/* Regra Padrão para Botões com Ícone Redondo */
+.item-actions button.btn-icon-only {
+    width: 38px !important;
+    height: 38px !important;
     border-radius: 50% !important;
-    border: none !important;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
-    font-size: 1rem;
+    cursor: pointer;
+    border: none !important;
+    font-size: 1.1rem !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     margin: 0 !important;
 }
 
-.item-actions button.btn-edit, 
-.item-actions button[style*="background:#007bff"],
-.item-actions button[style*="background: rgb(0, 123, 255)"] {
-    background: #edf5ff !important;
-    color: #007bff !important;
-    border: 1px solid rgba(0, 123, 255, 0.15) !important;
+/* Regra Padrão para Botões Retangulares com Texto (Editar, Excluir, etc.) */
+.item-actions button:not(.btn-icon-only) {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    border: none !important;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-family: inherit !important;
+    margin: 0 !important;
+}
+
+/* Estilo para Botão de Edição */
+.item-actions button.btn-edit,
+.item-actions button[style*="background:#ffc107"] {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+    border: 1px solid rgba(3, 105, 161, 0.15) !important;
 }
 
 .item-actions button.btn-edit:hover,
-.item-actions button[style*="background:#007bff"]:hover,
-.item-actions button[style*="background: rgb(0, 123, 255)"]:hover {
-    background: #007bff !important;
+.item-actions button[style*="background:#ffc107"]:hover {
+    background: #0369a1 !important;
     color: white !important;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 12px rgba(3, 105, 161, 0.25);
 }
 
+/* Estilo para Botão de Exclusão */
 .item-actions button.btn-delete {
-    background: #fff5f5 !important;
-    color: #dc3545 !important;
-    border: 1px solid rgba(220, 53, 69, 0.15) !important;
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 1px solid rgba(185, 28, 28, 0.15) !important;
 }
 
 .item-actions button.btn-delete:hover {
-    background: #dc3545 !important;
+    background: #b91c1c !important;
     color: white !important;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.25);
 }
 
 /* GRID DE IMAGENS DO CARROSSEL */
