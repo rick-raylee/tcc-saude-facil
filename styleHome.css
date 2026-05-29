@@ -3664,4 +3664,9 @@ body {
 
 .btn-logout-premium:hover svg {
     transform: translateX(2px);
+}
+
+/* Correção do Modal de Edição Global para preenchimento de todo o espaço */
+#modalEditarPerfil .modal-auth-card {
+    padding: 0 !important;
 }
