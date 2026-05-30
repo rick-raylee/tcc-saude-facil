@@ -1077,7 +1077,7 @@ async function syncChatMedico() {
 }
 
 async function enviarMensagemChat(usuario) {
-    const input = document.querySelector('#panel-chat input');
+    const input = document.querySelector('#panel-chat input[type="text"]');
     const texto = input.value.trim();
     if (!texto) return;
 
@@ -1131,7 +1131,7 @@ async function enviarArquivoChat(usuario) {
 // Inicializar listeners do painel de telemedicina
 document.addEventListener('DOMContentLoaded', () => {
     // Escutar tecla Enter no chat do médico
-    const chatInput = document.querySelector('#panel-chat input');
+    const chatInput = document.querySelector('#panel-chat input[type="text"]');
     if (chatInput) {
         // Exibir notificações de fila
         window.addEventListener('load', () => {

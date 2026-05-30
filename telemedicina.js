@@ -963,7 +963,7 @@ async function syncChat(usuario) {
 }
 
 async function enviarMensagemChat(usuario) {
-    const input = document.querySelector('.chat-input-area input');
+    const input = document.querySelector('.chat-input-area input[type="text"]');
     if (!input || !input.value.trim() || !currentConsultaId) return;
 
     if (typeof API !== 'undefined') {
@@ -1004,8 +1004,8 @@ async function enviarArquivoChat(usuario) {
 
 // Inicializar listener de enter no chat
 document.addEventListener('DOMContentLoaded', () => {
-    const chatInput = document.querySelector('.chat-input-area input');
-    const chatBtn = document.querySelector('.chat-input-area button');
+    const chatInput = document.querySelector('.chat-input-area input[type="text"]');
+    const chatBtn = document.querySelector('.chat-input-area button:last-of-type');
     if (chatInput) {
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') enviarMensagemChat('paciente');
