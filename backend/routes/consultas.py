@@ -107,6 +107,7 @@ def minhas_consultas():
         cur = db.cursor()
         cur.execute("""
             SELECT c.id, c.data, c.hora, c.especialidade, c.tipo, c.status, c.link_video, c.senha_fila,
+                   c.confirmacao_paciente, c.confirmacao_medico,
                    med.nome AS medico_nome,
                    pac.nome AS paciente_nome
             FROM consultas c
@@ -129,6 +130,8 @@ def minhas_consultas():
                 'status': r['status'],
                 'link_video': r['link_video'],
                 'senha_fila': r['senha_fila'] if 'senha_fila' in r.keys() else None,
+                'confirmacao_paciente': r['confirmacao_paciente'] if 'confirmacao_paciente' in r.keys() else 0,
+                'confirmacao_medico': r['confirmacao_medico'] if 'confirmacao_medico' in r.keys() else 0,
                 'medico': r['medico_nome'],
                 'paciente': r['paciente_nome']
             })
@@ -334,4 +337,53 @@ def checkin_presencial(consulta_id):
 
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+
+# ── CONFIRMAÇÃO DE REALIZAÇÃO DA CONSULTA PELO PACIENTE ──────────
+@consultas_bp.route('/api/consultas/<int:consulta_id>/confirmar-paciente', methods=['POST'])
+def confirmar_paciente(consulta_id):
+    from app import get_db_connection
+    paciente_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not paciente_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        
+        # Buscar a consulta
+        cur.execute("""
+            SELECT id, paciente_id, medico_id, data, confirmacao_medico 
+            FROM consultas WHERE id = ?
+        """, (consulta_id,))
+        consulta = cur.fetchone()
+        
+        if not consulta:
+            db.close()
+            return jsonify({'erro': 'Consulta não encontrada'}), 404
+            
+        if str(consulta['paciente_id']) != str(paciente_id):
+            db.close()
+            return jsonify({'erro': 'Acesso negado'}), 403
+
+        # Atualizar confirmação do paciente
+        cur.execute("UPDATE consultas SET confirmacao_paciente = 1 WHERE id = ?", (consulta_id,))
+        
+        # Verificar se o médico já confirmou
+        if consulta['confirmacao_medico'] == 1:
+            cur.execute("SELECT nome FROM usuarios WHERE id = ?", (consulta['medico_id'],))
+            med = cur.fetchone()
+            medico_nome = med['nome'] if med else 'Médico'
+            
+            cur.execute("""
+                INSERT INTO notificacoes (usuario_id, mensagem)
+                VALUES (?, ?)
+            """, (paciente_id, f'Sua consulta presencial com Dr(a). {medico_nome} em {consulta["data"]} foi realizada e confirmada por ambas as partes!'))
+            
+        db.commit()
+        db.close()
+        return jsonify({'sucesso': True})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
 

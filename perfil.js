@@ -239,6 +239,10 @@ async function carregarDadosPerfilAPI() {
 function renderizarMinhasConsultas(consultas) {
     const pendentes = consultas.filter(c => {
         const s = (c.status || '').toLowerCase();
+        const isPresencial = c.tipo && c.tipo.toLowerCase() === 'presencial';
+        if (s === 'finalizada') {
+            return isPresencial && (c.confirmacao_paciente === 0 || c.confirmacao_medico === 0);
+        }
         return s === 'agendado' || s === 'confirmado' || s === 'confirmada' || s === 'em_atendimento' || s === 'aguardando';
     });
     const card = document.getElementById('card-minhas-consultas');
@@ -292,7 +296,33 @@ function renderizarMinhasConsultas(consultas) {
                 
                 const cStatus = (c.status || '').toLowerCase();
                 
-                if (isToday && (cStatus === 'confirmada' || cStatus === 'confirmado' || cStatus === 'agendada' || cStatus === 'agendado')) {
+                if (cStatus === 'finalizada' || c.confirmacao_paciente === 1 || c.confirmacao_medico === 1) {
+                    if (c.confirmacao_paciente === 1 && c.confirmacao_medico === 1) {
+                        actionHtml = `
+                            <div style="margin-top:10px; padding:12px; background:#e8f5e9; border: 1px solid #c8e6c9; border-radius:8px; text-align:center;">
+                                <div style="font-size:0.9rem; color:#2e7d32; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fi fi-rr-check-circle"></i>✅ Realizada & Confirmada</div>
+                                <div style="font-size:0.8rem; color:#555; margin-top:5px;">Esta consulta foi confirmada por você e pelo médico!</div>
+                            </div>
+                        `;
+                    } else if (c.confirmacao_paciente === 1 && c.confirmacao_medico === 0) {
+                        actionHtml = `
+                            <div style="margin-top:10px; padding:12px; background:#fff3cd; border: 1px solid #ffeeba; border-radius:8px; text-align:center;">
+                                <div style="font-size:0.9rem; color:#856404; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fi fi-rr-time-past"></i>⏳ Aguardando Confirmação do Médico</div>
+                                <div style="font-size:0.8rem; color:#666; margin-top:5px;">Você confirmou a presença. Aguardando o registro médico.</div>
+                            </div>
+                        `;
+                    } else {
+                        const notaMed = c.confirmacao_medico === 1 ? `<div style="font-size:0.8rem; color:#0f5132; margin-bottom:8px; text-align:center; font-weight:600;">💡 O médico já confirmou a realização desta consulta!</div>` : '';
+                        actionHtml = `
+                            <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+                                ${notaMed}
+                                <button id="btn-confirmar-pac-${c.id}" onclick="realizarConfirmacaoPaciente(${c.id})" style="width:100%; padding:12px; background:#004b82; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.95rem; box-shadow: 0 4px 10px rgba(0, 75, 130, 0.2); transition: all 0.3s; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                    🤝 Confirmar Minha Presença
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else if (isToday && (cStatus === 'confirmada' || cStatus === 'confirmado' || cStatus === 'agendada' || cStatus === 'agendado')) {
                     actionHtml = `
                         <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
                             <div style="padding:10px; background:#e3f2fd; color:#004b82; border-radius:6px; text-align:center; font-size:0.9rem;"><i class="fi fi-rr-hospital"></i>📍 Atendimento Presencial</div>
@@ -307,11 +337,21 @@ function renderizarMinhasConsultas(consultas) {
                         <div style="margin-top:10px; padding:12px; background:#e8f5e9; border: 1px solid #c8e6c9; border-radius:8px; text-align:center;">
                             <div style="font-size:0.85rem; color:#2e7d32; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fi fi-rr-check"></i>📍 PRESENÇA CONFIRMADA</div>
                             <div style="font-size:1.8rem; font-weight:900; color:#2e7d32; margin: 5px 0; letter-spacing:1px;">${senhaFila}</div>
-                            <div style="font-size:0.8rem; color:#555;">Sua senha na fila do médico. Aguarde ser chamado no painel!</div>
+                            <div style="font-size:0.8rem; color:#555; margin-bottom: 10px;">Sua senha na fila do médico. Aguarde ser chamado no painel!</div>
+                            <button id="btn-confirmar-pac-${c.id}" onclick="realizarConfirmacaoPaciente(${c.id})" style="width:100%; padding:8px; background:#004b82; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.85rem;">
+                                🤝 Confirmar Minha Presença Agora
+                            </button>
                         </div>
                     `;
                 } else {
-                    actionHtml = `<div style="margin-top:10px; padding:10px; background:#e3f2fd; color:#004b82; border-radius:6px; text-align:center; font-size:0.9rem;">📍 Atendimento Presencial</div>`;
+                    actionHtml = `
+                        <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+                            <div style="padding:10px; background:#e3f2fd; color:#004b82; border-radius:6px; text-align:center; font-size:0.9rem;">📍 Atendimento Presencial</div>
+                            <button id="btn-confirmar-pac-${c.id}" onclick="realizarConfirmacaoPaciente(${c.id})" style="width:100%; padding:8px; background:#004b82; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.85rem;">
+                                🤝 Confirmar Minha Presença
+                            </button>
+                        </div>
+                    `;
                 }
             }
 
@@ -887,6 +927,56 @@ window.realizarAutoCheckin = async function(id) {
         if (btn) {
             btn.disabled = false;
             btn.textContent = '🎫 Ativar Fila (Auto Check-in)';
+        }
+    }
+};
+
+window.realizarConfirmacaoPaciente = async function(id) {
+    if (typeof API === 'undefined') return;
+    
+    const result = await Swal.fire({
+        title: 'Confirmar Realização?',
+        text: 'Você confirma que compareceu e realizou esta consulta presencial?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, Confirmo!',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#004b82'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const btn = document.getElementById(`btn-confirmar-pac-${id}`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Processando...';
+        }
+        
+        const resp = await API.confirmarConsultaPaciente(id);
+        if (resp && resp.sucesso) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Consulta Confirmada!',
+                text: 'Sua confirmação foi registrada com sucesso.',
+                confirmButtonText: 'Entendido'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao realizar confirmação.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro na Confirmação',
+            text: err.message || 'Não foi possível registrar a confirmação. Tente novamente mais tarde.'
+        });
+        const btn = document.getElementById(`btn-confirmar-pac-${id}`);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '🤝 Confirmar Minha Presença';
         }
     }
 };

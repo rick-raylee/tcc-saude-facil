@@ -128,6 +128,7 @@ const API = {
     listarEspecialidades: () => apiCall('/api/especialidades'),
     atualizarPresencaMedico: (status) => apiCall('/api/medico/presenca', 'POST', { presencial_ativo: status }),
     checkinPresencialConsulta: (id) => apiCall(`/api/consultas/${id}/checkin-presencial`, 'POST'),
+    confirmarConsultaPaciente: (id) => apiCall(`/api/consultas/${id}/confirmar-paciente`, 'POST'),
 
     // Enfermeiro
     buscarPacienteEnf: (cpf) => apiCall(`/api/enfermeiro/buscar-paciente?cpf=${cpf}`),

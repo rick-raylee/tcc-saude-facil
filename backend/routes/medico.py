@@ -346,9 +346,23 @@ def salvar_atendimento():
             """, (prontuario_id, medicamentos, instrucoes))
             db.commit()
 
-        # Atualizar status da consulta
-        cur.execute("UPDATE consultas SET status = 'finalizada' WHERE id = ?", (consulta_id,))
+        # Atualizar status da consulta e a confirmação do médico
+        cur.execute("UPDATE consultas SET status = 'finalizada', confirmacao_medico = 1 WHERE id = ?", (consulta_id,))
         db.commit()
+
+        # Verificar se o paciente já confirmou para gerar a notificação
+        cur.execute("SELECT paciente_id, data, confirmacao_paciente FROM consultas WHERE id = ?", (consulta_id,))
+        cons = cur.fetchone()
+        if cons and cons['confirmacao_paciente'] == 1:
+            cur.execute("SELECT nome FROM usuarios WHERE id = ?", (medico_id,))
+            med = cur.fetchone()
+            medico_nome = med['nome'] if med else 'Médico'
+            
+            cur.execute("""
+                INSERT INTO notificacoes (usuario_id, mensagem)
+                VALUES (?, ?)
+            """, (cons['paciente_id'], f'Sua consulta presencial com Dr(a). {medico_nome} em {cons["data"]} foi realizada e confirmada por ambas as partes!'))
+            db.commit()
 
         db.close()
         return jsonify({'sucesso': True, 'prontuario_id': prontuario_id, 'consulta_id': consulta_id}), 201
