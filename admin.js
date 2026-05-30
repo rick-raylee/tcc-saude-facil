@@ -410,8 +410,10 @@ async function carregarNoticias() {
         }
     }
 
+    window._adminNoticiasCache = noticias;
+
     lista.innerHTML = '';
-    noticias.forEach(noticia => {
+    noticias.forEach((noticia, idx) => {
         const item = document.createElement('div');
         item.className = 'admin-item';
         const dataStr = noticia.criada_em || noticia.data || '---';
@@ -421,13 +423,19 @@ async function carregarNoticias() {
                 <small>${dataStr} • Categoria: ${noticia.categoria || 'Geral'}</small>
             </div>
             <div class="item-actions">
-                <button class="btn-edit btn-icon-only" onclick='abrirModalNoticia(${JSON.stringify(noticia).replace(/'/g, "&#39;")})'><i class="fi fi-rr-edit"></i></button>
+                <button class="btn-edit btn-icon-only" onclick="window.abrirModalNoticiaIndex(${idx})"><i class="fi fi-rr-edit"></i></button>
                 <button class="btn-delete btn-icon-only" onclick="deletarNoticia(${noticia.id})"><i class="fi fi-rr-trash"></i></button>
             </div>
         `;
         lista.appendChild(item);
     });
 }
+
+window.abrirModalNoticiaIndex = function(index) {
+    if (window._adminNoticiasCache && window._adminNoticiasCache[index]) {
+        window.abrirModalNoticia(window._adminNoticiasCache[index]);
+    }
+};
 
 async function deletarNoticia(id) {
     if (!confirm('Excluir notícia permanentemente?')) return;
@@ -1307,8 +1315,10 @@ async function carregarCampanhas() {
         }
     }
 
+    window._adminCampanhasCache = campanhas;
+
     if (campanhas && !campanhas.erro) {
-        lista.innerHTML = campanhas.map(c => `
+        lista.innerHTML = campanhas.map((c, idx) => `
                 <div class="admin-item">
                     <div style="display:flex; gap:15px; flex:1; align-items:center;">
                         <img src="${c.imagem || 'https://via.placeholder.com/80x50?text=Campanha'}" style="width:80px; height:50px; object-fit:cover; border-radius:4px;" />
@@ -1319,7 +1329,7 @@ async function carregarCampanhas() {
                         </div>
                     </div>
                     <div class="item-actions">
-                        <button class="btn-edit btn-icon-only" onclick='abrirModalCampanha(${JSON.stringify(c).replace(/'/g, "&#39;")})'><i class="fi fi-rr-edit"></i></button>
+                        <button class="btn-edit btn-icon-only" onclick="window.abrirModalCampanhaIndex(${idx})"><i class="fi fi-rr-edit"></i></button>
                         <button class="btn-delete btn-icon-only" onclick="deletarCampanha(${c.id})"><i class="fi fi-rr-trash"></i></button>
                     </div>
                 </div>
@@ -1327,6 +1337,12 @@ async function carregarCampanhas() {
         if (campanhas.length === 0) lista.innerHTML = '<p style="padding:15px; text-align:center; color:#666;">Nenhuma campanha ativa.</p>';
     }
 }
+
+window.abrirModalCampanhaIndex = function(index) {
+    if (window._adminCampanhasCache && window._adminCampanhasCache[index]) {
+        window.abrirModalCampanha(window._adminCampanhasCache[index]);
+    }
+};
 
 window.abrirModalCampanha = function (camp = null) {
     const modal = document.getElementById('modal-admin');
@@ -1836,3 +1852,13 @@ async function deletarNotificacaoAdmin(id) {
         }
     }
 }
+
+// Expor todas as funções globais necessárias ao escopo window para garantir a correta execução dos onclicks inline
+window.deletarNoticia = deletarNoticia;
+window.deletarSlide = deletarSlide;
+window.deletarCampanha = deletarCampanha;
+window.aprovarComentario = aprovarComentario;
+window.rejeitarComentario = rejeitarComentario;
+window.abrirModalDoenca = abrirModalDoenca;
+window.excluirDoenca = excluirDoenca;
+window.deletarNotificacaoAdmin = deletarNotificacaoAdmin;
