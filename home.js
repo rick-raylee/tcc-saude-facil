@@ -389,7 +389,7 @@ async function carregarCarouselDinamico() {
     let todosSlides = [...slidesAPI];
     slidesLocal.forEach(sl => { if(!todosSlides.find(s => s.id === sl.id)) todosSlides.push(sl); });
 
-    let slides = [...todosSlides, ...destaquesNoticias];
+    let slides = [...todosSlides];
 
 
     slides3D = slides.filter(s => parseInt(s.ativo) === 1 || parseInt(s.status) === 1 || String(s.status) === 'publicado' || s.ativo === undefined);

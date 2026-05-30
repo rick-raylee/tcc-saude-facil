@@ -946,33 +946,7 @@ async function carregarCarrosselEditor() {
         lista.appendChild(item);
     });
 
-    // 2. Renderizar as Notícias que estão ocupando o carrossel
-    noticiasNoCarrossel.forEach((noticia) => {
-        const item = document.createElement('div');
-        item.className = 'admin-item';
-        item.style.borderLeft = "5px solid #ffc107";
-        item.style.background = "#fffdf5";
-        
-        // Encontrar o índice real no cache de notícias
-        const newsIdx = window._adminCarouselCache.noticias.findIndex(n => n.id === noticia.id);
-
-        item.innerHTML = `
-            <div class="item-info" style="display: flex; align-items: center; gap: 15px;">
-                <img src="${noticia.imagem || 'https://via.placeholder.com/80x50'}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ffc107;">
-                <div>
-                    <h4 style="margin: 0;">${noticia.titulo}</h4>
-                    <p style="margin: 0; font-size: 0.8rem; color: #856404; display: flex; align-items: center; gap: 4px;"><b><i class="fi fi-rr-thumbtack"></i> Notícia em Destaque</b> (Gerencie na aba Notícias)</p>
-                    <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; display: inline-flex; align-items: center; gap: 4px;"><i class="fi fi-rr-flame"></i> Destaque no Topo</span>
-                </div>
-            </div>
-            <div class="item-actions">
-                <button class="btn-edit" style="background:#ffc107; color:#856404; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold; display:inline-flex; align-items:center; gap:6px;" onclick="irParaNoticia(${newsIdx})"><i class="fi fi-rr-edit"></i> Editar Notícia</button>
-            </div>
-        `;
-        lista.appendChild(item);
-    });
-
-    if (slides.length === 0 && noticiasNoCarrossel.length === 0) {
+    if (slides.length === 0) {
         lista.innerHTML = '<div style="text-align:center; padding: 20px; color: #666;">Nenhum item ativo no carrossel.</div>';
     }
 }
