@@ -421,8 +421,8 @@ async function carregarNoticias() {
                 <small>${dataStr} • Categoria: ${noticia.categoria || 'Geral'}</small>
             </div>
             <div class="item-actions">
-                <button class="btn-edit btn-icon-only" onclick='abrirModalNoticia(${JSON.stringify(noticia).replace(/'/g, "&#39;")})'>✏️</button>
-                <button class="btn-delete btn-icon-only" onclick="deletarNoticia(${noticia.id})">🗑️</button>
+                <button class="btn-edit btn-icon-only" onclick='abrirModalNoticia(${JSON.stringify(noticia).replace(/'/g, "&#39;")})'><i class="fi fi-rr-edit"></i></button>
+                <button class="btn-delete btn-icon-only" onclick="deletarNoticia(${noticia.id})"><i class="fi fi-rr-trash"></i></button>
             </div>
         `;
         lista.appendChild(item);
@@ -485,7 +485,7 @@ window.abrirModalNoticia = function (noticia = null) {
         <div style="margin-bottom:10px; display:flex; gap:15px; align-items:center; background:#f5f5f5; padding:10px; border-radius:4px;">
             <label style="display:flex; align-items:center; gap:5px; margin:0;"><input type="checkbox" id="form-destaque" ${noticia && noticia.destaque_carrossel ? 'checked' : ''}> Aparecer no Carrossel</label>
         </div>
-        <button type="submit" style="background:var(--admin-success); color:white; border:none; padding:10px; width:100%; font-weight:bold;">${noticia ? 'Salvar Alterações' : 'Publicar Notícia'}</button>
+        <button type="submit" style="background:var(--admin-success); color:white; border:none; padding:10px; width:100%; font-weight:bold; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fi fi-rr-disk"></i> ${noticia ? 'Salvar Alterações' : 'Publicar Notícia'}</button>
     `;
     modal.style.display = 'flex';
 }
@@ -557,9 +557,9 @@ async function carregarStatsEditor() {
             { value: "<i class='fi fi-rr-medicine'></i> ", label: "💊 Remédio (Medicamentos)" },
             { value: "<i class='fi fi-rr-hospital'></i> ", label: "🏥 Hospital (Estrutura)" },
             { value: "<i class='fi fi-rr-stethoscope'></i> ", label: "🩺 Estetoscópio (Consultas)" },
-            { value: "🔬", label: "🔬 Microscópio (Análises)" },
-            { value: "🚑", label: "🚑 Ambulância (Urgência)" },
-            { value: "🩸", label: "🩸 Gota de Sangue (Doação)" }
+            { value: "<i class='fi fi-rr-microscope'></i> ", label: "🔬 Microscópio (Análises)" },
+            { value: "<i class='fi fi-rr-ambulance'></i> ", label: "🚑 Ambulância (Urgência)" },
+            { value: "<i class='fi fi-rr-drop'></i> ", label: "🩸 Gota de Sangue (Doação)" }
         ];
         const cleanIcon = (str) => str ? str.replace(/"/g, "'").trim() : '';
         const optionsHtml = iconOptions.map(op => {
@@ -587,8 +587,8 @@ async function carregarStatsEditor() {
                 </select>
             </div>
             <div style="padding-bottom:1px; display:flex; gap:5px;">
-                <button class="btn-edit" onclick="selecionarParaMapa(${index})" id="btn-map-${index}" style="height:35px; background:#0056AC; color:white; border:none; border-radius:4px; cursor:pointer; width:35px;" title="Selecionar para editar no mapa">📍</button>
-                <button class="btn-delete" onclick="deletarEstatistica(${index})" style="height:35px;">🗑️</button>
+                <button class="btn-edit" onclick="selecionarParaMapa(${index})" id="btn-map-${index}" style="height:35px; background:#0056AC; color:white; border:none; border-radius:4px; cursor:pointer; width:35px; display:inline-flex; align-items:center; justify-content:center;" title="Selecionar para editar no mapa"><i class="fi fi-rr-map-marker"></i></button>
+                <button class="btn-delete" onclick="deletarEstatistica(${index})" style="height:35px; width:35px; background:#fee2e2; color:#b91c1c; border:1px solid rgba(185,28,28,0.15); border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Deletar estatística"><i class="fi fi-rr-trash"></i></button>
             </div>
             <div id="stat-preview-${index}" style="grid-column: 1 / -1; margin-top:10px; display:flex; justify-content:center; background:#eee; padding:10px; border-radius:8px;">
                 <!-- Card Preview Injected Here -->
@@ -810,7 +810,7 @@ function initAdminMap() {
     // Click on Background/Map to capture coordinates
     chart.seriesContainer.events.on("hit", function(ev) {
         if (idxEstatisticaSelecionada === null) {
-            Swal.fire({ icon: 'warning', title: 'Atenção', text: 'Selecione primeiro qual estatística deseja posicionar clicando no ícone �? ao lado dela.' });
+            Swal.fire({ icon: 'warning', title: 'Atenção', text: 'Selecione primeiro qual estatística deseja posicionar clicando no ícone de marcador (📍) ao lado dela.' });
             return;
         }
 
@@ -927,12 +927,12 @@ async function carregarCarrosselEditor() {
                 <div>
                     <h4 style="margin: 0;">${slide.titulo || 'Slide'}</h4>
                     <p style="margin: 0; font-size: 0.8rem; color: #555;">${slide.subtitulo || ''}</p>
-                    <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: #d4edda; color: #155724; border: 1px solid currentColor;">✅ Slide Ativo</span>
+                    <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: #d4edda; color: #155724; border: 1px solid currentColor; display: inline-flex; align-items: center; gap: 4px;"><i class="fi fi-rr-check-circle"></i> Slide Ativo</span>
                 </div>
             </div>
             <div class="item-actions">
-                <button class="btn-edit" onclick="window.abrirModalCarrossel(window._adminCarouselCache.slides[${idx}])">✏️ Editar</button>
-                <button class="btn-delete" onclick="deletarSlide('${slide.id}')">🗑️ Excluir</button>
+                <button class="btn-edit" onclick="window.abrirModalCarrossel(window._adminCarouselCache.slides[${idx}])"><i class="fi fi-rr-edit"></i> Editar</button>
+                <button class="btn-delete" onclick="deletarSlide('${slide.id}')"><i class="fi fi-rr-trash"></i> Excluir</button>
             </div>
         `;
         lista.appendChild(item);
@@ -953,12 +953,12 @@ async function carregarCarrosselEditor() {
                 <img src="${noticia.imagem || 'https://via.placeholder.com/80x50'}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ffc107;">
                 <div>
                     <h4 style="margin: 0;">${noticia.titulo}</h4>
-                    <p style="margin: 0; font-size: 0.8rem; color: #856404;"><b>📌 Notícia em Destaque</b> (Gerencie na aba Notícias)</p>
-                    <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba;">🔥 Destaque no Topo</span>
+                    <p style="margin: 0; font-size: 0.8rem; color: #856404; display: flex; align-items: center; gap: 4px;"><b><i class="fi fi-rr-thumbtack"></i> Notícia em Destaque</b> (Gerencie na aba Notícias)</p>
+                    <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; display: inline-flex; align-items: center; gap: 4px;"><i class="fi fi-rr-flame"></i> Destaque no Topo</span>
                 </div>
             </div>
             <div class="item-actions">
-                <button class="btn-edit" style="background:#ffc107; color:#856404; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold;" onclick="irParaNoticia(${newsIdx})">✏️ Editar Notícia</button>
+                <button class="btn-edit" style="background:#ffc107; color:#856404; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold; display:inline-flex; align-items:center; gap:6px;" onclick="irParaNoticia(${newsIdx})"><i class="fi fi-rr-edit"></i> Editar Notícia</button>
             </div>
         `;
         lista.appendChild(item);
@@ -1035,7 +1035,7 @@ window.abrirModalCarrossel = function (slide = null) {
             <input type="checkbox" id="form-img-ativo" ${!slide || parseInt(slide.ativo) || parseInt(slide.status) ? 'checked' : ''}>
             <label for="form-img-ativo" style="margin:0;">Ativar slide na página inicial</label>
         </div>
-        <button type="submit" style="background:var(--admin-success); color:white; border:none; padding:10px; width:100%; font-weight:bold;">${slide ? 'Salvar Alterações' : 'Adicionar Slide'}</button>
+        <button type="submit" style="background:var(--admin-success); color:white; border:none; padding:10px; width:100%; font-weight:bold; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fi fi-rr-disk"></i> ${slide ? 'Salvar Alterações' : 'Adicionar Slide'}</button>
     `;
     modal.style.display = 'flex';
 }
@@ -1248,8 +1248,8 @@ async function carregarComentarios() {
                         <span style="font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; background: ${c.status === 'aprovado' ? '#d4edda' : '#fff3cd'}; color: ${c.status === 'aprovado' ? '#155724' : '#856404'};">${c.status.toUpperCase()}</span>
                     </div>
                     <div class="item-actions">
-                        ${c.status !== 'aprovado' ? `<button class="btn-edit" style="background:#28a745; color:white;" onclick="aprovarComentario(${c.id})">Aprovar</button>` : ''}
-                        <button class="btn-delete" onclick="rejeitarComentario(${c.id})">Excluir</button>
+                        ${c.status !== 'aprovado' ? `<button class="btn-edit" style="background:#28a745; color:white; display:inline-flex; align-items:center; gap:6px;" onclick="aprovarComentario(${c.id})"><i class="fi fi-rr-check"></i> Aprovar</button>` : ''}
+                        <button class="btn-delete" onclick="rejeitarComentario(${c.id})"><i class="fi fi-rr-trash"></i> Excluir</button>
                     </div>
                 </div>
             `).join('');
@@ -1319,8 +1319,8 @@ async function carregarCampanhas() {
                         </div>
                     </div>
                     <div class="item-actions">
-                        <button class="btn-edit btn-icon-only" onclick='abrirModalCampanha(${JSON.stringify(c).replace(/'/g, "&#39;")})'>✏️</button>
-                        <button class="btn-delete btn-icon-only" onclick="deletarCampanha(${c.id})">🗑️</button>
+                        <button class="btn-edit btn-icon-only" onclick='abrirModalCampanha(${JSON.stringify(c).replace(/'/g, "&#39;")})'><i class="fi fi-rr-edit"></i></button>
+                        <button class="btn-delete btn-icon-only" onclick="deletarCampanha(${c.id})"><i class="fi fi-rr-trash"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -1354,7 +1354,7 @@ window.abrirModalCampanha = function (camp = null) {
                  <option value="0" ${camp && (parseInt(camp.status) === 0 || String(camp.status).toLowerCase() === 'inativa') ? 'selected' : ''}>Inativa</option>
              </select>
         </div>
-        <button type="submit" style="background:var(--admin-success); color:white; border:none; padding:10px; width:100%; font-weight:bold;">${camp ? 'Salvar Alterações' : 'Lançar Campanha'}</button>
+        <button type="submit" style="background:var(--admin-success); color:white; border:none; padding:10px; width:100%; font-weight:bold; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fi fi-rr-disk"></i> ${camp ? 'Salvar Alterações' : 'Lançar Campanha'}</button>
     `;
     modal.style.display = 'flex';
 }
@@ -1389,7 +1389,7 @@ async function carregarLogs() {
             logs = response;
         } else if (response && response.erro) {
             console.error('Erro ao carregar logs:', response.erro);
-            lista.innerHTML = '<li style="padding: 15px; text-align: center; color: #d32f2f;">❌ Erro ao carregar logs: ' + response.erro + '</li>';
+            lista.innerHTML = '<li style="padding: 15px; text-align: center; color: #d32f2f;"><i class="fi fi-rr-cross-circle"></i> Erro ao carregar logs: ' + response.erro + '</li>';
             return;
         } else {
             logs = [];
@@ -1537,8 +1537,8 @@ async function carregarDoencas() {
                     </div>
                 </div>
                 <div class="item-actions">
-                    <button class="btn-edit btn-icon-only" onclick="abrirModalDoenca(${idx})">✏️</button>
-                    <button class="btn-delete btn-icon-only" onclick="excluirDoenca(${idx})">🗑️</button>
+                    <button class="btn-edit btn-icon-only" onclick="abrirModalDoenca(${idx})"><i class="fi fi-rr-edit"></i></button>
+                    <button class="btn-delete btn-icon-only" onclick="excluirDoenca(${idx})"><i class="fi fi-rr-trash"></i></button>
                 </div>
             </div>
             
@@ -1586,9 +1586,9 @@ function abrirModalDoenca(idx = null) {
         { value: "<i class='fi fi-rr-bone'></i> ", label: '🦴 Osso (Ortopedia)' },
         { value: "<i class='fi fi-rr-wheelchair'></i> ", label: '♿ Cadeirante (Mobilidade)' },
         { value: "<i class='fi fi-rr-virus'></i> ", label: '🦠 Vírus (COVID/Gripe)' },
-        { value: '🩸', label: '🩸 Sangue (Hematologia)' },
-        { value: '🔬', label: '🔬 Microscópio (Análises)' },
-        { value: '🚑', label: '🚑 Ambulância (Emergência)' },
+        { value: "<i class='fi fi-rr-drop'></i> ", label: '🩸 Sangue (Hematologia)' },
+        { value: "<i class='fi fi-rr-microscope'></i> ", label: '🔬 Microscópio (Análises)' },
+        { value: "<i class='fi fi-rr-ambulance'></i> ", label: '🚑 Ambulância (Emergência)' },
     ];
 
     const iconeOptionsHtml = iconeOpcoes.map(op => {
@@ -1678,7 +1678,7 @@ function abrirModalDoenca(idx = null) {
         
         <div style="text-align:right;">
             <button type="button" class="btn-cancel" onclick="fecharModalAdmin()" style="margin-right:10px; padding:10px 15px; cursor:pointer;">Cancelar</button>
-            <button type="submit" class="btn-save" style="background:#28a745; color:white; border:none; padding:10px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">Salvar Alterações</button>
+            <button type="submit" class="btn-save" style="background:#28a745; color:white; border:none; padding:10px 15px; border-radius:4px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px;"><i class="fi fi-rr-disk"></i> Salvar Alterações</button>
         </div>
     `;
 
@@ -1781,10 +1781,10 @@ async function carregarNotificacoesAdmin() {
                 <div style="flex:1;">
                     <h4 style="margin:0 0-5px 0;">Para: ${n.usuario_nome || 'Usuário Desconhecido'} (${n.usuario_cpf || '---'})</h4>
                     <p style="margin:5px 0; font-size:0.95rem; color:#333;">"${n.mensagem}"</p>
-                    <small style="color:#888;">Enviada em: ${n.criada_em || '---'} | Status: ${n.lida ? '<i class=\"fi fi-rr-check-circle\"></i>  Lida' : '📩 Pendente'}</small>
+                    <small style="color:#888;">Enviada em: ${n.criada_em || '---'} | Status: ${n.lida ? '<i class=\"fi fi-rr-check-circle\"></i> Lida' : '<i class=\"fi fi-rr-envelope\"></i> Pendente'}</small>
                 </div>
                 <div class="item-actions">
-                    <button class="btn-delete" onclick="deletarNotificacaoAdmin(${n.id})">🗑️ Excluir</button>
+                    <button class="btn-delete" onclick="deletarNotificacaoAdmin(${n.id})"><i class="fi fi-rr-trash"></i> Excluir</button>
                 </div>
             </div>
         `).join('');
@@ -1821,7 +1821,7 @@ window.abrirModalNotificacao = async function() {
         </div>
         <div style="text-align:right; gap:10px; display:flex; justify-content:flex-end;">
             <button type="button" class="btn-cancel" onclick="fecharModalAdmin()" style="padding:10px 20px;">Cancelar</button>
-            <button type="submit" style="background:#28a745; color:white; border:none; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer;">  Enviar Notificação</button>
+            <button type="submit" style="background:#28a745; color:white; border:none; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px;"><i class="fi fi-rr-paper-plane"></i> Enviar Notificação</button>
         </div>
     `;
     modal.style.display = 'flex';
