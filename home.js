@@ -888,21 +888,38 @@ function exibirNoticia() {
     const conteudoDiv = document.getElementById('noticiaConteudo');
     const numeroSpan = document.getElementById('noticiaNumero');
 
+    // ✅ FIX: Imagem robusta com múltiplos fallbacks para o modal
+    let imagemUrl = '';
+    if (noticia.imagem) imagemUrl = noticia.imagem;
+    else if (noticia.imagemUrl) imagemUrl = noticia.imagemUrl;
+    else if (noticia.img) imagemUrl = noticia.img;
+    else if (noticia.imagem_path) imagemUrl = noticia.imagem_path;
+
+    // ✅ FIX: Data robusta com múltiplos fallbacks
+    const dataExibicao = noticia.data || noticia.criada_em || noticia.data_criacao || 'Data não disponível';
+
     // Atualizar conteúdo
     conteudoDiv.innerHTML = `
-                <h2>${noticia.titulo}</h2>
-            <div class="noticia-meta">
-                <div class="meta-item">
-                    <span>📂</span>
-                    <span>${noticia.categoria}</span>
-                </div>
-                <div class="meta-item">
-                    <span><i class='fi fi-rr-calendar'></i> </span>
-                    <span>${noticia.data}</span>
-                </div>
+        <h2>${noticia.titulo}</h2>
+        <div class="noticia-meta">
+            <div class="meta-item">
+                <span>📂</span>
+                <span>${noticia.categoria || 'Geral'}</span>
             </div>
-        ${noticia.conteudo}
-                `;
+            <div class="meta-item">
+                <span><i class='fi fi-rr-calendar'></i> </span>
+                <span>${dataExibicao}</span>
+            </div>
+        </div>
+        ${imagemUrl ? `
+        <div class="noticia-imagem-modal-container" style="width: 100%; max-height: 400px; overflow: hidden; border-radius: 12px; margin: 20px 0; box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
+            <img src="${imagemUrl}" alt="${noticia.titulo || 'Notícia'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+        </div>
+        ` : ''}
+        <div class="noticia-texto-completo" style="line-height: 1.8; color: #444; font-size: 1.05rem; margin-top: 20px;">
+            ${noticia.conteudo || noticia.texto || noticia.descricao || 'Conteúdo indisponível.'}
+        </div>
+    `;
 
     // Atualizar número
     numeroSpan.textContent = `${noticiaAtual + 1} / ${noticias.length}`;
