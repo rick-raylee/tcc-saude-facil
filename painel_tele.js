@@ -1,19 +1,25 @@
 let sessaoTelemedicina = null;
 let jitsiApi = null;
 let salaPadrao = "SalaMedica" + Math.floor(Math.random() * 1000000);
+window.activeConsultaId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Verificar Sessão via API
     if (typeof API !== 'undefined') {
         const p = await API.sessao();
-        if (p && p.autenticado && p.tipo === 'medico_tele') {
-            sessaoTelemedicina = p;
-            document.getElementById('nome-medico-tele').textContent = 'Dr(a). ' + p.nome;
-            document.getElementById('crm-medico-tele').textContent = 'CRM: ' + (p.crm || 'N/D');
+        if (p && p.logado && p.usuario && (p.usuario.tipo === 'medico_tele' || p.usuario.tipo === 'medico')) {
+            sessaoTelemedicina = p.usuario;
+            document.getElementById('nome-medico-tele').textContent = 'Dr(a). ' + p.usuario.nome;
             
-            // Buscar link da sala padrão do backend se existir
-            if(p.telemedicina_link_padrao) {
-                salaPadrao = p.telemedicina_link_padrao.split('/').pop() || salaPadrao;
+            // Buscar CRM e dados locais de medicoRegistrado
+            const medicoLocal = JSON.parse(localStorage.getItem('medicoRegistrado') || '{}');
+            document.getElementById('crm-medico-tele').textContent = 'CRM: ' + (medicoLocal.crm || p.usuario.crm || 'N/D');
+            
+            // Buscar link da sala padrão do backend ou do localStorage se existir
+            if(p.usuario.telemedicina_link_padrao) {
+                salaPadrao = p.usuario.telemedicina_link_padrao.split('/').pop() || salaPadrao;
+            } else if (medicoLocal.link_sala_padrao) {
+                salaPadrao = medicoLocal.link_sala_padrao.split('/').pop() || salaPadrao;
             }
 
             carregarFilaOnlineAPI();
@@ -79,6 +85,7 @@ window.iniciarChamada = async function(id_consulta, nome_paciente) {
     container.style.display = 'block';
     
     document.getElementById('controles-fim').style.display = 'flex';
+    window.activeConsultaId = id_consulta;
 
     // Gerar string da sala
     // Idealmente, a sala deve ser vinculada à consulta ou sala padrão persistida.
@@ -118,10 +125,17 @@ window.iniciarChamada = async function(id_consulta, nome_paciente) {
     jitsiApi = new JitsiMeetExternalAPI(domain, options);
 }
 
-window.encerrarJitsi = function() {
+window.encerrarJitsi = async function() {
     if(jitsiApi) {
         jitsiApi.dispose();
         jitsiApi = null;
+    }
+    
+    if (window.activeConsultaId) {
+        try {
+            await API.teleStatus(window.activeConsultaId, 'finalizada');
+        } catch(e) { console.error('Erro ao finalizar consulta no backend:', e); }
+        window.activeConsultaId = null;
     }
     
     document.getElementById('jitsi-container').style.display = 'none';
