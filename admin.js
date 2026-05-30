@@ -1116,7 +1116,7 @@ window.salvarDadosAdmin = async function (e) {
         const titulo = document.getElementById('form-img-alt').value;
         const subtitulo = document.getElementById('form-img-sub').value;
         const texto = document.getElementById('form-img-txt').value;
-        let imagem = '';
+        let imagem = document.getElementById('form-img-url') ? document.getElementById('form-img-url').value.trim() : '';
         const fileInput = document.getElementById('form-slide-file');
         if (fileInput && fileInput.files && fileInput.files[0]) {
             if (typeof showHealthLoader === 'function') showHealthLoader('Processando imagem');
@@ -1124,9 +1124,6 @@ window.salvarDadosAdmin = async function (e) {
                 imagem = await converteParaBase64(fileInput.files[0]);
             } catch (e) { console.error('Erro ao ler imagem', e); }
             if (typeof hideHealthLoader === 'function') hideHealthLoader();
-        } else {
-            const imgUrlInput = document.getElementById('form-img-url');
-            imagem = imgUrlInput ? imgUrlInput.value.trim() : '';
         }
 
         if (!imagem) imagem = 'https://via.placeholder.com/300x200?text=Saude';
