@@ -2895,19 +2895,20 @@ async function carregarCampanhasHome() {
         const campanhas = await API.campanhasPublic();
         if (!campanhas || !Array.isArray(campanhas) || campanhas.length === 0) {
             container.innerHTML = '';
+            container.style.display = 'none';
             return;
         }
 
-        // Filtra para mostrar apenas a primeira campanha "Ativa" (status 1 ou 'Ativa')
-        // (O backend já filtra, mas por garantia pegamos a 1ª)
-        const c = campanhas[0];
+        // Filtra para mostrar apenas a primeira campanha "Ativa" (status 1, 'Ativa' ou 'ativo')
+        const c = campanhas.find(x => x.status == 1 || String(x.status).toLowerCase() === 'ativa' || String(x.status).toLowerCase() === 'ativo') || campanhas[0];
         
+        container.style.display = 'block';
         container.innerHTML = `
             <div class="home-campanha-banner">
                 <div class="home-campanha-icon">📢</div>
                 <div class="home-campanha-content">
-                    <h4>Campanha Ativa: ${c.nome || c.titulo}</h4>
-                    <p>${c.descricao || 'Fique atento às nossas campanhas de saúde.'}</p>
+                    <h4>Campanha Ativa: ${c.titulo || c.nome || 'Campanha de Saúde'}</h4>
+                    <p>${c.resumo || c.descricao || 'Fique atento às nossas campanhas de saúde.'}</p>
                 </div>
             </div>
         `;

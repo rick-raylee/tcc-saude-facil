@@ -95,7 +95,7 @@ let activeCampanhasList = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     configurarFiltros();
-    await carregarCampanhasPublicas();
+    await carregarCampanhasPaginaCampanhas();
 });
 
 function configurarFiltros() {
@@ -110,7 +110,7 @@ function configurarFiltros() {
     });
 }
 
-async function carregarCampanhasPublicas() {
+async function carregarCampanhasPaginaCampanhas() {
     let dados = [];
     if (typeof API !== 'undefined') {
         try {
