@@ -166,6 +166,7 @@ async function carregarCampanhasPublicas() {
 
     renderizarDestaque();
     renderizarCampanhas('todas');
+    renderizarCalendarioDinamico();
 }
 
 function renderizarDestaque() {
@@ -324,3 +325,95 @@ window.addEventListener('click', (e) => {
     const modal = document.getElementById('modalDetalhes');
     if (e.target === modal) fecharDetalhes();
 });
+
+function renderizarCalendarioDinamico() {
+    const grid = document.querySelector('.calendario-grid');
+    if (!grid) return;
+
+    const mesesNomes = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+    const mesesCampanhas = Array(12).fill(null).map(() => []);
+
+    // Mapeamento de palavras-chave de meses em português
+    const palavrasChaveMeses = [
+        ["janeiro", "jan"],
+        ["fevereiro", "fev"],
+        ["março", "marco", "mar"],
+        ["abril", "abr"],
+        ["maio", "mai"],
+        ["junho", "jun"],
+        ["julho", "jul"],
+        ["agosto", "ago"],
+        ["setembro", "set"],
+        ["outubro", "out"],
+        ["novembro", "nov"],
+        ["dezembro", "dez"]
+    ];
+
+    activeCampanhasList.forEach(c => {
+        let mesEncontrado = -1;
+
+        // 1. Tentar ler da data de início (AAAA-MM-DD ou DD/MM/AAAA)
+        const dataStr = String(c.dataInicio || '').trim();
+        if (dataStr.includes('-')) {
+            const parts = dataStr.split('-');
+            if (parts.length >= 2) {
+                const mesVal = parseInt(parts[1], 10);
+                if (mesVal >= 1 && mesVal <= 12) {
+                    mesEncontrado = mesVal - 1;
+                }
+            }
+        } else if (dataStr.includes('/')) {
+            const parts = dataStr.split('/');
+            if (parts.length >= 2) {
+                const mesVal = parseInt(parts[1], 10);
+                if (mesVal >= 1 && mesVal <= 12) {
+                    mesEncontrado = mesVal - 1;
+                }
+            }
+        }
+
+        // 2. Se não encontrou por data, tenta por palavra-chave no título (ex: "Outubro Rosa")
+        if (mesEncontrado === -1) {
+            const tituloLower = String(c.titulo || '').toLowerCase();
+            for (let i = 0; i < 12; i++) {
+                if (palavrasChaveMeses[i].some(kw => tituloLower.includes(kw))) {
+                    mesEncontrado = i;
+                    break;
+                }
+            }
+        }
+
+        if (mesEncontrado >= 0 && mesEncontrado < 12) {
+            mesesCampanhas[mesEncontrado].push(c.titulo);
+        }
+    });
+
+    const fallbacksClassicos = {
+        0: "Janeiro Branco",
+        1: "Carnaval Seguro",
+        3: "Abril Azul (Autismo)",
+        4: "Maio Amarelo (Trânsito)",
+        8: "Setembro Amarelo",
+        9: "Outubro Rosa",
+        10: "Novembro Azul",
+        11: "Dezembro Vermelho"
+    };
+
+    grid.innerHTML = mesesNomes.map((mes, idx) => {
+        let campanhasDoMes = mesesCampanhas[idx];
+        let textoExibicao = "";
+
+        if (campanhasDoMes.length > 0) {
+            textoExibicao = [...new Set(campanhasDoMes)].join("<br>");
+        } else {
+            textoExibicao = fallbacksClassicos[idx] || "Sem campanhas";
+        }
+
+        return `
+            <div class="mes-card animate-up" style="animation-delay: ${idx * 0.05}s;">
+                <div class="mes-numero">${mes}</div>
+                <p style="font-size: 0.9rem; font-weight: 600; margin: 0; color: #444; min-height: 40px; display: flex; align-items: center; justify-content: center;">${textoExibicao}</p>
+            </div>
+        `;
+    }).join('');
+}
