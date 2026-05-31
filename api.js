@@ -144,6 +144,7 @@ const API = {
     resumoEnf: () => apiCall('/api/enfermeiro/resumo'),
     prescricoesPendentes: () => apiCall('/api/enfermeiro/prescricoes-pendentes'),
     aplicarPrescricao: (dados) => apiCall('/api/enfermeiro/aplicar-prescricao', 'POST', dados),
+    atendimentosHoje: () => apiCall('/api/enfermeiro/atendimentos-hoje'),
 
     // Consultas
     agendar: (dados) => apiCall('/api/consultas/agendar', 'POST', dados),

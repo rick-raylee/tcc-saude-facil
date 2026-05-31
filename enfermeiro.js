@@ -571,14 +571,83 @@ async function carregarHistoricoPaciente() {
     }
 }
 
-function carregarAtendimentosDoDia() {
-    const hoje = new Date().toLocaleDateString('pt-BR');
-    const todos = JSON.parse(localStorage.getItem('db_triagens') || '[]').filter(t => t.data === hoje)
-        .map(t => ({ tipo: 'Triagem', nome: t.pacienteNome, hora: t.hora, prioridade: t.prioridade }));
-
+async function carregarAtendimentosDoDia() {
     const container = document.getElementById('enf-lista-atendimentos');
-    if (todos.length === 0) { container.innerHTML = '<p class="enf-empty">Nenhum atendimento registrado hoje.</p>'; return; }
-    container.innerHTML = todos.map(a => `<div class="enf-atendimento-item ${a.prioridade ? 'risco-' + a.prioridade : ''}"><div class="atd-nome">${a.nome}</div><div class="atd-hora">⏰ ${a.hora}</div><div class="atd-tipo">${a.tipo}</div></div>`).join('');
+    if (!container) return;
+
+    // 1. TENTA VIA API
+    if (typeof API !== 'undefined') {
+        try {
+            const atendimentos = await API.atendimentosHoje();
+            if (atendimentos && Array.isArray(atendimentos)) {
+                if (atendimentos.length === 0) {
+                    container.innerHTML = '<p class="enf-empty">Nenhum atendimento registrado hoje.</p>';
+                    return;
+                }
+                
+                container.innerHTML = atendimentos.map(a => {
+                    const badgeRisco = a.prioridade ? `risco-${a.prioridade}` : '';
+                    const detailHtml = a.detalhe ? `<div class="atd-detalhe"><i class="fi fi-rr-arrow-right"></i> ${a.detalhe}</div>` : '';
+                    
+                    return `
+                        <div class="enf-atendimento-item ${badgeRisco}">
+                            <div class="atd-nome">${a.nome}</div>
+                            <div class="atd-hora">⏰ ${a.hora || 'N/A'}</div>
+                            <div class="atd-tipo">${a.tipo}</div>
+                            ${detailHtml}
+                        </div>
+                    `;
+                }).join('');
+                return;
+            }
+        } catch (err) {
+            console.error("Erro ao carregar atendimentos via API:", err);
+        }
+    }
+
+    // 2. FALLBACK LOCAL (OFFLINE)
+    console.warn("Carregando atendimentos do dia via Fallback Local...");
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    const todos = JSON.parse(localStorage.getItem('db_triagens') || '[]')
+        .filter(t => t.data === hoje)
+        .map(t => ({
+            tipo: 'Triagem',
+            nome: t.pacienteNome || t.paciente_cpf || 'Paciente',
+            hora: t.hora,
+            prioridade: t.prioridade,
+            detalhe: t.medico_destino ? `Encaminhado: ${t.medico_destino}` : 'Triagem concluída'
+        }));
+
+    // Adicionar vacinas locais se existirem
+    const dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
+    dbV.filter(v => v.data === hoje).forEach(v => {
+        todos.push({
+            tipo: 'Vacina',
+            nome: v.pacienteNome || v.paciente_cpf || 'Paciente',
+            hora: v.hora,
+            prioridade: null,
+            detalhe: `Vacina: ${v.vacina_nome || v.vacinaNome}`
+        });
+    });
+
+    if (todos.length === 0) {
+        container.innerHTML = '<p class="enf-empty">Nenhum atendimento registrado hoje.</p>';
+        return;
+    }
+
+    container.innerHTML = todos.map(a => {
+        const badgeRisco = a.prioridade ? `risco-${a.prioridade}` : '';
+        const detailHtml = a.detalhe ? `<div class="atd-detalhe"><i class="fi fi-rr-arrow-right"></i> ${a.detalhe}</div>` : '';
+        
+        return `
+            <div class="enf-atendimento-item ${badgeRisco}">
+                <div class="atd-nome">${a.nome}</div>
+                <div class="atd-hora">⏰ ${a.hora || 'N/A'}</div>
+                <div class="atd-tipo">${a.tipo}</div>
+                ${detailHtml}
+            </div>
+        `;
+    }).join('');
 }
 
 function adicionarAtendimentoDia(registro) { carregarAtendimentosDoDia(); }

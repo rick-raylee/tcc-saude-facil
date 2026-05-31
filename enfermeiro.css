@@ -269,6 +269,20 @@ body {
     color: #555;
 }
 
+.enf-atendimento-item .atd-detalhe {
+    font-size: 0.73rem;
+    margin-top: 6px;
+    color: #004d40;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e0f2f1;
+    border: 1px solid #b2dfdb;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
 .enf-empty {
     color: #aaa;
     text-align: center;
