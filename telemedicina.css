@@ -1005,3 +1005,44 @@ body.font-large .btn-primary {
         top: auto;
     }
 }
+
+/* ==========================================================================
+   BOTOES PREMIUM - SECAO DE ACESSO RESTRITO
+   ========================================================================== */
+.glass-neon-card .btn-neon-health {
+    background: linear-gradient(135deg, #0056AC 0%, #00bcd4 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 14px 32px !important;
+    border-radius: 50px !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 15px rgba(0, 86, 172, 0.3) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.glass-neon-card .btn-neon-health:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(0, 86, 172, 0.5) !important;
+    filter: brightness(1.1) !important;
+}
+
+.glass-neon-card .btn-neon-health[style*="var(--accent-light)"] {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.35) !important;
+    box-shadow: none !important;
+}
+
+.glass-neon-card .btn-neon-health[style*="var(--accent-light)"]:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1) !important;
+}
