@@ -1189,6 +1189,31 @@ window.salvarDadosAdmin = async function (e) {
                 resp = await API.criarCampanha(payload);
             }
             if (resp && resp.sucesso) {
+                const campDataObj = { 
+                    id: idCampanha || resp.id || Date.now(),
+                    titulo, 
+                    descricao, 
+                    imagem, 
+                    data_inicio, 
+                    data_fim, 
+                    status, 
+                    categoria, 
+                    icone, 
+                    resumo, 
+                    publico_alvo, 
+                    publicoAlvo: publico_alvo, 
+                    local, 
+                    documentos 
+                };
+                let listaCamp = JSON.parse(localStorage.getItem('admin_campanhas') || '[]');
+                if (idCampanha) {
+                    const i = listaCamp.findIndex(c => c.id == idCampanha);
+                    if (i !== -1) listaCamp[i] = { ...listaCamp[i], ...campDataObj };
+                } else {
+                    listaCamp.unshift(campDataObj);
+                }
+                localStorage.setItem('admin_campanhas', JSON.stringify(listaCamp));
+
                 Swal.fire({ icon: 'success', title: 'Sucesso', text: idCampanha ? 'Campanha atualizada!' : 'Campanha criada!' });
                 await carregarCampanhas();
                 fecharModalAdmin();
@@ -1530,6 +1555,11 @@ async function deletarCampanha(id) {
     if (typeof API !== 'undefined') {
         const resp = await API.deletarCampanha(id);
         if (resp && resp.sucesso) {
+            // Sincroniza localmente no localStorage também!
+            let campanhas = JSON.parse(localStorage.getItem('admin_campanhas') || '[]');
+            campanhas = campanhas.filter(c => c.id != id);
+            localStorage.setItem('admin_campanhas', JSON.stringify(campanhas));
+
             carregarCampanhas();
             return;
         }

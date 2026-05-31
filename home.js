@@ -1018,7 +1018,7 @@ async function carregarCampanhasPublicas() {
         campanhas = [{ id: 0, titulo: "Portal Saúde Fácil", descricao: "Bem-vindo ao portal!", imagem: "health_campaign_art_branded.png", status: "ativa" }];
     }
 
-    campanhas = campanhas.filter(c => c.status == 1 || String(c.status).toLowerCase() === 'ativa');
+    campanhas = campanhas.filter(c => c.status == 1 || String(c.status).toLowerCase() === 'ativa' || String(c.status).toLowerCase() === 'ativo');
 
     // Welcome Card
     let welcomeCamp = campanhas.find(c => (c.titulo && c.titulo.toLowerCase().includes("bem-vindo")) || c.id == 0) || campanhas[0];
