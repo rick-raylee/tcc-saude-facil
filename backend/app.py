@@ -318,6 +318,27 @@ def migrar_schema_admin():
     cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('portal_subtitulo', 'A saúde de Cascavel ao alcance de um clique. Agendamentos, telemedicina, campanhas e muito mais.')")
     cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('google_analytics_id', '')")
 
+    # Seed de campanhas reais se a tabela estiver vazia
+    try:
+        cur.execute("SELECT COUNT(*) FROM campanhas")
+        if cur.fetchone()[0] == 0:
+            campanhas_semente = [
+                ("Vacinação Febre Amarela 2026", "destaque", "ativo", "2026-01-01", "2026-12-31", "<i class='fi fi-rr-syringe'></i>", "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&q=80&w=600", "Proteja-se e proteja sua família contra a febre amarela.", "Proteja-se e proteja sua família! A vacina contra febre amarela está disponível em todas as UBS de Cascavel.", "População em geral a partir de 9 meses", "Todas as Unidades Básicas de Saúde (UBS) de Cascavel", "Cartão SUS, RG e CPF"),
+                ("Outubro Rosa", "prevencao", "ativo", "2026-10-01", "2026-10-31", "<i class='fi fi-rr-stethoscope'></i>", "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=600", "Campanha de prevenção ao câncer de mama.", "O Outubro Rosa é um movimento internacional de conscientização para o controle do câncer de mama. O objetivo é compartilhar informações e promover a conscientização sobre a doença; proporcionar maior acesso aos serviços de diagnóstico e de tratamento e contribuir para a redução da moralidade.", "Mulheres a partir de 40 anos", "Todas as Unidades Básicas de Saúde (UBS)", "Cartão SUS, RG e CPF"),
+                ("Novembro Azul", "prevencao", "aguardando", "2026-11-01", "2026-11-30", "💙", "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600", "Prevenção ao câncer de próstata.", "O Novembro Azul reforça a importância da prevenção e do diagnóstico precoce do câncer de próstata. A doença é o segundo tipo de câncer mais comum entre os homens brasileiros. As maiores vítimas são homens a partir de 50 anos.", "Homens a partir de 45 anos", "Clínicas da Família e UBS", "Documento com foto e Cartão SUS"),
+                ("Saúde Bucal nas Escolas", "infantil", "ativo", "2026-02-15", "2026-12-15", "🦷", "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=600", "Atendimento odontológico preventivo para estudantes.", "Programa que visa promover a saúde bucal no ambiente escolar, com palestras educativas, escovação supervisionada e aplicação tópica de flúor.", "Crianças e adolescentes da rede pública", "Escolas Municipais e Estaduais", "Autorização dos pais"),
+                ("Hipertensão e Diabetes", "cronicos", "ativo", "2026-01-01", "2026-12-31", "<i class='fi fi-rr-heart'></i>", "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=600", "Triagem e acompanhamento contínuo.", "Acompanhamento mensal para portadores de hipertensão e diabetes, com entrega de medicação gratuita e verificação de pressão arterial e glicemia.", "Portadores de doenças crônicas", "Farmácias Popular e UBS", "Receita médica updated e Cartão SUS"),
+                ("Vacinação Infantil", "vacinacao", "ativo", "2026-01-01", "2026-12-31", "🧒", "https://images.unsplash.com/photo-1609188076864-c35269136b99?auto=format&fit=crop&q=80&w=600", "Atualização da caderneta de vacinação.", "Manter a vacinação em dia é fundamental para proteger as crianças contra diversas doenças graves. Traga a caderneta de vacinação para conferência.", "Crianças de 0 a 5 anos", "Salas de Vacinação das UBS", "Caderneta de Vacinação"),
+                ("Janeiro Branco", "mental", "encerrado", "2026-01-01", "2026-01-31", "<i class='fi fi-rr-brain'></i>", "https://images.unsplash.com/photo-1518072718539-7c4c917f8d5b?auto=format&fit=crop&q=80&w=600", "Conscientização sobre saúde mental.", "O Janeiro Branco é uma campanha dedicada a convidar as pessoas a pensarem sobre suas vidas, o sentido e o propósito das suas existências, a qualidade dos seus relacionamentos e o quanto elas conhecem sobre si mesmas, suas emoções, seus pensamentos e seus comportamentos.", "População em geral", "CAPS e Centros de Convivência", "Nenhum documento necessário")
+            ]
+            cur.executemany("""
+                INSERT INTO campanhas (titulo, categoria, status, data_inicio, data_fim, icone, imagem, resumo, descricao, publico_alvo, local, documentos)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, campanhas_semente)
+            print("--> Seed de campanhas reais executado no SQLite.")
+    except Exception as seed_err:
+        print(f"--> [Erro] Falha ao semear campanhas: {seed_err}")
+
     db.commit()
     db.close()
 
@@ -571,7 +592,7 @@ def public_estatisticas():
 def public_campanhas():
     db = get_db_connection()
     cur = db.cursor()
-    cur.execute("SELECT * FROM campanhas WHERE status=1 OR status='Ativa' ORDER BY id DESC")
+    cur.execute("SELECT * FROM campanhas ORDER BY id ASC")
     rows = cur.fetchall()
     db.close()
     return jsonify([dict(r) for r in rows])

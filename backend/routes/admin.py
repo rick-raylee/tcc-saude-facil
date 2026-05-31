@@ -377,11 +377,13 @@ def criar_campanha():
         db = get_db_connection()
         cur = db.cursor()
         cur.execute("""
-            INSERT INTO campanhas (titulo, descricao, imagem, data_inicio, data_fim, status)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO campanhas (titulo, categoria, status, data_inicio, data_fim, icone, imagem, resumo, descricao, publico_alvo, local, documentos)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            data.get('titulo', ''), data.get('descricao', ''), data.get('imagem', ''),
-            data.get('data_inicio', ''), data.get('data_fim', ''), data.get('status', 1)
+            data.get('titulo', ''), data.get('categoria', ''), data.get('status', ''),
+            data.get('data_inicio', ''), data.get('data_fim', ''), data.get('icone', ''),
+            data.get('imagem', ''), data.get('resumo', ''), data.get('descricao', ''),
+            data.get('publico_alvo', ''), data.get('local', ''), data.get('documentos', '')
         ))
         db.commit()
         new_id = cur.lastrowid
@@ -401,11 +403,13 @@ def editar_campanha(campanha_id):
         cur = db.cursor()
         cur.execute("""
             UPDATE campanhas 
-            SET titulo = ?, descricao = ?, imagem = ?, data_inicio = ?, data_fim = ?, status = ?
+            SET titulo = ?, categoria = ?, status = ?, data_inicio = ?, data_fim = ?, icone = ?, imagem = ?, resumo = ?, descricao = ?, publico_alvo = ?, local = ?, documentos = ?
             WHERE id = ?
         """, (
-            data.get('titulo', ''), data.get('descricao', ''), data.get('imagem', ''),
-            data.get('data_inicio', ''), data.get('data_fim', ''), data.get('status', 1),
+            data.get('titulo', ''), data.get('categoria', ''), data.get('status', ''),
+            data.get('data_inicio', ''), data.get('data_fim', ''), data.get('icone', ''),
+            data.get('imagem', ''), data.get('resumo', ''), data.get('descricao', ''),
+            data.get('publico_alvo', ''), data.get('local', ''), data.get('documentos', ''),
             campanha_id
         ))
         db.commit()

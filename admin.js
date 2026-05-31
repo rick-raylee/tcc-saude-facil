@@ -1159,10 +1159,30 @@ window.salvarDadosAdmin = async function (e) {
         const data_inicio = document.getElementById('form-camp-inicio').value;
         const data_fim = document.getElementById('form-camp-fim').value;
         const status = document.getElementById('form-camp-status').value;
+        
+        const categoria = document.getElementById('form-camp-categoria').value;
+        const icone = document.getElementById('form-camp-icone').value;
+        const resumo = document.getElementById('form-camp-resumo').value;
+        const publico_alvo = document.getElementById('form-camp-publico').value;
+        const local = document.getElementById('form-camp-local').value;
+        const documentos = document.getElementById('form-camp-documentos').value;
 
         if (typeof API !== 'undefined') {
             let resp;
-            const payload = { titulo, descricao, imagem, data_inicio, data_fim, status, resumo: descricao }; // Fallback resumo
+            const payload = { 
+                titulo, 
+                descricao, 
+                imagem, 
+                data_inicio, 
+                data_fim, 
+                status, 
+                categoria, 
+                icone, 
+                resumo, 
+                publico_alvo, 
+                local, 
+                documentos 
+            };
             if (idCampanha) {
                 resp = await API.editarCampanha(idCampanha, payload);
             } else {
@@ -1182,11 +1202,26 @@ window.salvarDadosAdmin = async function (e) {
 
         // Fallback Local
         let listaCamp = JSON.parse(localStorage.getItem('admin_campanhas') || '[]');
+        const campDataObj = { 
+            titulo, 
+            descricao, 
+            imagem, 
+            data_inicio, 
+            data_fim, 
+            status, 
+            categoria, 
+            icone, 
+            resumo, 
+            publico_alvo, 
+            publicoAlvo: publico_alvo, 
+            local, 
+            documentos 
+        };
         if (idCampanha) {
             const i = listaCamp.findIndex(c => c.id == idCampanha);
-            if (i !== -1) listaCamp[i] = { ...listaCamp[i], titulo, descricao, imagem, data_inicio, data_fim, status, resumo: descricao };
+            if (i !== -1) listaCamp[i] = { ...listaCamp[i], ...campDataObj };
         } else {
-            listaCamp.unshift({ id: Date.now(), titulo, descricao, imagem, data_inicio, data_fim, status, resumo: descricao });
+            listaCamp.unshift({ id: Date.now(), ...campDataObj });
         }
         localStorage.setItem('admin_campanhas', JSON.stringify(listaCamp));
         Swal.fire({ icon: 'info', title: 'Modo Offline', text: idCampanha ? 'Campanha atualizada localmente!' : 'Campanha criada localmente!' });
@@ -1261,27 +1296,124 @@ async function carregarCampanhas() {
         campanhas = await API.campanhas();
     }
 
+    const sementeCampanhas = [
+        {
+            id: 10,
+            titulo: "Vacinação Febre Amarela 2026",
+            categoria: "destaque",
+            status: "ativo",
+            data_inicio: "2026-01-01",
+            data_fim: "2026-12-31",
+            icone: "<i class='fi fi-rr-syringe'></i>",
+            imagem: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&q=80&w=600",
+            resumo: "Proteja-se e proteja sua família contra a febre amarela.",
+            descricao: "Proteja-se e proteja sua família! A vacina contra febre amarela está disponível em todas as UBS de Cascavel.",
+            publico_alvo: "População em geral a partir de 9 meses",
+            local: "Todas as Unidades Básicas de Saúde (UBS) de Cascavel",
+            documentos: "Cartão SUS, RG e CPF"
+        },
+        {
+            id: 1,
+            titulo: "Outubro Rosa",
+            categoria: "prevencao",
+            status: "ativo",
+            data_inicio: "2026-10-01",
+            data_fim: "2026-10-31",
+            icone: "<i class='fi fi-rr-stethoscope'></i>",
+            imagem: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=600",
+            resumo: "Campanha de prevenção ao câncer de mama.",
+            descricao: "O Outubro Rosa é um movimento internacional de conscientização para o controle do câncer de mama. O objetivo é compartilhar informações e promover a conscientização sobre a doença; proporcionar maior acesso aos serviços de diagnóstico e de tratamento e contribuir para a redução da moralidade.",
+            publico_alvo: "Mulheres a partir de 40 anos",
+            local: "Todas as Unidades Básicas de Saúde (UBS)",
+            documentos: "Cartão SUS, RG e CPF"
+        },
+        {
+            id: 2,
+            titulo: "Novembro Azul",
+            categoria: "prevencao",
+            status: "aguardando",
+            data_inicio: "2026-11-01",
+            data_fim: "2026-11-30",
+            icone: "💙",
+            imagem: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600",
+            resumo: "Prevenção ao câncer de próstata.",
+            descricao: "O Novembro Azul reforça a importância da prevenção e do diagnóstico precoce do câncer de próstata. A doença é o segundo tipo de câncer mais comum entre os homens brasileiros. As maiores vítimas são homens a partir de 50 anos.",
+            publico_alvo: "Homens a partir de 45 anos",
+            local: "Clínicas da Família e UBS",
+            documentos: "Documento com foto e Cartão SUS"
+        },
+        {
+            id: 3,
+            titulo: "Saúde Bucal nas Escolas",
+            categoria: "infantil",
+            status: "ativo",
+            data_inicio: "2026-02-15",
+            data_fim: "2026-12-15",
+            icone: "🦷",
+            imagem: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=600",
+            resumo: "Atendimento odontológico preventivo para estudantes.",
+            descricao: "Programa que visa promover a saúde bucal no ambiente escolar, com palestras educativas, escovação supervisionada e aplicação tópica de flúor.",
+            publico_alvo: "Crianças e adolescentes da rede pública",
+            local: "Escolas Municipais e Estaduais",
+            documentos: "Autorização dos pais"
+        },
+        {
+            id: 4,
+            titulo: "Hipertensão e Diabetes",
+            categoria: "cronicos",
+            status: "ativo",
+            data_inicio: "2026-01-01",
+            data_fim: "2026-12-31",
+            icone: "<i class='fi fi-rr-heart'></i>",
+            imagem: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=600",
+            resumo: "Triagem e acompanhamento contínuo.",
+            descricao: "Acompanhamento mensal para portadores de hipertensão e diabetes, com entrega de medicação gratuita e verificação de pressão arterial e glicemia.",
+            publico_alvo: "Portadores de doenças crônicas",
+            local: "Farmácias Popular e UBS",
+            documentos: "Receita médica atualizada e Cartão SUS"
+        },
+        {
+            id: 5,
+            titulo: "Vacinação Infantil",
+            categoria: "vacinacao",
+            status: "ativo",
+            data_inicio: "2026-01-01",
+            data_fim: "2026-12-31",
+            icone: "🧒",
+            imagem: "https://images.unsplash.com/photo-1609188076864-c35269136b99?auto=format&fit=crop&q=80&w=600",
+            resumo: "Atualização da caderneta de vacinação.",
+            descricao: "Manter a vacinação em dia é fundamental para proteger as crianças contra diversas doenças graves. Traga a caderneta de vacinação para conferência.",
+            publico_alvo: "Crianças de 0 a 5 anos",
+            local: "Salas de Vacinação das UBS",
+            documentos: "Caderneta de Vacinação"
+        },
+        {
+            id: 6,
+            titulo: "Janeiro Branco",
+            categoria: "mental",
+            status: "encerrado",
+            data_inicio: "2026-01-01",
+            data_fim: "2026-01-31",
+            icone: "<i class='fi fi-rr-brain'></i>",
+            imagem: "https://images.unsplash.com/photo-1518072718539-7c4c917f8d5b?auto=format&fit=crop&q=80&w=600",
+            resumo: "Conscientização sobre saúde mental.",
+            descricao: "O Janeiro Branco é uma campanha dedicada a convidar as pessoas a pensarem sobre suas vidas, o sentido e o propósito das suas existências, a qualidade dos seus relacionamentos e o quanto elas conhecem sobre si mesmas, suas emoções, seus pensamentos e seus comportamentos.",
+            publico_alvo: "População em geral",
+            local: "CAPS e Centros de Convivência",
+            documentos: "Nenhum documento necessário"
+        }
+    ];
+
     // Tratamento Fallback Local para evitar Tela em Branco Offline
     if (!campanhas || campanhas.length === 0 || campanhas.erro) {
-        // Forçar reset para incluir a nova arte premium (um clique apenas)
-        if (!localStorage.getItem('admin_campanhas_v3_fix')) {
-            let existingCamps = JSON.parse(localStorage.getItem('admin_campanhas') || '[]');
-            const hasWelcome = existingCamps.some(c => c.titulo.includes("Bem-vindo") || c.id == 0);
-
-            if (!hasWelcome) {
-                existingCamps.unshift({ id: 0, titulo: "Portal Saúde Fácil - Bem-vindo", descricao: "Acesse nossos novos recursos de agendamento e telemedicina de forma rápida e segura.", imagem: "health_campaign_art_branded.png", status: "ativa", data_inicio: "2026-03-08", data_fim: "2026-12-31" });
-            }
-            localStorage.setItem('admin_campanhas', JSON.stringify(existingCamps));
-            localStorage.setItem('admin_campanhas_v3_fix', 'true');
+        if (!localStorage.getItem('admin_campanhas_v4_fix')) {
+            localStorage.setItem('admin_campanhas', JSON.stringify(sementeCampanhas));
+            localStorage.setItem('admin_campanhas_v4_fix', 'true');
         }
 
         campanhas = JSON.parse(localStorage.getItem('admin_campanhas') || '[]');
         if (campanhas.length === 0) {
-            campanhas = [
-                { id: 0, titulo: "Portal Saúde Fácil - Bem-vindo", descricao: "Acesse nossos novos recursos de agendamento e telemedicina de forma rápida e segura.", data_inicio: "2026-03-08", data_fim: "2026-12-31", imagem: "health_campaign_art_branded.png", status: "ativa" },
-                { id: 1, titulo: "Doação de Sangue 2026", descricao: "A sua doação pode salvar até 4 vidas. Procure o hemocentro mais próximo e faça sua parte!", data_inicio: "2026-03-01", data_fim: "2026-03-31", imagem: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=600", status: "ativa" },
-                { id: 2, titulo: "Combate à Dengue", descricao: "O mosquito mata! Receba os agentes de saúde em sua casa e elimine os focos de água parada.", data_inicio: "2026-01-01", data_fim: "2026-12-31", imagem: "https://images.unsplash.com/photo-1584483754972-2fc1f4da047f?auto=format&fit=crop&q=80&w=600", status: "ativa" }
-            ];
+            campanhas = sementeCampanhas;
             localStorage.setItem('admin_campanhas', JSON.stringify(campanhas));
         }
     }
@@ -1289,14 +1421,23 @@ async function carregarCampanhas() {
     window._adminCampanhasCache = campanhas;
 
     if (campanhas && !campanhas.erro) {
-        lista.innerHTML = campanhas.map((c, idx) => `
+        lista.innerHTML = campanhas.map((c, idx) => {
+            const statusLower = String(c.status || '').toLowerCase();
+            const isAtiva = statusLower === 'ativa' || statusLower === 'ativo' || c.status == 1;
+            const isEmBreve = statusLower === 'aguardando' || statusLower === 'em breve';
+            
+            const badgeColor = isAtiva ? '#28a745' : (isEmBreve ? '#f39c12' : '#dc3545');
+            const badgeText = isAtiva ? 'ATIVA' : (isEmBreve ? 'EM BREVE' : 'ENCERRADA');
+
+            return `
                 <div class="admin-item">
                     <div style="display:flex; gap:15px; flex:1; align-items:center;">
                         <img src="${c.imagem || 'https://via.placeholder.com/80x50?text=Campanha'}" style="width:80px; height:50px; object-fit:cover; border-radius:4px;" />
                         <div>
                             <h4 style="margin:0;">${c.titulo}</h4>
-                            <p style="margin:0; font-size:0.85rem; color:#666;">Início: ${c.data_inicio || '---'} | Término: ${c.data_fim || '---'}</p>
-                            <span style="font-size:0.7rem; background:${c.status == 1 || String(c.status).toLowerCase() === 'ativa' ? '#28a745' : '#dc3545'}; color:white; padding:2px 5px; border-radius:3px;">${c.status == 1 || String(c.status).toLowerCase() === 'ativa' ? 'ATIVA' : 'INATIVA'}</span>
+                            <p style="margin:0; font-size:0.85rem; color:#666;">Início: ${c.data_inicio || c.dataInicio || '---'} | Término: ${c.data_fim || c.dataFim || '---'}</p>
+                            <span style="font-size:0.7rem; background:${badgeColor}; color:white; padding:2px 5px; border-radius:3px;">${badgeText}</span>
+                            <span style="font-size:0.7rem; background:#17a2b8; color:white; padding:2px 5px; border-radius:3px; margin-left:5px;">${String(c.categoria || 'Geral').toUpperCase()}</span>
                         </div>
                     </div>
                     <div class="item-actions">
@@ -1304,7 +1445,8 @@ async function carregarCampanhas() {
                         <button class="btn-delete btn-icon-only" onclick="deletarCampanha(${c.id})"><i class="fi fi-rr-trash"></i></button>
                     </div>
                 </div>
-            `).join('');
+            `;
+        }).join('');
         if (campanhas.length === 0) lista.innerHTML = '<p style="padding:15px; text-align:center; color:#666;">Nenhuma campanha ativa.</p>';
     }
 }
@@ -1324,7 +1466,41 @@ window.abrirModalCampanha = function (camp = null) {
         <input type="hidden" id="tipo-form" value="campanha">
         ${camp ? `<input type="hidden" id="form-camp-id" value="${camp.id}">` : ''}
         <div style="margin-bottom:10px"><label>Título da Campanha</label><input type="text" id="form-camp-titulo" value="${camp ? camp.titulo : ''}" required style="width:100%; padding:8px;"></div>
+        
+        <div style="margin-bottom:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div>
+                <label>Categoria</label>
+                <select id="form-camp-categoria" style="width:100%; padding:8px;" required>
+                    <option value="destaque" ${camp && camp.categoria === 'destaque' ? 'selected' : ''}>Destaque (Banner Principal)</option>
+                    <option value="vacinacao" ${camp && camp.categoria === 'vacinacao' ? 'selected' : ''}>Vacinação</option>
+                    <option value="prevencao" ${camp && camp.categoria === 'prevencao' ? 'selected' : ''}>Prevenção</option>
+                    <option value="infantil" ${camp && camp.categoria === 'infantil' ? 'selected' : ''}>Infantil / Escolar</option>
+                    <option value="cronicos" ${camp && camp.categoria === 'cronicos' ? 'selected' : ''}>Doenças Crônicas</option>
+                    <option value="mental" ${camp && camp.categoria === 'mental' ? 'selected' : ''}>Saúde Mental</option>
+                </select>
+            </div>
+            <div>
+                <label>Ícone (Emoji ou classe CSS)</label>
+                <input type="text" id="form-camp-icone" value="${camp ? (camp.icone || '') : ''}" placeholder="Ex: 💉 ou 🦷" style="width:100%; padding:8px;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px"><label>Resumo / Descrição Curta</label><input type="text" id="form-camp-resumo" value="${camp ? (camp.resumo || '') : ''}" required placeholder="Ex: Proteja-se e proteja sua família contra a febre amarela." style="width:100%; padding:8px;"></div>
         <div style="margin-bottom:10px"><label>Descrição Completa</label><textarea id="form-camp-descricao" rows="4" style="width:100%; padding:8px;">${camp ? (camp.descricao || camp.resumo || '') : ''}</textarea></div>
+        
+        <div style="margin-bottom:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div>
+                <label>Público-Alvo</label>
+                <input type="text" id="form-camp-publico" value="${camp ? (camp.publico_alvo || camp.publicoAlvo || '') : ''}" placeholder="Ex: População em geral" style="width:100%; padding:8px;">
+            </div>
+            <div>
+                <label>Local de Atendimento</label>
+                <input type="text" id="form-camp-local" value="${camp ? (camp.local || '') : ''}" placeholder="Ex: Todas as UBS" style="width:100%; padding:8px;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px"><label>Documentos Necessários</label><input type="text" id="form-camp-documentos" value="${camp ? (camp.documentos || '') : ''}" placeholder="Ex: Cartão SUS, RG e CPF" style="width:100%; padding:8px;"></div>
+
         <div style="margin-bottom:10px; border:1px solid #ccc; padding:10px; border-radius:5px; background:#fafafa;">
              <label style="display:block; margin-bottom:5px;">Imagem Banner</label>
              <input type="file" id="form-camp-file" accept="image/*" style="width:100%; padding:8px; margin-bottom:10px; background:white; border:1px solid #ddd; cursor:pointer;">
@@ -1332,13 +1508,14 @@ window.abrirModalCampanha = function (camp = null) {
              <input type="text" id="form-camp-img" value="${camp ? camp.imagem : ''}" placeholder="https://..." style="width:100%; padding:8px;">
         </div>
         <div style="margin-bottom:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div><label>Data Início</label><input type="date" id="form-camp-inicio" value="${camp ? camp.data_inicio : ''}" style="width:100%; padding:8px;"></div>
-            <div><label>Data Fim</label><input type="date" id="form-camp-fim" value="${camp ? camp.data_fim : ''}" style="width:100%; padding:8px;"></div>
+             <div><label>Data Início</label><input type="date" id="form-camp-inicio" value="${camp ? camp.data_inicio : ''}" style="width:100%; padding:8px;"></div>
+             <div><label>Data Fim</label><input type="date" id="form-camp-fim" value="${camp ? camp.data_fim : ''}" style="width:100%; padding:8px;"></div>
         </div>
         <div style="margin-bottom:10px;"><label>Status da Campanha</label>
              <select id="form-camp-status" style="width:100%; padding:8px;">
-                 <option value="1" ${!camp || parseInt(camp.status) === 1 || String(camp.status).toLowerCase() === 'ativa' ? 'selected' : ''}>Ativa</option>
-                 <option value="0" ${camp && (parseInt(camp.status) === 0 || String(camp.status).toLowerCase() === 'inativa') ? 'selected' : ''}>Inativa</option>
+                  <option value="ativo" ${!camp || String(camp.status).toLowerCase() === 'ativo' || String(camp.status).toLowerCase() === 'ativa' || parseInt(camp.status) === 1 ? 'selected' : ''}>Ativa (Em andamento)</option>
+                  <option value="aguardando" ${camp && (String(camp.status).toLowerCase() === 'aguardando' || String(camp.status).toLowerCase() === 'em breve') ? 'selected' : ''}>Aguardando (Em breve)</option>
+                  <option value="encerrado" ${camp && (String(camp.status).toLowerCase() === 'encerrado' || String(camp.status).toLowerCase() === 'inativa' || parseInt(camp.status) === 0) ? 'selected' : ''}>Encerrada</option>
              </select>
         </div>
         <button type="submit" style="background:var(--admin-success); color:white; border:none; padding:10px; width:100%; font-weight:bold; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fi fi-rr-disk"></i> ${camp ? 'Salvar Alterações' : 'Lançar Campanha'}</button>
