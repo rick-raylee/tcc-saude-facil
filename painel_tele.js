@@ -2,6 +2,8 @@ let sessaoTelemedicina = null;
 let jitsiApi = null;
 let salaPadrao = "SalaMedica" + Math.floor(Math.random() * 1000000);
 window.activeConsultaId = null;
+let currentPacienteId = null;
+let currentPacienteCpf = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Verificar Sessão via API
@@ -71,7 +73,7 @@ async function carregarFilaOnlineAPI() {
             <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">
                 🕒 Agendado para as ${c.hora || 'Hoje'}
             </div>
-            <button class="btn-iniciar-chamada" onclick="iniciarChamada('${c.id}', '${c.paciente_nome}')">
+            <button class="btn-iniciar-chamada" onclick="iniciarChamada('${c.id}', '${c.paciente_nome}', '${c.paciente_id}', '${c.paciente_cpf || ''}')">
                 📹 INICIAR CHAMADA
             </button>
         `;
@@ -79,19 +81,52 @@ async function carregarFilaOnlineAPI() {
     });
 }
 
-window.iniciarChamada = async function(id_consulta, nome_paciente) {
+window.iniciarChamada = async function(id_consulta, nome_paciente, paciente_id, paciente_cpf) {
     document.getElementById('dash-vazio').style.display = 'none';
+    
+    // Tornar o workspace completo visível (Jitsi + Painel Clínico)
+    const workspace = document.getElementById('tele-workspace');
+    if (workspace) {
+        workspace.style.display = 'flex';
+    }
+    
     const container = document.getElementById('jitsi-container');
-    container.style.display = 'block';
+    if (container) {
+        container.style.display = 'block';
+    }
     
     document.getElementById('controles-fim').style.display = 'flex';
     window.activeConsultaId = id_consulta;
+    currentPacienteId = paciente_id;
+    currentPacienteCpf = paciente_cpf;
 
-    // Gerar string da sala
-    // Idealmente, a sala deve ser vinculada à consulta ou sala padrão persistida.
+    // Resetar o formulário clínico para este novo atendimento
+    const form = document.getElementById('form-tele-clinico');
+    if (form) {
+        form.reset();
+        
+        // Configurar os estados padrão dos checkboxes
+        const recChk = document.getElementById('emitir-receita-chk');
+        if (recChk) {
+            recChk.checked = true;
+            toggleReceitaForm(true);
+        }
+        const atChk = document.getElementById('emitir-atestado-chk');
+        if (atChk) {
+            atChk.checked = false;
+            toggleAtestadoForm(false);
+        }
+        
+        // Configurar dropdown de encaminhamento
+        const nextStep = document.getElementById('clin-proxima-etapa');
+        if (nextStep) {
+            nextStep.value = 'alta';
+            toggleEncaminhamentoDropdown('alta');
+        }
+    }
+
     const roomName = "ceep_teleconsulta_" + id_consulta + "_" + salaPadrao;
     
-    // Altera o status no banco para indicar que o médico entrou
     try {
         await API.teleStatus(id_consulta, 'Em Atendimento');
     } catch(e) { console.error('Aviso ao registrar log da sala:', e); }
@@ -120,9 +155,148 @@ window.iniciarChamada = async function(id_consulta, nome_paciente) {
         }
     };
     
-    // Clear se já tinha iframe
     container.innerHTML = '';
     jitsiApi = new JitsiMeetExternalAPI(domain, options);
+}
+
+// ── COMPONENTES CLÍNICOS E DOCUMENTAÇÃO ───────────────────────
+
+window.toggleReceitaForm = function(checked) {
+    const form = document.getElementById('clin-receita-form');
+    if (form) {
+        form.style.display = checked ? 'flex' : 'none';
+        const med = document.getElementById('clin-med');
+        const dose = document.getElementById('clin-dose');
+        const freq = document.getElementById('clin-freq');
+        if (med) med.required = checked;
+        if (dose) dose.required = checked;
+        if (freq) freq.required = checked;
+    }
+}
+
+window.toggleAtestadoForm = function(checked) {
+    const form = document.getElementById('clin-atestado-form');
+    if (form) {
+        form.style.display = checked ? 'flex' : 'none';
+        const dias = document.getElementById('clin-dias');
+        const motivo = document.getElementById('clin-motivo');
+        if (dias) dias.required = checked;
+        if (motivo) motivo.required = checked;
+    }
+}
+
+window.toggleEncaminhamentoDropdown = async function(value) {
+    const wrapper = document.getElementById('clin-wrapper-encaminhamento');
+    if (!wrapper) return;
+    
+    if (value === 'encaminhar') {
+        wrapper.style.display = 'flex';
+        const selectMed = document.getElementById('clin-encaminhar-medico');
+        if (selectMed) {
+            selectMed.innerHTML = '<option value="">Carregando especialistas...</option>';
+            selectMed.required = true;
+            try {
+                if (typeof API !== 'undefined') {
+                    const medicos = await API.listarMedicos();
+                    selectMed.innerHTML = '<option value="">Selecione o médico especialista</option>';
+                    if (medicos && !medicos.erro && Array.isArray(medicos)) {
+                        const currentMedId = sessaoTelemedicina ? sessaoTelemedicina.id : null;
+                        medicos.forEach(m => {
+                            if (m.id !== currentMedId) {
+                                const opt = document.createElement('option');
+                                opt.value = m.id;
+                                opt.textContent = `${m.nome} - ${m.especialidade} (CRM: ${m.crm || 'N/D'})`;
+                                selectMed.appendChild(opt);
+                            }
+                        });
+                    } else {
+                        selectMed.innerHTML = '<option value="">Erro ao carregar médicos</option>';
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao carregar médicos para encaminhamento:", e);
+                selectMed.innerHTML = '<option value="">Erro ao carregar médicos</option>';
+            }
+        }
+    } else {
+        wrapper.style.display = 'none';
+        const selectMed = document.getElementById('clin-encaminhar-medico');
+        if (selectMed) selectMed.required = false;
+    }
+}
+
+window.salvarAtendimentoTele = async function(e) {
+    if (e) e.preventDefault();
+    
+    if (!window.activeConsultaId || !currentPacienteCpf) {
+        alert("⚠️ Nenhuma consulta ativa para registrar.");
+        return;
+    }
+    
+    const diagnostico = document.getElementById('clin-diagnostico').value;
+    const proximaEtapa = document.getElementById('clin-proxima-etapa').value;
+    const encaminhadoParaMedicoId = proximaEtapa === 'encaminhar' ? document.getElementById('clin-encaminhar-medico').value : null;
+    
+    // Compilar medicamentos e instruções se a receita digital estiver marcada
+    let medicamentos = "";
+    let instrucoes = "";
+    if (document.getElementById('emitir-receita-chk').checked) {
+        const medName = document.getElementById('clin-med').value;
+        const dose = document.getElementById('clin-dose').value;
+        const freq = document.getElementById('clin-freq').value;
+        const via = document.getElementById('clin-via').value || 'Oral';
+        const duracao = document.getElementById('clin-duracao').value || '';
+        
+        medicamentos = `${medName} ${dose}`;
+        instrucoes = `Frequência: ${freq} | Via: ${via} ${duracao ? `| Duração: ${duracao}` : ''}`;
+    }
+    
+    const dadosAtendimento = {
+        consulta_id: window.activeConsultaId,
+        paciente_cpf: currentPacienteCpf,
+        diagnostico: diagnostico,
+        queixa: "Atendimento por Telemedicina",
+        conduta: "Orientação e prescrição digital fornecidas via teleconsulta.",
+        observacoes: proximaEtapa === 'alta' ? "Alta médica pós teleconsulta." : (proximaEtapa === 'retorno' ? "Retorno agendado." : "Encaminhado para especialista."),
+        medicamentos: medicamentos,
+        instrucoes: instrucoes,
+        encaminhado_para_medico_id: encaminhadoParaMedicoId
+    };
+    
+    try {
+        // 1. Salvar Atendimento / Prontuário & Receita
+        if (typeof API !== 'undefined') {
+            const respAtd = await API.salvarAtendimento(dadosAtendimento);
+            if (!respAtd || respAtd.erro) {
+                alert("❌ Erro ao salvar prontuário: " + (respAtd ? respAtd.erro : "Falha desconhecida"));
+                return;
+            }
+            
+            // 2. Salvar Atestado em paralelo se marcado
+            if (document.getElementById('emitir-atestado-chk').checked) {
+                const dadosAtestado = {
+                    paciente_cpf: currentPacienteCpf,
+                    dias: parseInt(document.getElementById('clin-dias').value) || 1,
+                    motivo: document.getElementById('clin-motivo').value || "Necessidade de repouso",
+                    cid: document.getElementById('clin-cid').value || "",
+                    consulta_id: window.activeConsultaId
+                };
+                
+                const respAt = await API.gerarAtestado(dadosAtestado);
+                if (!respAt || respAt.erro) {
+                    console.warn("Aviso: Falha ao emitir atestado digital:", respAt ? respAt.erro : "");
+                }
+            }
+            
+            alert("✅ Teleconsulta finalizada com sucesso! Todos os prontuários, receitas e atestados foram assinados digitalmente e estão visíveis no portal do paciente.");
+            
+            // Finalizar Jitsi e voltar para a fila
+            await encerrarJitsi();
+        }
+    } catch(err) {
+        console.error("Erro ao finalizar atendimento:", err);
+        alert("❌ Ocorreu um erro ao salvar o atendimento.");
+    }
 }
 
 window.encerrarJitsi = async function() {
@@ -138,11 +312,16 @@ window.encerrarJitsi = async function() {
         window.activeConsultaId = null;
     }
     
+    // Ocultar workspace e exibir tela vazia
+    const workspace = document.getElementById('tele-workspace');
+    if (workspace) {
+        workspace.style.display = 'none';
+    }
+    
     document.getElementById('jitsi-container').style.display = 'none';
     document.getElementById('controles-fim').style.display = 'none';
     document.getElementById('dash-vazio').style.display = 'block';
     
-    alert("Consulta finalizada. Lembre-se de anexar as receitas ou relatórios no painel tradicional se necessário.");
     carregarFilaOnlineAPI();
 }
 

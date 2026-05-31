@@ -323,7 +323,48 @@ def resumo_saude():
                 'data_atualizacao': None
             })
             
+            
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+
+# ── RECEITAS DO PACIENTE ──────────────────────────────────────────
+@paciente_bp.route('/api/paciente/receitas', methods=['GET'])
+def paciente_receitas():
+    from app import get_db_connection
+    usuario_id = session.get('usuario_id')
+    if not usuario_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        cur.execute("""
+            SELECT r.id, r.medicamentos, r.instrucoes, r.criado_em,
+                   u.nome AS medico_nome,
+                   p.diagnostico
+            FROM receitas r
+            JOIN prontuarios p ON r.prontuario_id = p.id
+            LEFT JOIN usuarios u ON p.medico_id = u.id
+            WHERE p.paciente_id = ?
+            ORDER BY r.criado_em DESC
+        """, (usuario_id,))
+        rows = cur.fetchall()
+        db.close()
+
+        lista_receitas = []
+        for r in rows:
+            lista_receitas.append({
+                'id': r['id'],
+                'medicamentos': r['medicamentos'],
+                'instrucoes': r['instrucoes'],
+                'data': str(r['criado_em']) if r['criado_em'] else None,
+                'medico': r['medico_nome'],
+                'diagnostico': r['diagnostico']
+            })
+        return jsonify(lista_receitas)
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
 
 

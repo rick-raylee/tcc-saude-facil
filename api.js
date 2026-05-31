@@ -110,6 +110,7 @@ const API = {
     historico: () => apiCall('/api/paciente/historico'),
     minhasVacinas: () => apiCall('/api/paciente/vacinas'),
     meusAtestados: () => apiCall('/api/paciente/atestados'),
+    minhasReceitas: () => apiCall('/api/paciente/receitas'),
     medicacoesHistorico: () => apiCall('/api/paciente/medicacoes'),
     resumoSaudePaciente: () => apiCall('/api/paciente/resumo-saude'),
     listarDoencas: (cpf) => apiCall(`/api/paciente/doencas?cpf=${cpf || ''}`),

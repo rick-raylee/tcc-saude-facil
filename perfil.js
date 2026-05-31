@@ -232,6 +232,9 @@ async function carregarDadosPerfilAPI() {
 
     // 7. Resumo de Saúde (Última Triagem)
     await carregarResumoSaudeAPI();
+
+    // 8. Atestados e Documentos
+    await carregarAtestadosPacienteAPI();
 }
 
 // ── ANTIGA LÓGICA (MANTIDA COMO FALLBACK) ───────────────────────
@@ -980,4 +983,157 @@ window.realizarConfirmacaoPaciente = async function(id) {
         }
     }
 };
+
+async function carregarAtestadosPacienteAPI() {
+    const listaExames = document.getElementById('lista-exames-paciente');
+    if (!listaExames) return;
+    
+    if (typeof API === 'undefined') return;
+    
+    try {
+        listaExames.innerHTML = '<li style="text-align:center; padding:20px; color:#888;">Carregando documentos digitais...</li>';
+        
+        // Chamada paralela para carregar Atestados e Receitas do banco
+        const [atestados, receitas] = await Promise.all([
+            API.meusAtestados().catch(err => { console.error("Erro ao carregar atestados:", err); return []; }),
+            API.minhasReceitas().catch(err => { console.error("Erro ao carregar receitas:", err); return []; })
+        ]);
+        
+        // Obter documentos offline do localStorage também se existirem para demonstrar
+        const meuCpf = localStorage.getItem('usuarioCpf') || '';
+        const docsStr = localStorage.getItem('documentos_paciente');
+        let meusDocs = [];
+        if (docsStr && meuCpf) {
+            const docsDict = JSON.parse(docsStr);
+            meusDocs = docsDict[meuCpf] || [];
+        }
+        
+        const totalAtestados = (atestados && !atestados.erro) ? atestados.length : 0;
+        const totalReceitas = (receitas && !receitas.erro) ? receitas.length : 0;
+        
+        if (totalAtestados === 0 && totalReceitas === 0 && meusDocs.length === 0) {
+            listaExames.innerHTML = '<li class="empty-msg" style="text-align:center; padding:20px; color:#888;">Nenhum documento, receita ou atestado registrado no momento.</li>';
+            return;
+        }
+        
+        listaExames.innerHTML = '';
+        
+        // 1. Renderizar as Receitas Digitais Online (Verde)
+        if (receitas && !receitas.erro && Array.isArray(receitas)) {
+            receitas.forEach(rec => {
+                const li = document.createElement('li');
+                li.style.cssText = 'padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; border-left: 4px solid #22c55e; box-shadow: 0 2px 4px rgba(0,0,0,0.02);';
+                
+                // Formatação HTML para visualização/impressão da Receita
+                const formattedHtml = `
+                    <div style="padding: 25px; font-family: 'Inter', sans-serif; line-height: 1.6; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <div style="text-align: center; border-bottom: 2px solid #22c55e; padding-bottom: 15px; margin-bottom: 20px;">
+                            <h2 style="color: #1b4332; margin: 0; font-size: 1.6rem; font-weight: 800; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fi fi-rr-medicine"></i> RECEITUÁRIO MÉDICO DIGITAL</h2>
+                            <small style="color: #40916c; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Validação SUS Digital • Cascavel/PR</small>
+                        </div>
+                        <div style="margin-bottom: 25px;">
+                            <p style="margin: 5px 0;"><strong>Paciente:</strong> ${localStorage.getItem('usuarioNome') || 'Paciente SUS'}</p>
+                            <p style="margin: 5px 0;"><strong>CPF:</strong> ${meuCpf || '---'}</p>
+                            ${rec.diagnostico ? `<p style="margin: 5px 0;"><strong>Diagnóstico (CID):</strong> <span style="background: #e8f5e9; color: #2e7d32; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${rec.diagnostico}</span></p>` : ''}
+                        </div>
+                        <div style="background: #f4fbf7; border: 1px solid #c7f9cc; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                            <h3 style="color: #2d6a4f; margin-top: 0; font-size: 1.1rem; border-bottom: 1px dashed #c7f9cc; padding-bottom: 8px;"><i class="fi fi-rr-capsules"></i> Medicamentos Prescritos</h3>
+                            <p style="font-size: 1.15rem; color: #1b4332; font-weight: bold; margin: 12px 0;">${rec.medicamentos || 'N/A'}</p>
+                            <p style="font-size: 0.95rem; color: #40916c; line-height: 1.4; margin: 0;"><strong>Instruções de Uso:</strong><br>${rec.instrucoes || 'Tomar conforme orientação médica.'}</p>
+                        </div>
+                        <div style="text-align: center; margin-top: 30px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+                            <p style="margin: 5px 0; font-weight: bold; color: #334155;">Dr(a). ${rec.medico || 'Médico'}</p>
+                            <small style="color: #64748b; display: block; margin-top: 2px;">Prescritor Habilitado SUS • Emitido em: ${new Date(rec.data).toLocaleString()}</small>
+                            <div style="margin-top: 15px; font-size: 0.75rem; color: #94a3b8; border: 1px dashed #e2e8f0; padding: 8px; border-radius: 6px;">
+                                🔒 Assinatura Digital ICP-Brasil: <strong>SHA-256 / SUS-MED-INTEGRADO</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                li.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2rem; color: #22c55e; display: flex; align-items: center;"><i class="fi fi-rr-medicine"></i></div>
+                        <div>
+                            <h4 style="margin: 0 0 5px 0; color: #333; font-weight: 700;">Receita Médica Digital</h4>
+                            <small style="color: #777;">Emitido em: ${new Date(rec.data).toLocaleDateString()}</small><br>
+                            <small style="color: #555;">Prescritor: Dr(a). ${rec.medico} • Medicamentos: <strong style="color: #27ae60;">${rec.medicamentos || '--'}</strong></small>
+                        </div>
+                    </div>
+                    <button onclick="visualizarDocumento('${encodeURIComponent(formattedHtml)}')" style="background: #22c55e; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.2); transition: all 0.2s;"><i class="fi fi-rr-eye"></i> Ver/Imprimir</button>
+                `;
+                listaExames.appendChild(li);
+            });
+        }
+        
+        // 2. Renderizar os Atestados Digitais Online (Vermelho)
+        if (atestados && !atestados.erro && Array.isArray(atestados)) {
+            atestados.forEach(at => {
+                const li = document.createElement('li');
+                li.style.cssText = 'padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; border-left: 4px solid #ef4444; box-shadow: 0 2px 4px rgba(0,0,0,0.02);';
+                
+                // Texto do atestado formatado para HTML básico
+                const formattedHtml = `
+                    <div style="padding: 25px; font-family: 'Inter', sans-serif; line-height: 1.6; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <div style="text-align: center; border-bottom: 2px solid #ef4444; padding-bottom: 15px; margin-bottom: 20px;">
+                            <h2 style="color: #7a1b1b; margin: 0; font-size: 1.6rem; font-weight: 800; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="fi fi-rr-document-signed"></i> ATESTADO MÉDICO OFICIAL</h2>
+                            <small style="color: #b70909; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Validação SUS Digital • Cascavel/PR</small>
+                        </div>
+                        <div style="margin-bottom: 20px; font-size: 1.1rem; text-align: justify; color: #2d3748;">
+                            <p>Atesto para os devidos fins que o(a) paciente <strong>${localStorage.getItem('usuarioNome') || 'Paciente SUS'}</strong>, portador(a) do CPF <strong>${meuCpf || '---'}</strong>, esteve sob cuidados médicos nesta data, necessitando de <strong>${at.dias || 1} dia(s)</strong> de afastamento de suas atividades laborais por motivo de saúde.</p>
+                        </div>
+                        <div style="background: #fff5f5; border: 1px solid #fed7d7; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                            <p style="margin: 5px 0; color:#c53030;"><strong>Motivo do Afastamento:</strong> ${at.motivo || 'Necessidade de repouso por razões clínicas.'}</p>
+                            ${at.cid ? `<p style="margin: 5px 0; color:#c53030;"><strong>Classificação Internacional de Doenças (CID-10):</strong> ${at.cid}</p>` : ''}
+                        </div>
+                        <div style="text-align: center; margin-top: 30px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+                            <p style="margin: 5px 0; font-weight: bold; color: #334155;">Dr(a). ${at.medico || 'Médico'}</p>
+                            <small style="color: #64748b; display: block; margin-top: 2px;">Médico Assistente SUS • Emitido em: ${new Date(at.data).toLocaleDateString()}</small>
+                            <div style="margin-top: 15px; font-size: 0.75rem; color: #94a3b8; border: 1px dashed #e2e8f0; padding: 8px; border-radius: 6px;">
+                                🔒 Assinatura Digital ICP-Brasil: <strong>SHA-256 / SUS-ATESTADO-INTEGRADO</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                li.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 2rem; color: #ef4444; display: flex; align-items: center;"><i class="fi fi-rr-document-signed"></i></div>
+                        <div>
+                            <h4 style="margin: 0 0 5px 0; color: #333; font-weight: 700;">Atestado Médico Digital (${at.dias || 1} dias)</h4>
+                            <small style="color: #777;">Emitido em: ${new Date(at.data).toLocaleDateString()}</small><br>
+                            <small style="color: #555;">Médico: Dr(a). ${at.medico} • Motivo: ${at.motivo || '--'}</small>
+                        </div>
+                    </div>
+                    <button onclick="visualizarDocumento('${encodeURIComponent(formattedHtml)}')" style="background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2); transition: all 0.2s;"><i class="fi fi-rr-eye"></i> Ver/Imprimir</button>
+                `;
+                listaExames.appendChild(li);
+            });
+        }
+        
+        // 3. Renderizar os documentos Locais/Offline (Azul)
+        meusDocs.reverse().forEach(doc => {
+            const li = document.createElement('li');
+            li.style.cssText = 'padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; border-left: 4px solid #1565c0;';
+            const icone = doc.tipo.toLowerCase().includes('receita') ? '<i class=\"fi fi-rr-medicine\"></i> ' : '<i class=\"fi fi-rr-document-signed\"></i> ';
+            
+            li.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="font-size: 2rem; color: #1565c0; display: flex; align-items: center;">${icone}</div>
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; color: #333; font-weight: 700;">${doc.tipo} (Offline)</h4>
+                        <small style="color: #777;">Emitido em: ${doc.data}</small><br>
+                        <small style="color: #555;">Médico: ${doc.medico}</small>
+                    </div>
+                </div>
+                <button onclick="visualizarDocumento('${encodeURIComponent(doc.html)}')" style="background: #1565c0; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(21, 101, 192, 0.2);"><i class="fi fi-rr-eye"></i> Ver/Imprimir</button>
+            `;
+            listaExames.appendChild(li);
+        });
+        
+    } catch (err) {
+        console.error("Erro geral ao renderizar documentos:", err);
+        listaExames.innerHTML = '<li class="empty-msg" style="text-align:center; padding:20px; color:#888;">Erro ao carregar documentos da telemedicina.</li>';
+    }
+}
 

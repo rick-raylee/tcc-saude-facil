@@ -23,7 +23,7 @@ def listar_consultas():
         
         if tipo in ['medico', 'medico_tele']:
             cur.execute("""
-                SELECT c.id, c.data, c.hora, c.especialidade, c.tipo, c.status,
+                SELECT c.id, c.data, c.hora, c.especialidade, c.tipo, c.status, c.paciente_id,
                        u.nome AS paciente_nome, u.cpf AS paciente_cpf, u.imagem AS paciente_foto
                 FROM consultas c
                 JOIN usuarios u ON c.paciente_id = u.id

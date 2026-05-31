@@ -346,11 +346,40 @@ def salvar_atendimento():
             """, (prontuario_id, medicamentos, instrucoes))
             db.commit()
 
-        # Atualizar status da consulta e a confirmação do médico
-        cur.execute("UPDATE consultas SET status = 'finalizada', confirmacao_medico = 1 WHERE id = ?", (consulta_id,))
+        # Atualizar status da consulta, a confirmação do médico e o encaminhamento
+        encaminhado_para_medico_id = data.get('encaminhado_para_medico_id')
+        if encaminhado_para_medico_id in ('', 'null', 'None', None):
+            encaminhado_para_medico_id = None
+        else:
+            try:
+                encaminhado_para_medico_id = int(encaminhado_para_medico_id)
+            except ValueError:
+                encaminhado_para_medico_id = None
+
+        cur.execute("""
+            UPDATE consultas 
+            SET status = 'finalizada', confirmacao_medico = 1, encaminhado_para_medico_id = ? 
+            WHERE id = ?
+        """, (encaminhado_para_medico_id, consulta_id))
         db.commit()
 
-        # Verificar se o paciente já confirmou para gerar a notificação
+        # Se houver encaminhamento, gera a notificação correspondente
+        if encaminhado_para_medico_id:
+            cur.execute("SELECT nome FROM usuarios WHERE id = ?", (encaminhado_para_medico_id,))
+            ref_med = cur.fetchone()
+            ref_medico_nome = ref_med['nome'] if ref_med else 'Especialista'
+            
+            cur.execute("SELECT nome FROM usuarios WHERE id = ?", (medico_id,))
+            med = cur.fetchone()
+            medico_nome = med['nome'] if med else 'Médico'
+            
+            cur.execute("""
+                INSERT INTO notificacoes (usuario_id, mensagem)
+                VALUES (?, ?)
+            """, (paciente_id, f'Você foi encaminhado(a) pelo(a) Dr(a). {medico_nome} para o(a) especialista {ref_medico_nome}. Acesse seu perfil para agendar.'))
+            db.commit()
+
+        # Verificar se o paciente já confirmou para gerar a notificação de confirmação conjunta
         cur.execute("SELECT paciente_id, data, confirmacao_paciente FROM consultas WHERE id = ?", (consulta_id,))
         cons = cur.fetchone()
         if cons and cons['confirmacao_paciente'] == 1:
