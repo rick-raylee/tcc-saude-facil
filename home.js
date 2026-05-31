@@ -467,11 +467,18 @@ async function carregarCarouselDinamico() {
 
         const imagemUrl = slide.imagem || slide.img || 'https://via.placeholder.com/500x280/004b82/ffffff?text=Destaque';
 
+        let pContent = '';
+        // Apenas exibir subtítulo se for curto (banners/campanhas) para não entulhar o card com o corpo da notícia
+        const txtApoio = slide.subtitulo || slide.texto || '';
+        if (txtApoio && txtApoio.length < 75) {
+            pContent = `<p style="font-size:0.95rem; opacity:0.9; margin-top:5px; line-height:1.4;">${txtApoio}</p>`;
+        }
+
         div.innerHTML = `
             <div class="card-3d-image" style="background-image: url('${imagemUrl}');"></div>
-            <div class="card-3d-content" style="background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2));">
-                <h3>${slide.titulo || ''}</h3>
-                <p>${slide.subtitulo || slide.texto || ''}</p>
+            <div class="card-3d-content" style="background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.2)); padding: 20px;">
+                <h3 style="font-size:1.6rem; font-weight:800; line-height:1.3; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${slide.titulo || ''}</h3>
+                ${pContent}
             </div>
         `;
 
