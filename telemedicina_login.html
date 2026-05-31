@@ -8,7 +8,7 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <style>
         body {
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            background: linear-gradient(135deg, #003566 0%, #0056AC 50%, #00bcd4 100%);
             height: 100vh;
             display: flex;
             align-items: center;
@@ -26,32 +26,33 @@
         }
 
         .login-card {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 242, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 30px;
             padding: 40px;
             text-align: center;
-            box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 53, 102, 0.25);
         }
 
         .logo-area i {
             font-size: 4rem;
-            color: var(--neon-cyan);
-            filter: drop-shadow(0 0 10px var(--neon-cyan));
+            color: #0056AC;
+            filter: drop-shadow(0 4px 10px rgba(0, 86, 172, 0.15));
             margin-bottom: 20px;
             display: inline-block;
         }
 
         h1 {
-            color: white;
+            color: #003566;
             font-size: 1.8rem;
             margin-bottom: 10px;
             letter-spacing: -1px;
+            font-weight: 800;
         }
 
         p {
-            color: #94a3b8;
+            color: #475569;
             font-size: 0.95rem;
             margin-bottom: 30px;
         }
@@ -63,7 +64,7 @@
 
         .input-group label {
             display: block;
-            color: #64748b;
+            color: #475569;
             font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -73,27 +74,27 @@
 
         .input-group input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
             padding: 15px;
             border-radius: 12px;
-            color: white;
+            color: #0f172a;
             font-size: 1rem;
             transition: all 0.3s;
             box-sizing: border-box;
         }
 
         .input-group input:focus {
-            border-color: var(--neon-cyan);
-            background: rgba(0, 242, 255, 0.05);
+            border-color: #00bcd4;
+            background: #f8fafc;
             outline: none;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.15);
         }
 
         .btn-login-tele {
             width: 100%;
-            background: var(--neon-cyan);
-            color: #020617;
+            background: linear-gradient(135deg, #0056AC 0%, #00bcd4 100%);
+            color: #ffffff;
             border: none;
             padding: 18px;
             border-radius: 12px;
@@ -103,11 +104,12 @@
             transition: all 0.3s;
             margin-top: 10px;
             text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(0, 86, 172, 0.2);
         }
 
         .btn-login-tele:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 242, 255, 0.4);
+            box-shadow: 0 10px 25px rgba(0, 86, 172, 0.35);
             filter: brightness(1.1);
         }
 
@@ -122,10 +124,11 @@
             color: #64748b;
             text-decoration: none;
             transition: color 0.2s;
+            font-weight: 600;
         }
 
         .footer-links a:hover {
-            color: var(--neon-cyan);
+            color: #0056AC;
         }
 
         @keyframes fadeIn {
@@ -139,9 +142,9 @@
             width: 400px;
             height: 400px;
             border-radius: 50%;
-            background: var(--neon-cyan);
+            background: #00bcd4;
             filter: blur(150px);
-            opacity: 0.05;
+            opacity: 0.1;
             z-index: -1;
         }
     </style>
@@ -183,7 +186,8 @@
     <script>
         document.getElementById('form-login-tele').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const cpf = document.getElementById('tele-cpf').value;
+            const cpfRaw = document.getElementById('tele-cpf').value;
+            const cpf = cpfRaw.replace(/\D/g, ''); // Limpar CPF antes de enviar à API
             const pass = document.getElementById('tele-pass').value;
 
             if (typeof API === 'undefined') {
@@ -194,15 +198,28 @@
             try {
                 const resp = await API.login(cpf, pass);
                 if (resp && resp.sucesso) {
-                    // Armazenar dados da sessão exclusiva de telemedicina
+                    const u = resp.usuario;
+                    // Armazenar dados da sessão de forma completa e compatível com o resto do site
                     localStorage.setItem('usuarioLogado', 'true');
-                    localStorage.setItem('usuarioTipo', resp.usuario.tipo);
-                    localStorage.setItem('usuarioNome', resp.usuario.nome);
+                    localStorage.setItem('usuarioNome', u.nome);
+                    localStorage.setItem('tipoUsuario', (u.tipo || 'paciente').toLowerCase());
+                    localStorage.setItem('usuarioCpf', u.cpf);
+                    localStorage.setItem('usuarioSUS', u.sus || '');
+                    localStorage.setItem('usuarioId', u.id);
+                    
+                    const tipo = (u.tipo || 'paciente').toLowerCase();
+                    if (tipo === 'admin') {
+                        localStorage.setItem('adminLogado', 'true');
+                    } else if (tipo === 'medico' || tipo === 'medico_tele') {
+                        localStorage.setItem('medicoRegistrado', JSON.stringify(u));
+                    } else if (tipo === 'enfermeiro') {
+                        localStorage.setItem('enfermeiroRegistrado', JSON.stringify(u));
+                    }
                     
                     Swal.fire({
                         icon: 'success',
                         title: 'Acesso Autorizado',
-                        text: `Bem-vindo ao Portal de Telemedicina, ${resp.usuario.nome}!`,
+                        text: `Bem-vindo ao Portal de Telemedicina, ${u.nome}!`,
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
