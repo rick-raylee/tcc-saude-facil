@@ -29,10 +29,6 @@ async function initTelemedicina() {
     // Use API response (logado) or fallback to localStorage
     if (!sessao || !sessao.logado || !localLogado) {
         document.getElementById('section-unauth').classList.add('active');
-        // Redirecionamento automático para o login exclusivo após 2 segundos
-        setTimeout(() => {
-            window.location.href = 'telemedicina_login.html';
-        }, 2000);
         return;
     }
 
