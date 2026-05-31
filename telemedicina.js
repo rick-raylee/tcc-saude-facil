@@ -704,7 +704,7 @@ async function abrirSalaTelemedicina(id) {
     if (!sessao || !sessao.logado || !localLogado) {
         hideHealthLoader();
         Swal.fire({ icon: 'warning', title: 'Acesso Negado', text: 'Você precisa estar logado para acessar a sala de telemedicina.' }).then(() => {
-            if (typeof abrirModalAuth === 'function') abrirModalAuth('login');
+            window.location.href = 'telemedicina_login.html';
         });
         return;
     }
