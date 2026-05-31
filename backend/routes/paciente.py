@@ -42,7 +42,7 @@ def perfil():
 def historico():
     from app import get_db_connection
 
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not usuario_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -87,7 +87,7 @@ def historico():
 def vacinas():
     from app import get_db_connection
 
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     cpf = request.args.get('cpf', '')
 
     try:
@@ -137,7 +137,7 @@ def vacinas():
 @paciente_bp.route('/api/paciente/doencas', methods=['GET'])
 def listar_doencas():
     from app import get_db_connection
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     cpf = request.args.get('cpf', '')
 
     try:
@@ -202,7 +202,7 @@ def remover_doenca(doenca_id):
 @paciente_bp.route('/api/paciente/atestados', methods=['GET'])
 def atestados():
     from app import get_db_connection
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not usuario_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -237,7 +237,7 @@ def atestados():
 @paciente_bp.route('/api/paciente/medicacoes', methods=['GET'])
 def medicacoes_paciente():
     from app import get_db_connection
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not usuario_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -286,7 +286,7 @@ def medicacoes_paciente():
 @paciente_bp.route('/api/paciente/resumo-saude', methods=['GET'])
 def resumo_saude():
     from app import get_db_connection
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not usuario_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -332,7 +332,7 @@ def resumo_saude():
 @paciente_bp.route('/api/paciente/receitas', methods=['GET'])
 def paciente_receitas():
     from app import get_db_connection
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not usuario_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 

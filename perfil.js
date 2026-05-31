@@ -84,6 +84,24 @@ async function carregarDadosPerfilAPI() {
 
     // Carregar Online
     let minhasVacinas = await API.minhasVacinas() || [];
+
+    // Se o banco online não tiver vacinas aplicadas para este paciente, popula com as simuladas (TCC)
+    if (!minhasVacinas || minhasVacinas.length === 0 || minhasVacinas.erro) {
+        minhasVacinas = [];
+        vacinasTomadasSimuladas.forEach(s => {
+            const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
+            minhasVacinas.push({
+                id: s.id,
+                vacina_id: s.id,
+                vacina: vSUS.nome,
+                data: s.data,
+                local: s.local,
+                dose: vSUS.dose,
+                lote: 'SIM-999',
+                status: 'oficial'
+            });
+        });
+    }
     
     // Carregar Offline (Locais pendentes)
     const dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
@@ -543,30 +561,37 @@ function carregarVacinas() {
     const dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
     const vacinasLocais = dbV.filter(v => (v.paciente_cpf && v.paciente_cpf.replace(/\D/g, '') === cpfLimpo) || (v.pacienteCpf && v.pacienteCpf.replace(/\D/g, '') === cpfLimpo));
 
-    // 3. Mesclar com as simuladas APENAS se estiver vazio (ou sempre mesclar para demonstração)
-    let todasMinhas = vacinasLocais.map(v => ({
-        id: v.vacinaId || 'local',
-        nome: v.vacina_nome || v.vacina,
-        data: v.data,
-        local: v.local_aplicacao || v.local,
-        dose: v.dose,
-        status: 'local'
-    }));
-
-    // Se estiver vazio, podemos usar as simuladas para o TCC não parecer vazio
-    if (todasMinhas.length === 0) {
-        vacinasTomadasSimuladas.forEach(s => {
-            const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
-            todasMinhas.push({
-                id: s.id,
-                nome: vSUS.nome,
-                data: s.data,
-                local: s.local,
-                dose: vSUS.dose,
-                status: 'simulada'
-            });
+    // 3. Sempre carregar as vacinas simuladas para demonstrar histórico no TCC
+    let todasMinhas = [];
+    
+    vacinasTomadasSimuladas.forEach(s => {
+        const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
+        todasMinhas.push({
+            id: s.id,
+            nome: vSUS.nome,
+            data: s.data,
+            local: s.local,
+            dose: vSUS.dose,
+            status: 'simulada'
         });
-    }
+    });
+
+    // 4. Adicionar vacinas registradas pelo enfermeiro no mesmo navegador (LocalStorage)
+    vacinasLocais.forEach(v => {
+        const nomeVacina = v.vacina_nome || v.vacina;
+        // Evitar duplicar se a vacina com o mesmo nome e dose já existir nas simuladas
+        const existe = todasMinhas.some(m => m.nome === nomeVacina && m.dose === v.dose);
+        if (!existe) {
+            todasMinhas.push({
+                id: v.vacinaId || 'local',
+                nome: nomeVacina,
+                data: v.data,
+                local: v.local_aplicacao || v.local,
+                dose: v.dose,
+                status: 'local'
+            });
+        }
+    });
 
     const idsTomados = new Set(todasMinhas.map(v => v.id).filter(id => id !== 'local'));
     const nomesTomados = new Set(todasMinhas.map(v => v.nome));

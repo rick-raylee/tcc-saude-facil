@@ -44,7 +44,7 @@ def salvar_triagem():
     from app import get_db_connection
     data = request.get_json()
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     paciente_cpf = data.get('paciente_cpf', '')
 
     try:
@@ -146,7 +146,7 @@ def registrar_vacina():
     from app import get_db_connection
     data = request.get_json()
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     paciente_cpf = data.get('paciente_cpf', '')
 
     try:
@@ -188,7 +188,7 @@ def dashboard_resumo():
     from app import get_db_connection
     from datetime import datetime
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
     
@@ -229,7 +229,7 @@ def dashboard_resumo():
 def prescricoes_pendentes():
     from app import get_db_connection
     
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -274,7 +274,7 @@ def prescricoes_pendentes():
 def aplicar_prescricao():
     from app import get_db_connection
     
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -399,7 +399,7 @@ def editar_vacina(id):
     from app import get_db_connection
     data = request.get_json()
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -438,7 +438,7 @@ def editar_vacina(id):
 def remover_vacina(id):
     from app import get_db_connection
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
