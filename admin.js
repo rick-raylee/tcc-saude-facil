@@ -1462,10 +1462,12 @@ window.abrirModalCampanha = function (camp = null) {
     const form = document.getElementById('form-admin');
     document.getElementById('modal-title').textContent = camp ? 'Editar Campanha' : 'Nova Campanha';
 
+    const escapeAttr = (str) => String(str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
     form.innerHTML = `
         <input type="hidden" id="tipo-form" value="campanha">
-        ${camp ? `<input type="hidden" id="form-camp-id" value="${camp.id}">` : ''}
-        <div style="margin-bottom:10px"><label>Título da Campanha</label><input type="text" id="form-camp-titulo" value="${camp ? camp.titulo : ''}" required style="width:100%; padding:8px;"></div>
+        ${camp ? `<input type="hidden" id="form-camp-id" value="${escapeAttr(camp.id)}">` : ''}
+        <div style="margin-bottom:10px"><label>Título da Campanha</label><input type="text" id="form-camp-titulo" value="${camp ? escapeAttr(camp.titulo) : ''}" required style="width:100%; padding:8px;"></div>
         
         <div style="margin-bottom:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <div>
@@ -1481,35 +1483,35 @@ window.abrirModalCampanha = function (camp = null) {
             </div>
             <div>
                 <label>Ícone (Emoji ou classe CSS)</label>
-                <input type="text" id="form-camp-icone" value="${camp ? (camp.icone || '') : ''}" placeholder="Ex: 💉 ou 🦷" style="width:100%; padding:8px;">
+                <input type="text" id="form-camp-icone" value="${camp ? escapeAttr(camp.icone || '') : ''}" placeholder="Ex: 💉 ou 🦷" style="width:100%; padding:8px;">
             </div>
         </div>
 
-        <div style="margin-bottom:10px"><label>Resumo / Descrição Curta</label><input type="text" id="form-camp-resumo" value="${camp ? (camp.resumo || '') : ''}" required placeholder="Ex: Proteja-se e proteja sua família contra a febre amarela." style="width:100%; padding:8px;"></div>
-        <div style="margin-bottom:10px"><label>Descrição Completa</label><textarea id="form-camp-descricao" rows="4" style="width:100%; padding:8px;">${camp ? (camp.descricao || camp.resumo || '') : ''}</textarea></div>
+        <div style="margin-bottom:10px"><label>Resumo / Descrição Curta</label><input type="text" id="form-camp-resumo" value="${camp ? escapeAttr(camp.resumo || '') : ''}" required placeholder="Ex: Proteja-se e proteja sua família contra a febre amarela." style="width:100%; padding:8px;"></div>
+        <div style="margin-bottom:10px"><label>Descrição Completa</label><textarea id="form-camp-descricao" rows="4" style="width:100%; padding:8px;">${camp ? escapeAttr(camp.descricao || camp.resumo || '') : ''}</textarea></div>
         
         <div style="margin-bottom:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <div>
                 <label>Público-Alvo</label>
-                <input type="text" id="form-camp-publico" value="${camp ? (camp.publico_alvo || camp.publicoAlvo || '') : ''}" placeholder="Ex: População em geral" style="width:100%; padding:8px;">
+                <input type="text" id="form-camp-publico" value="${camp ? escapeAttr(camp.publico_alvo || camp.publicoAlvo || '') : ''}" placeholder="Ex: População em geral" style="width:100%; padding:8px;">
             </div>
             <div>
                 <label>Local de Atendimento</label>
-                <input type="text" id="form-camp-local" value="${camp ? (camp.local || '') : ''}" placeholder="Ex: Todas as UBS" style="width:100%; padding:8px;">
+                <input type="text" id="form-camp-local" value="${camp ? escapeAttr(camp.local || '') : ''}" placeholder="Ex: Todas as UBS" style="width:100%; padding:8px;">
             </div>
         </div>
 
-        <div style="margin-bottom:10px"><label>Documentos Necessários</label><input type="text" id="form-camp-documentos" value="${camp ? (camp.documentos || '') : ''}" placeholder="Ex: Cartão SUS, RG e CPF" style="width:100%; padding:8px;"></div>
+        <div style="margin-bottom:10px"><label>Documentos Necessários</label><input type="text" id="form-camp-documentos" value="${camp ? escapeAttr(camp.documentos || '') : ''}" placeholder="Ex: Cartão SUS, RG e CPF" style="width:100%; padding:8px;"></div>
 
         <div style="margin-bottom:10px; border:1px solid #ccc; padding:10px; border-radius:5px; background:#fafafa;">
              <label style="display:block; margin-bottom:5px;">Imagem Banner</label>
              <input type="file" id="form-camp-file" accept="image/*" style="width:100%; padding:8px; margin-bottom:10px; background:white; border:1px solid #ddd; cursor:pointer;">
              <div style="text-align:center; font-size:0.85rem; color:#666; margin-bottom:5px;">OU informe uma URL:</div>
-             <input type="text" id="form-camp-img" value="${camp ? camp.imagem : ''}" placeholder="https://..." style="width:100%; padding:8px;">
+             <input type="text" id="form-camp-img" value="${camp ? escapeAttr(camp.imagem || '') : ''}" placeholder="https://..." style="width:100%; padding:8px;">
         </div>
         <div style="margin-bottom:10px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-             <div><label>Data Início</label><input type="date" id="form-camp-inicio" value="${camp ? camp.data_inicio : ''}" style="width:100%; padding:8px;"></div>
-             <div><label>Data Fim</label><input type="date" id="form-camp-fim" value="${camp ? camp.data_fim : ''}" style="width:100%; padding:8px;"></div>
+             <div><label>Data Início</label><input type="date" id="form-camp-inicio" value="${camp ? escapeAttr(camp.data_inicio || '') : ''}" style="width:100%; padding:8px;"></div>
+             <div><label>Data Fim</label><input type="date" id="form-camp-fim" value="${camp ? escapeAttr(camp.data_fim || '') : ''}" style="width:100%; padding:8px;"></div>
         </div>
         <div style="margin-bottom:10px;"><label>Status da Campanha</label>
              <select id="form-camp-status" style="width:100%; padding:8px;">
