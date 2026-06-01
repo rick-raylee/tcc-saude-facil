@@ -557,10 +557,15 @@ async function carregarNoticiasDinamicas() {
 
     let noticiasLocal = safeParseArray(localStorage.getItem('admin_noticias'));
 
-    if (noticiasAPI.length > 0) {
-        noticias = noticiasAPI;
-    } else if (noticiasLocal.length > 0) {
-        noticias = noticiasLocal;
+    let todasNoticias = [...noticiasAPI];
+    noticiasLocal.forEach(nl => {
+        if (!todasNoticias.find(n => n.id === nl.id || n.titulo === nl.titulo)) {
+            todasNoticias.push(nl);
+        }
+    });
+
+    if (todasNoticias.length > 0) {
+        noticias = todasNoticias;
     } else {
         noticias = [];
     }

@@ -245,6 +245,8 @@ def migrar_schema_admin():
     # Migração para a tabela notícias
     if 'acessos' not in colunas_noticias:
         cur.execute("ALTER TABLE noticias ADD COLUMN acessos INTEGER DEFAULT 0")
+    if 'cliques' not in colunas_noticias:
+        cur.execute("ALTER TABLE noticias ADD COLUMN cliques INTEGER DEFAULT 0")
     if 'prioridade' not in colunas_noticias:
         cur.execute("ALTER TABLE noticias ADD COLUMN prioridade INTEGER DEFAULT 0")
     if 'destaque_carrossel' not in colunas_noticias:

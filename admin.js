@@ -1062,13 +1062,39 @@ window.salvarDadosAdmin = async function (e) {
                 resp = await API.criarNoticia(payload);
             }
             if (resp && resp.sucesso) {
+                // Sincronizar com LocalStorage também em caso de sucesso
+                let listaN = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
+                const noticiaId = idNoticia || resp.id || Date.now();
+                const noticiaDataObj = {
+                    id: noticiaId,
+                    titulo,
+                    resumo,
+                    conteudo,
+                    imagem,
+                    categoria,
+                    status,
+                    destaque_carrossel,
+                    data: new Date().toLocaleDateString(),
+                    criada_em: new Date().toISOString()
+                };
+                if (idNoticia) {
+                    const i = listaN.findIndex(n => n.id == idNoticia);
+                    if (i !== -1) listaN[i] = { ...listaN[i], ...noticiaDataObj };
+                } else {
+                    listaN.unshift(noticiaDataObj);
+                }
+                localStorage.setItem('admin_noticias', JSON.stringify(listaN));
+
                 Swal.fire({ icon: 'success', title: 'Sucesso', text: idNoticia ? 'Notícia atualizada com sucesso!' : 'Notícia publicada com sucesso!' });
                 await carregarNoticias();
                 fecharModalAdmin();
                 return;
             } else if (resp && resp.erro) {
-                Swal.fire({ icon: 'error', title: 'Erro na API', text: 'Erro ao salvar notícia: ' + resp.erro });
-                return;
+                const isNetError = resp.erro.includes('conexão') || resp.erro.includes('conexao') || resp.erro.includes('limite excedido') || resp.erro.includes('Falha na conexão') || resp.erro.includes('Failed to fetch');
+                if (!isNetError) {
+                    Swal.fire({ icon: 'error', title: 'Erro na API', text: 'Erro ao salvar notícia: ' + resp.erro });
+                    return;
+                }
             }
             console.warn("Backend offline. Usando fallback local para Notícias...");
         }
@@ -1082,7 +1108,7 @@ window.salvarDadosAdmin = async function (e) {
             listaN.unshift({ id: Date.now(), titulo, resumo, conteudo, imagem, categoria, status, destaque_carrossel, data: new Date().toLocaleDateString() });
         }
         localStorage.setItem('admin_noticias', JSON.stringify(listaN));
-        Swal.fire({ icon: 'info', title: 'Modo Offline', text: idNoticia ? 'Notícia atualizada localmente!' : 'Notícia publicada localmente!' });
+        Swal.fire({ icon: 'info', title: 'Modo Offline', text: idNoticia ? 'Notícia updated localmente!' : 'Notícia publicada localmente!' });
         carregarNoticias();
 
     } else if (tipo === 'carrossel') {
@@ -1115,13 +1141,38 @@ window.salvarDadosAdmin = async function (e) {
                 resp = await API.criarSlide(payload);
             }
             if (resp && resp.sucesso) {
+                // Sincronizar com LocalStorage também em caso de sucesso
+                let listaC = JSON.parse(localStorage.getItem('admin_carrossel') || '[]');
+                const slideId = idSlide || resp.id || Date.now();
+                const slideDataObj = {
+                    id: slideId,
+                    titulo,
+                    subtitulo,
+                    texto,
+                    imagem,
+                    link,
+                    ativo,
+                    ordem,
+                    status: ativo
+                };
+                if (idSlide) {
+                    const i = listaC.findIndex(s => s.id == idSlide);
+                    if (i !== -1) listaC[i] = { ...listaC[i], ...slideDataObj };
+                } else {
+                    listaC.push(slideDataObj);
+                }
+                localStorage.setItem('admin_carrossel', JSON.stringify(listaC));
+
                 Swal.fire({ icon: 'success', title: 'Sucesso', text: idSlide ? 'Slide atualizado!' : 'Slide adicionado!' });
                 await carregarCarrosselEditor();
                 fecharModalAdmin();
                 return;
             } else if (resp && resp.erro) {
-                Swal.fire({ icon: 'error', title: 'Erro na API', text: 'Erro ao salvar slide: ' + resp.erro });
-                return;
+                const isNetError = resp.erro.includes('conexão') || resp.erro.includes('conexao') || resp.erro.includes('limite excedido') || resp.erro.includes('Falha na conexão') || resp.erro.includes('Failed to fetch');
+                if (!isNetError) {
+                    Swal.fire({ icon: 'error', title: 'Erro na API', text: 'Erro ao salvar slide: ' + resp.erro });
+                    return;
+                }
             }
             console.warn("Backend offline. Usando fallback local para Carrossel...");
         }
@@ -1219,8 +1270,11 @@ window.salvarDadosAdmin = async function (e) {
                 fecharModalAdmin();
                 return;
             } else if (resp && resp.erro) {
-                Swal.fire({ icon: 'error', title: 'Erro na API', text: 'Erro ao salvar campanha: ' + resp.erro });
-                return;
+                const isNetError = resp.erro.includes('conexão') || resp.erro.includes('conexao') || resp.erro.includes('limite excedido') || resp.erro.includes('Falha na conexão') || resp.erro.includes('Failed to fetch');
+                if (!isNetError) {
+                    Swal.fire({ icon: 'error', title: 'Erro na API', text: 'Erro ao salvar campanha: ' + resp.erro });
+                    return;
+                }
             }
             console.warn("Backend offline. Usando fallback local para Campanhas...");
         }
