@@ -1092,6 +1092,15 @@ window.toggleNotificacoes = function(event) {
     event.stopPropagation();
     const dropdown = document.getElementById('navNotifDropdown');
     dropdown.classList.toggle('show');
+    
+    // Ocultar o badge do número de notificações quando aberto
+    if (dropdown.classList.contains('show')) {
+        const badge = document.getElementById('nav-notif-count');
+        if (badge) {
+            badge.style.display = 'none';
+            badge.innerText = '0';
+        }
+    }
 }
 
 window.marcarNotifLida = async function(id, event) {
