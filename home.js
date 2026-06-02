@@ -927,7 +927,7 @@ function exibirNoticia() {
             <img src="${imagemUrl}" alt="${noticia.titulo || 'Notícia'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
         </div>
         ` : ''}
-        <div class="noticia-texto-completo" style="line-height: 1.8; color: #444; font-size: 1.05rem; margin-top: 20px;">
+        <div class="noticia-texto-completo" style="line-height: 1.8; color: #444; font-size: 1.05rem; margin-top: 20px; white-space: pre-wrap; text-align: justify;">
             ${noticia.conteudo || noticia.texto || noticia.descricao || 'Conteúdo indisponível.'}
         </div>
     `;
