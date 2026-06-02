@@ -374,9 +374,9 @@ except Exception as e:
 
 @app.after_request
 def add_no_cache_headers(response):
-    """Evita que HTML/CSS/JS antigos fiquem presos no cache do navegador em dev."""
+    """Evita que HTML/CSS/JS e respostas de API fiquem presas no cache."""
     path = request.path.lower()
-    if path.endswith(('.html', '.js', '.css')) or path in {
+    if path.startswith('/api/') or path.endswith(('.html', '.js', '.css')) or path in {
         '/', '/admin', '/painel-admin', '/painel-enfermeiro', '/painel-telemedicina', '/dashboard'
     }:
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
