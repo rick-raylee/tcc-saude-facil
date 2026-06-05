@@ -39,6 +39,23 @@ document.addEventListener('DOMContentLoaded', async function () {
         // 5. Verificações secundárias
         checkAppointments();
         carregarConfiguracoesPortal().catch(err => console.error('Falha ao carregar config identidade:', err));
+
+        // 6. Verificar se veio busca da URL (para a página de dúvidas)
+        if (window.location.pathname.includes('duvidas.html')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const busca = urlParams.get('busca');
+            if (busca) {
+                const searchInput = document.getElementById('search-faq');
+                if (searchInput) {
+                    searchInput.value = busca;
+                    setTimeout(() => {
+                        if (typeof buscarDuvida === 'function') {
+                            buscarDuvida();
+                        }
+                    }, 300);
+                }
+            }
+        }
     } catch (err) {
         console.error('ERRO CRÍTICO NA INICIALIZAÇÃO:', err);
         // Fallback: Tentar iniciar ao menos a lógica básica do carrossel para não quebrar a UI
@@ -2426,8 +2443,19 @@ async function verificarSessao() {
     const logado = localStorage.getItem('usuarioLogado') === 'true';
     const nome = localStorage.getItem('usuarioNome') || 'Usuário';
 
-    // Limpar conteúdo atual da nav-auth
-    navAuth.innerHTML = '';
+    // Limpar conteúdo atual da nav-auth e injetar o contêiner de busca que sempre aparece
+    navAuth.innerHTML = `
+        <!-- Lupa de Busca Expansível -->
+        <div class="nav-search-container" id="navSearchContainer">
+            <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar no portal..." onkeydown="handleSearchKey(event)">
+            <button class="btn-search-toggle" id="navSearchToggle" onclick="toggleNavbarSearch(event)"><i class="fi fi-rr-search"></i></button>
+            <!-- Dropdown de resultados -->
+            <div class="search-results-dropdown" id="searchResultsDropdown">
+                <div class="search-results-header">Resultados da Busca</div>
+                <div class="search-results-list" id="searchResultsList"></div>
+            </div>
+        </div>
+    `;
 
     // Remover link "Meu Portal Saúde" se já existir (para evitar duplicatas)
     const existingLink = document.getElementById('nav-meu-sus');
@@ -2569,12 +2597,13 @@ async function verificarSessao() {
         // Carregar alertas/campanhas apenas após login
         carregarCampanhasHome();
     } else {
-        // Criar botões de login/cadastro padrão
-        const buttonsHTML = `
-            <button class="btn-auth btn-login" onclick="abrirModalLogin()"> LOGIN</button>
-        <button class="btn-auth btn-cadastro" onclick="abrirModalCadastro()">CADASTRE-SE</button>
+        // Criar botão de login padrão modernizado
+        const loginBtnHTML = `
+            <button class="btn-auth btn-login-modern" onclick="abrirModalLogin()">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>Login
+            </button>
         `;
-        navAuth.insertAdjacentHTML('beforeend', buttonsHTML);
+        navAuth.insertAdjacentHTML('beforeend', loginBtnHTML);
     }
 }
 
@@ -3183,3 +3212,174 @@ window.salvarEdicaoPerfil = function(event) {
         window.location.reload();
     }
 }
+
+// Funções da Lupa de Busca na Navbar
+function toggleNavbarSearch(event) {
+    if (event) event.stopPropagation();
+    const container = document.getElementById('navSearchContainer');
+    const input = document.getElementById('navSearchInput');
+    const dropdown = document.getElementById('searchResultsDropdown');
+    
+    if (!container || !input) return;
+    
+    const isActivating = !container.classList.contains('active');
+    
+    if (isActivating) {
+        container.classList.add('active');
+        setTimeout(() => input.focus(), 100);
+    } else {
+        const query = input.value.trim();
+        if (query) {
+            executarBusca(query);
+        } else {
+            container.classList.remove('active');
+            if (dropdown) dropdown.classList.remove('show');
+        }
+    }
+}
+
+function handleSearchKey(event) {
+    const input = event.target;
+    const dropdown = document.getElementById('searchResultsDropdown');
+    const query = input.value.trim();
+    
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        if (query) {
+            executarBusca(query);
+        }
+    } else if (event.key === 'Escape') {
+        const container = document.getElementById('navSearchContainer');
+        if (container) container.classList.remove('active');
+        if (dropdown) dropdown.classList.remove('show');
+        input.value = '';
+    } else {
+        // Busca em tempo real após pequena espera (debounce manual simples)
+        setTimeout(() => {
+            const updatedQuery = input.value.trim();
+            buscarSugestoes(updatedQuery);
+        }, 100);
+    }
+}
+
+const PORTAL_PAGES = [
+    {
+        title: "Agendamento de Consultas",
+        desc: "Marcar consultas presenciais ou remotas.",
+        url: "agendamento.html",
+        icon: "fi-rr-calendar",
+        keywords: ["agendar", "agendamento", "consulta", "marcar", "medico", "agenda", "data", "hora"]
+    },
+    {
+        title: "Telemedicina",
+        desc: "Consultas virtuais via videoconferência.",
+        url: "telemedicina.html",
+        icon: "fi-rr-laptop",
+        keywords: ["telemedicina", "remoto", "video", "chamada", "consulta online", "virtual", "camera"]
+    },
+    {
+        title: "Campanhas de Saúde",
+        desc: "Campanhas ativas de vacinação e alertas.",
+        url: "campanhas.html",
+        icon: "fi-rr-syringe",
+        keywords: ["vacina", "vacinacao", "campanhas", "prevencao", "gripe", "dengue", "febre amarela", "covid"]
+    },
+    {
+        title: "Mapas das Unidades (UBS)",
+        desc: "Localizar postos de saúde em Cascavel.",
+        url: "mapas.html",
+        icon: "fi-rr-map",
+        keywords: ["postos", "posto", "ubs", "mapa", "unidade", "localizacao", "onde", "endereço"]
+    },
+    {
+        title: "Dúvidas Frequentes",
+        desc: "Respostas para perguntas frequentes (FAQ).",
+        url: "duvidas.html",
+        icon: "fi-rr-interrogation",
+        keywords: ["duvidas", "perguntas", "faq", "ajuda", "como fazer", "cancelar", "desmarcar", "gratis"]
+    },
+    {
+        title: "Meu Portal Saúde",
+        desc: "Visualizar seus dados e consultas.",
+        url: "perfil.html",
+        icon: "fi-rr-user",
+        keywords: ["perfil", "meu portal", "meus dados", "historico", "minhas consultas", "dados", "logout"]
+    }
+];
+
+function buscarSugestoes(query) {
+    const dropdown = document.getElementById('searchResultsDropdown');
+    const list = document.getElementById('searchResultsList');
+    if (!dropdown || !list) return;
+    
+    if (!query || query.length < 2) {
+        dropdown.classList.remove('show');
+        return;
+    }
+    
+    const searchTerms = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(" ");
+    
+    const matches = PORTAL_PAGES.filter(page => {
+        return searchTerms.some(term => {
+            const matchTitle = page.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term);
+            const matchDesc = page.desc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term);
+            const matchKeywords = page.keywords.some(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term));
+            return matchTitle || matchDesc || matchKeywords;
+        });
+    });
+    
+    list.innerHTML = '';
+    
+    if (matches.length === 0) {
+        list.innerHTML = '<div class="search-results-empty">Nenhum resultado encontrado</div>';
+    } else {
+        matches.forEach(match => {
+            const item = document.createElement('a');
+            item.className = 'search-result-item';
+            item.href = match.url;
+            item.innerHTML = `
+                <i class="fi ${match.icon}"></i>
+                <div class="item-info">
+                    <span class="item-title">${match.title}</span>
+                    <span class="item-desc">${match.desc}</span>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+    
+    dropdown.classList.add('show');
+}
+
+function executarBusca(query) {
+    if (!query) return;
+    
+    // Tenta achar a melhor correspondência direta
+    const searchTerms = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(" ");
+    const bestMatch = PORTAL_PAGES.find(page => {
+        return searchTerms.some(term => {
+            return page.keywords.some(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === term) ||
+                   page.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term);
+        });
+    });
+    
+    if (bestMatch) {
+        window.location.href = bestMatch.url;
+    } else {
+        // Redireciona para dúvidas (FAQ) como backup, passando a query como parâmetro
+        window.location.href = `duvidas.html?busca=${encodeURIComponent(query)}`;
+    }
+}
+
+// Fechar busca ao clicar fora
+document.addEventListener('click', function(event) {
+    const container = document.getElementById('navSearchContainer');
+    const dropdown = document.getElementById('searchResultsDropdown');
+    const input = document.getElementById('navSearchInput');
+    
+    if (container && !container.contains(event.target)) {
+        container.classList.remove('active');
+        if (dropdown) dropdown.classList.remove('show');
+        if (input) input.value = '';
+    }
+});

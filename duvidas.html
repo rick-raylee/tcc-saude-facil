@@ -28,8 +28,20 @@
             <a href="duvidas.html">Dúvidas</a>
         </nav>
         <div class="nav-auth">
-            <button class="btn-auth btn-login" onclick="abrirModalAuth()">LOGIN</button>
-            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">CADASTRE-SE</button>
+            <!-- Lupa de Busca Expansível -->
+            <div class="nav-search-container" id="navSearchContainer">
+                <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar no portal..." onkeydown="handleSearchKey(event)">
+                <button class="btn-search-toggle" id="navSearchToggle" onclick="toggleNavbarSearch(event)"><i class="fi fi-rr-search"></i></button>
+                <!-- Dropdown de resultados -->
+                <div class="search-results-dropdown" id="searchResultsDropdown">
+                    <div class="search-results-header">Resultados da Busca</div>
+                    <div class="search-results-list" id="searchResultsList"></div>
+                </div>
+            </div>
+            <!-- Botão de Login Modernizado Verde -->
+            <button class="btn-auth btn-login-modern" onclick="abrirModalAuth()">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>Login
+            </button>
         </div>
     </header>
 
