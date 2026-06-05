@@ -249,6 +249,16 @@ async function checkAppointments() {
     let isTime = false;
     let buttonHtml = '';
 
+    // Botão de desmarcar para o paciente na home
+    let cancelBtnHtml = '';
+    if (isLogged) {
+        cancelBtnHtml = `
+            <button onclick="window.cancelarConsultaPacienteHome(${ultimo.id})" style="padding: 10px 15px; background: #fff5f5; border: 1px solid #ffa39e; color: #cf1322; font-weight: bold; border-radius: 20px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+                ❌ Desmarcar
+            </button>
+        `;
+    }
+
     if (dataParaComparar && ultimo.hora) {
         const appointmentTime = new Date(`${dataParaComparar}T${ultimo.hora}:00`);
         const now = new Date();
@@ -273,16 +283,73 @@ async function checkAppointments() {
 
     container.style.display = 'block';
     container.innerHTML = `
-        <div class="appointment-alert-card" style="margin-top: 10px; margin-bottom: 10px;">
-            <div class="appointment-info">
+        <div class="appointment-alert-card" style="margin-top: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div class="appointment-info" style="flex: 1; min-width: 280px;">
                 <h3><i class='fi fi-rr-calendar'></i> Próxima Consulta: ${ultimo.medico}</h3>
                 <p>${ultimo.especialidade} • ${diaExibicao || 'Data pendente'} às ${ultimo.hora || 'Horário pendente'}</p>
                 <small>${(ultimo.tipo || '').toLowerCase() === 'telemedicina' ? 'Realize sua consulta de onde estiver.' : 'Compareça à unidade de saúde com antecedência.'}</small>
             </div>
-            ${buttonHtml}
+            <div style="display: flex; gap: 10px; align-items: center;">
+                ${buttonHtml}
+                ${cancelBtnHtml}
+            </div>
         </div>
     `;
 }
+
+window.cancelarConsultaPacienteHome = async function(id) {
+    if (typeof API === 'undefined') return;
+
+    const result = await Swal.fire({
+        title: 'Desmarcar Consulta?',
+        text: 'Você tem certeza que deseja cancelar esta próxima consulta agendada?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, Desmarcar',
+        cancelButtonText: 'Não, manter agendamento'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const resp = await API.cancelarConsulta(id);
+        if (resp && resp.sucesso) {
+            // Atualiza cópia local do localStorage se existir
+            try {
+                const localS = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+                const updated = localS.map(a => {
+                    if (a.id == id || a.dataRaw === id) {
+                        a.status = 'cancelada';
+                    }
+                    return a;
+                });
+                localStorage.setItem('agendamentos', JSON.stringify(updated));
+            } catch (e) {
+                console.warn("Erro ao atualizar localStorage na desmarcação:", e);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cancelada!',
+                text: 'Sua consulta foi desmarcada com sucesso.',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao desmarcar consulta.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao desmarcar',
+            text: err.message || 'Ocorreu um erro ao tentar desmarcar a consulta.'
+        });
+    }
+};
 
 // ====================================================================
 // MODAL DE NOTÍCIAS

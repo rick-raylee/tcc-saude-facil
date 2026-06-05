@@ -207,11 +207,25 @@ async function carregarConsultasPaciente() {
 
         const dataFmt = c.data ? new Date(c.data + 'T00:00:00').toLocaleDateString('pt-BR') : '--';
         
+        const statusBaixo = (c.status || '').toLowerCase();
+        const cancelable = statusBaixo === 'agendado' || statusBaixo === 'confirmado' || statusBaixo === 'confirmada' || statusBaixo === 'aguardando';
+        
+        let cancelBtnHtml = '';
+        if (cancelable) {
+            cancelBtnHtml = `<button class="btn-neon-health" style="background:#ff7675; border-color:#d63031; margin-top:8px; width:100%; font-weight:bold; cursor:pointer;" onclick="window.cancelarConsultaPacienteTelemedicina(${c.id})">❌ DESMARCAR CONSULTA</button>`;
+        }
+
         let acaoBotao = '';
         if (isTele && c.status !== 'cancelada') {
-            acaoBotao = `<button class="btn-neon-health" onclick="abrirSalaTelemedicina(${c.id})">ENTRAR NA SALA</button>`;
+            acaoBotao = `
+                <button class="btn-neon-health" onclick="abrirSalaTelemedicina(${c.id})">ENTRAR NA SALA</button>
+                ${cancelBtnHtml}
+            `;
         } else {
-            acaoBotao = `<button class="btn-neon-health" style="background: rgba(255,255,255,0.1); cursor:default; border:1px solid #444;">VER DETALHES</button>`;
+            acaoBotao = `
+                <button class="btn-neon-health" style="background: rgba(255,255,255,0.1); cursor:default; border:1px solid #444;">VER DETALHES</button>
+                ${cancelBtnHtml}
+            `;
         }
 
         card.innerHTML = `
@@ -235,6 +249,60 @@ async function carregarConsultasPaciente() {
         container.appendChild(card);
     });
 }
+
+window.cancelarConsultaPacienteTelemedicina = async function(id) {
+    if (typeof API === 'undefined') return;
+
+    const result = await Swal.fire({
+        title: 'Desmarcar Consulta?',
+        text: 'Você tem certeza que deseja cancelar esta consulta?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, Desmarcar',
+        cancelButtonText: 'Não, manter agendamento'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const resp = await API.cancelarConsulta(id);
+        if (resp && resp.sucesso) {
+            // Sincroniza LocalStorage
+            try {
+                const localS = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+                const updated = localS.map(a => {
+                    if (a.id == id || a.dataRaw === id) {
+                        a.status = 'cancelada';
+                    }
+                    return a;
+                });
+                localStorage.setItem('agendamentos', JSON.stringify(updated));
+            } catch (e) {
+                console.warn("Erro ao atualizar localStorage na desmarcação:", e);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cancelada!',
+                text: 'Sua consulta foi desmarcada com sucesso.',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao desmarcar consulta.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao desmarcar',
+            text: err.message || 'Ocorreu um erro ao tentar desmarcar a consulta.'
+        });
+    }
+};
 
 // --- FUNÇÕES DE NAVEGAÇÃO DO WIZARD ---
 function nextStep() {
