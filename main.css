@@ -5965,14 +5965,17 @@ i[class^='fi'] {
 
 /* Círculo do ícone de usuário */
 .login-user-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid var(--white);
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 0.75rem;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1.5px solid var(--white) !important;
+    border-radius: 50% !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    font-size: 0.7rem !important;
+    margin-right: 8px !important;
+    flex-shrink: 0 !important;
 }
 
 /* Menu Dropdown de resultados flutuante */

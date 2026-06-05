@@ -2597,13 +2597,34 @@ async function verificarSessao() {
         // Carregar alertas/campanhas apenas após login
         carregarCampanhasHome();
     } else {
-        // Criar botão de login padrão modernizado
-        const loginBtnHTML = `
-            <button class="btn-auth btn-login-modern" onclick="abrirModalLogin()">
-                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>Login
+        // Criar botões de login padrão e cadastro
+        const isIndex = window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
+        const isMapas = window.location.pathname.includes('mapas.html');
+        
+        let loginClick = "abrirModalAuth();";
+        let cadastroClick = "abrirModalAuth('cadastro');";
+        
+        if (isIndex) {
+            loginClick = "abrirModalLogin();";
+            cadastroClick = "abrirModalCadastro();";
+        } else if (isMapas) {
+            loginClick = "window.location.href='index.html';";
+        }
+        
+        let buttonsHTML = `
+            <button class="btn-auth btn-login-modern" onclick="${loginClick}">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>
+                <span style="margin-left: 2px;">Login</span>
             </button>
         `;
-        navAuth.insertAdjacentHTML('beforeend', loginBtnHTML);
+        
+        if (!isMapas) {
+            buttonsHTML += `
+                <button class="btn-auth btn-cadastro" onclick="${cadastroClick}">CADASTRE-SE</button>
+            `;
+        }
+        
+        navAuth.insertAdjacentHTML('beforeend', buttonsHTML);
     }
 }
 
