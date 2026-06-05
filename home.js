@@ -2620,7 +2620,9 @@ async function verificarSessao() {
         
         if (!isMapas) {
             buttonsHTML += `
-                <button class="btn-auth btn-cadastro" onclick="${cadastroClick}">CADASTRE-SE</button>
+                <button class="btn-auth btn-cadastro" onclick="${cadastroClick}">
+                    <i class="fi fi-rr-user-add" style="margin-right: 8px; font-size: 0.95rem; vertical-align: middle;"></i>CADASTRE-SE
+                </button>
             `;
         }
         
