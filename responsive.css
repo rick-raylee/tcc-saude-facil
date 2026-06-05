@@ -143,8 +143,10 @@ h1, h2, h3, h4, h5, h6, p, span, .stat-numero, .stat-label {
 }
 
 html, body {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .container {
@@ -162,6 +164,8 @@ p, a, span { font-size: clamp(0.9rem, 1.1vw, 1.1rem) !important; }
 
 /* 5. CORREÇÕES DE COMPONENTES CRÍTICOS (NAVBAR INTEGRADA) */
 .navbar {
+    position: sticky !important;
+    top: 0 !important;
     min-height: 80px !important;
     height: auto !important;
     padding: 15px 5% !important;
@@ -250,7 +254,7 @@ p, a, span { font-size: clamp(0.9rem, 1.1vw, 1.1rem) !important; }
 }
 
 body {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
 }
 
 .news-slider-wrapper {
