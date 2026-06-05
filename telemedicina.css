@@ -132,10 +132,18 @@
     text-transform: uppercase;
 }
 
-.status-agendada {
+.status-agendada,
+.status-agendado {
     background: rgba(0, 242, 255, 0.1);
     color: var(--neon-cyan);
     border: 1px solid var(--neon-cyan);
+}
+
+.status-confirmada,
+.status-confirmado {
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--neon-emerald);
+    border: 1px solid var(--neon-emerald);
 }
 
 .status-em_atendimento {
@@ -149,6 +157,19 @@
     background: rgba(255, 255, 255, 0.05);
     color: #888;
     border: 1px solid #444;
+}
+
+.status-cancelada,
+.status-cancelado {
+    background: rgba(255, 118, 117, 0.1);
+    color: #ff7675;
+    border: 1px solid #d63031;
+}
+
+.status-aguardando {
+    background: rgba(255, 159, 67, 0.1);
+    color: #ff9f43;
+    border: 1px solid #ff9f43;
 }
 
 @keyframes pulseNeon {

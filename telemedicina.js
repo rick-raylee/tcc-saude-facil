@@ -128,28 +128,28 @@ async function carregarAgendaMedico() {
         
         let botaoHtml = '';
         if (c.status === 'finalizada') {
-            botaoHtml = '<button class="btn-neon-health" style="opacity:0.5; cursor:default; background:#333;">FINALIZADA</button>';
+            botaoHtml = '<button class="btn-neon-health" style="opacity:0.5; cursor:default; background:#333; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="fi fi-rr-check"></i> FINALIZADA</button>';
         } else if (diffMin > 15) {
-            botaoHtml = `<button class="btn-neon-health" style="opacity:0.6; cursor:not-allowed; background: #222;" disabled>AGUARDE (${c.hora})</button>`;
+            botaoHtml = `<button class="btn-neon-health" style="opacity:0.6; cursor:not-allowed; background: #222; display: flex; align-items: center; justify-content: center; gap: 6px;" disabled><i class="fi fi-rr-clock"></i> AGUARDE (${c.hora})</button>`;
         } else {
-            botaoHtml = `<button class="btn-neon-health pulse-neon" onclick="abrirSalaTelemedicina(${c.id})">ENTRAR NA SALA</button>`;
+            botaoHtml = `<button class="btn-neon-health pulse-neon" style="display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="abrirSalaTelemedicina(${c.id})"><i class="fi fi-rr-play"></i> ENTRAR NA SALA</button>`;
         }
 
         card.innerHTML = `
             <div class="card-header-tele">
-                <span class="status-badge status-${c.status}">${c.status.replace('_', ' ')}</span>
+                <span class="status-badge status-${(c.status || '').toLowerCase().replace('_', '-')}">${(c.status || '').toUpperCase().replace('_', ' ')}</span>
                 <span style="font-size: 0.8rem; opacity: 0.7;">#${c.id}</span>
             </div>
             <div style="display: flex; gap: 15px; align-items: center;">
-                <img src="${c.paciente_foto || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan);">
+                <img src="${c.paciente_foto || 'https://via.placeholder.com/50'}" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwYmZhNSI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNlMGYyZjEiLz48cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+';" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan); object-fit: cover;">
                 <div>
                     <h4 style="margin:0;">${c.paciente_nome}</h4>
                     <p style="margin:0; font-size:0.8rem; opacity:0.8;">CPF: ${c.paciente_cpf}</p>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-bottom: 10px;">
-                <span><i class='fi fi-rr-calendar'></i>  ${dataFmt}</span>
-                <span>⏰ ${c.hora}</span>
+                <span><i class='fi fi-rr-calendar'></i> ${dataFmt}</span>
+                <span><i class='fi fi-rr-clock'></i> ${c.hora}</span>
             </div>
             ${botaoHtml}
         `;
@@ -212,37 +212,37 @@ async function carregarConsultasPaciente() {
         
         let cancelBtnHtml = '';
         if (cancelable) {
-            cancelBtnHtml = `<button class="btn-neon-health" style="background:#ff7675; border-color:#d63031; margin-top:8px; width:100%; font-weight:bold; cursor:pointer;" onclick="window.cancelarConsultaPacienteTelemedicina(${c.id})">❌ DESMARCAR CONSULTA</button>`;
+            cancelBtnHtml = `<button class="btn-neon-health btn-cancelar-tele" style="background: rgba(214, 48, 49, 0.15); border: 1.5px solid #d63031; color: #ff7675; margin-top:8px; width:100%; font-weight:bold; cursor:pointer; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; padding: 12px; font-size: 0.9rem;" onclick="window.cancelarConsultaPacienteTelemedicina(${c.id})"><i class="fi fi-rr-cross-small"></i> DESMARCAR CONSULTA</button>`;
         }
 
         let acaoBotao = '';
         if (isTele && c.status !== 'cancelada') {
             acaoBotao = `
-                <button class="btn-neon-health" onclick="abrirSalaTelemedicina(${c.id})">ENTRAR NA SALA</button>
+                <button class="btn-neon-health" style="background: linear-gradient(135deg, #00bfa5 0%, #00796b 100%); border: none; padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: white; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0, 191, 165, 0.4);" onclick="abrirSalaTelemedicina(${c.id})"><i class="fi fi-rr-play"></i> ENTRAR NA SALA</button>
                 ${cancelBtnHtml}
             `;
         } else {
             acaoBotao = `
-                <button class="btn-neon-health" style="background: rgba(255,255,255,0.1); cursor:default; border:1px solid #444;">VER DETALHES</button>
+                <button class="btn-neon-health" style="background: rgba(255,255,255,0.1); cursor:default; border:1px solid #444; padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; color: white; font-size: 0.9rem;"><i class="fi fi-rr-search-alt"></i> VER DETALHES</button>
                 ${cancelBtnHtml}
             `;
         }
 
         card.innerHTML = `
             <div class="card-header-tele">
-                <span class="status-badge status-${c.status}">${c.status.toUpperCase()}</span>
+                <span class="status-badge status-${(c.status || '').toLowerCase().replace('_', '-')}">${(c.status || '').toUpperCase().replace('_', ' ')}</span>
                 <span class="tipo-badge ${tipoClass}" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: rgba(0,255,255,0.1); color: var(--neon-cyan); border: 1px solid var(--neon-cyan);">${tipoIcon}</span>
             </div>
             <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-                <img src="${c.medico_foto || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan);">
+                <img src="${c.medico_foto || 'https://via.placeholder.com/50'}" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwYmZhNSI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNlMGYyZjEiLz48cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+';" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan); object-fit: cover;">
                 <div>
                     <h4 style="margin:0;">${c.medico || 'Médico'}</h4>
                     <p style="margin:0; font-size:0.8rem; opacity:0.8;">${c.especialidade || 'Clínico Geral'}</p>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-bottom: 10px;">
-                <span>📅 ${dataFmt}</span>
-                <span>⏰ ${c.hora}</span>
+                <span><i class="fi fi-rr-calendar"></i> ${dataFmt}</span>
+                <span><i class="fi fi-rr-clock"></i> ${c.hora}</span>
             </div>
             ${acaoBotao}
         `;
