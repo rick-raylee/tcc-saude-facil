@@ -510,6 +510,13 @@ async function generateTicket() {
         }
     }
 
+    const finalMedicoNome = wizardState.doctor.name;
+    const finalEspecialidade = wizardState.specialty;
+    const finalData = wizardState.date;
+    const finalHora = wizardState.time;
+    const finalModalidade = 'telemedicina';
+    const finalUnidade = 'Telemedicina Virtual';
+
     container.innerHTML = `
         <div class="ticket-container">
             <h2><i class='fi fi-rr-party-horn'></i>  Agendado com Sucesso!</h2>
@@ -517,16 +524,31 @@ async function generateTicket() {
                 <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
                     <div style="background: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i class='fi fi-rr-stethoscope'></i> </div>
                     <div>
-                        <strong style="color: #004b82; font-size: 1.2rem;">${wizardState.doctor.name}</strong><br>
-                        <span style="color: #555; font-size: 0.95rem;">${wizardState.specialty}</span>
+                        <strong style="color: #004b82; font-size: 1.2rem;">${finalMedicoNome}</strong><br>
+                        <span style="color: #555; font-size: 0.95rem;">${finalEspecialidade}</span>
                     </div>
                 </div>
                 <div style="display: flex; gap: 30px; border-top: 1px solid rgba(0,75,130,0.1); padding-top: 15px;">
                     <div><small style="color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;"><i class='fi fi-rr-calendar'></i>  Data</small><br><strong style="font-size: 1.1rem; color: #333;">${dateFormatted}</strong></div>
-                    <div><small style="color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">⏰ Horário</small><br><strong style="font-size: 1.1rem; color: #333;">${wizardState.time}</strong></div>
+                    <div><small style="color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">⏰ Horário</small><br><strong style="font-size: 1.1rem; color: #333;">${finalHora}</strong></div>
                 </div>
             </div>
             ${buttonHtml}
+
+            <!-- Integração WhatsApp & Agenda -->
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
+                <button onclick="notificarWhatsApp('${finalMedicoNome.replace(/'/g, "\\'")}', '${finalEspecialidade.replace(/'/g, "\\'")}', '${finalData}', '${finalHora}', '${finalModalidade}')" style="background: #25d366; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); transition: all 0.2s; width: 100%;">
+                    💬 Enviar Confirmação p/ WhatsApp
+                </button>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <a href="${gerarLinkGoogleCalendar('Consulta: ' + finalMedicoNome, finalData, finalHora, finalModalidade, finalUnidade)}" target="_blank" style="flex: 1; background: #4285f4; color: white; border-radius: 8px; padding: 12px; font-weight: bold; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.2); text-align: center;">
+                        📅 Google Calendar
+                    </a>
+                    <button onclick="baixarICS('Consulta: ${finalMedicoNome.replace(/'/g, "\\'")}', '${finalData}', '${finalHora}', '${finalModalidade}', '${finalUnidade}')" style="flex: 1; background: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        📥 Baixar .ICS
+                    </button>
+                </div>
+            </div>
             
             <style>
                 @keyframes pulseWarning {
@@ -1092,4 +1114,84 @@ window.sairDaChamada = function () {
     document.getElementById('sala-telemedicina').style.display = 'none';
     alert("Você saiu da consulta de telemedicina.");
     window.location.href = 'perfil.html';
+}
+
+// ── UTILS PARA CALENDÁRIO E NOTIFICAÇÃO ───────────────────────
+function gerarLinkGoogleCalendar(titulo, dataStr, horaStr, tipo, local) {
+    const d = dataStr.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const details = encodeURIComponent(`Consulta agendada pelo Portal Saúde Digital.\nModalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}\nLocal: ${local}`);
+    const title = encodeURIComponent(titulo);
+    
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${encodeURIComponent(local)}`;
+}
+
+function baixarICS(titulo, dataStr, horaStr, tipo, local) {
+    const d = dataStr.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Portal Saude Digital//NONSGML v1.0//PT
+BEGIN:VEVENT
+UID:${Date.now()}@saudefacil.com
+DTSTAMP:${start}
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${titulo}
+DESCRIPTION:Consulta agendada pelo Portal Saúde Digital.\\nModalidade: ${tipo === 'telemedicina' ? 'Remota' : 'Presencial'}\\nLocal: ${local}
+LOCATION:${local}
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'consulta_agendada.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function notificarWhatsApp(nomeMedico, especialidade, dataStr, horaStr, tipo) {
+    const tel = localStorage.getItem('usuarioTelefone') || '';
+    const cleanTel = tel.replace(/\D/g, '');
+    const dataFmt = dataStr.split('-').reverse().join('/');
+    
+    const msg = `Olá! Sua consulta no Portal Saúde Fácil está confirmada!
+🏥 Especialidade: ${especialidade}
+👨‍⚕️ Profissional: ${nomeMedico}
+📅 Data: ${dataFmt}
+⏰ Horário: ${horaStr}
+📍 Modalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}
+Obrigado por utilizar o Portal Saúde Digital!`;
+
+    const encoded = encodeURIComponent(msg);
+    const url = cleanTel ? `https://wa.me/55${cleanTel}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    window.open(url, '_blank');
 }

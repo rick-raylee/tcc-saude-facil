@@ -47,25 +47,29 @@ async function carregarAgendamentos() {
 
     if (!agendamentos || agendamentos.length === 0) {
         agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
-        // Filtrar apenas agendamentos do médico se mockado
-        agendamentos = agendamentos.filter(a => a.status === 'Agendado' || a.status === 'confirmada');
     }
 
+    // Filtrar apenas agendamentos ativos (não cancelados)
+    const ativos = agendamentos.filter(a => {
+        const s = (a.status || '').toLowerCase();
+        return s !== 'cancelada' && s !== 'cancelado';
+    });
+
     lista.innerHTML = '';
-    if (agendamentos.length === 0) {
-        lista.innerHTML = '<li class="empty-state" style="padding:10px; color:#999;">Nenhum agendimento futuro.</li>';
+    if (ativos.length === 0) {
+        lista.innerHTML = '<li class="empty-state" style="padding:10px; color:#999;">Nenhum agendamento futuro.</li>';
         return;
     }
 
-    agendamentos.forEach(ag => {
+    ativos.forEach(ag => {
         const item = document.createElement('li');
         item.className = 'agendamento-item';
         item.style = 'padding:10px; border-bottom:1px solid #eee; cursor:pointer; background:#e3f2fd; border-radius:6px; margin-bottom:5px;';
 
         item.onclick = () => {
             const pac = {
-                nome: ag.paciente_nome || ag.paciente?.nome || 'Paciente',
-                cpf: ag.paciente_cpf || ag.paciente?.cpf || '',
+                nome: ag.paciente_nome || ag.paciente?.nome || ag.paciente || 'Paciente',
+                cpf: ag.paciente_cpf || ag.paciente?.cpf || ag.cpf || '',
                 sus: ag.paciente_sus || ag.paciente?.sus || '',
                 queixa: ag.queixa,
                 tipo: ag.tipo
@@ -73,20 +77,174 @@ async function carregarAgendamentos() {
             carregarFichaPaciente(pac);
         };
 
-        const tipoIcon = (ag.tipo || '').toLowerCase() === 'telemedicina' ? '📹' : '<i class=\"fi fi-rr-hospital\"></i> ';
+        const tipoIcon = (ag.tipo || '').toLowerCase() === 'telemedicina' ? '📹' : '<i class="fi fi-rr-hospital"></i> ';
+        const tituloConsulta = `Consulta: ${ag.paciente_nome || ag.paciente?.nome || ag.paciente || 'Paciente'}`;
+        const localConsulta = (ag.tipo || '').toLowerCase() === 'telemedicina' ? 'Telemedicina Virtual' : 'Consultório Médico - Portal Saúde Digital';
+        
+        // Google Calendar & ICS links
+        const googleLink = gerarLinkGoogleCalendar(tituloConsulta, ag.data, ag.hora, ag.tipo, localConsulta);
+
         item.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong>${ag.data}</strong>
                 <span style="font-size:0.8rem; background:#fff; padding:2px 6px; border-radius:4px;">${ag.hora}</span>
             </div>
             <div style="font-size:0.9rem; color:#004b82; margin-top:4px;">
-                ${tipoIcon} ${ag.paciente_nome || ag.paciente?.nome || 'Paciente'}
+                ${tipoIcon} ${ag.paciente_nome || ag.paciente?.nome || ag.paciente || 'Paciente'}
             </div>
-            <div style="font-size:0.8rem; color:#666;">${ag.especialidade}</div>
+            <div style="font-size:0.8rem; color:#666; margin-bottom: 8px;">${ag.especialidade}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed #ccc; padding-top: 8px; margin-top: 8px;" onclick="event.stopPropagation()">
+                <div style="display:flex; gap:4px;">
+                    <a href="${googleLink}" target="_blank" style="font-size:0.7rem; padding:4px 8px; border:1px solid #4285f4; color:#4285f4; text-decoration:none; font-weight:bold; border-radius:4px; background:white;">
+                        📅 Google
+                    </a>
+                    <button onclick="window.baixarICSMedico('${tituloConsulta.replace(/'/g, "\\'")}', '${ag.data}', '${ag.hora}', '${ag.tipo}', '${localConsulta.replace(/'/g, "\\'")}')" style="font-size:0.7rem; padding:4px 8px; border:1px solid #888; color:#333; border-radius:4px; background:white; cursor:pointer;">
+                        📥 .ICS
+                    </button>
+                </div>
+                <button onclick="window.cancelarConsultaMedico(${ag.id})" style="font-size:0.7rem; padding:4px 8px; border:1px solid #dc3545; color:#dc3545; background:#fff5f5; font-weight:bold; cursor:pointer; border-radius:4px;">
+                    ❌ Desmarcar
+                </button>
+            </div>
         `;
         lista.appendChild(item);
     });
 }
+
+// Helpers para calendário do médico
+function formatToISODate(dateStr) {
+    if (!dateStr) return '';
+    if (dateStr.includes('-')) {
+        return dateStr;
+    }
+    if (dateStr.includes('/')) {
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+    }
+    return dateStr;
+}
+
+function gerarLinkGoogleCalendar(titulo, dataStr, horaStr, tipo, local) {
+    const isoData = formatToISODate(dataStr);
+    const d = isoData.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const details = encodeURIComponent(`Consulta agendada pelo Portal Saúde Digital.\nModalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}\nLocal: ${local}`);
+    const title = encodeURIComponent(titulo);
+    
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${encodeURIComponent(local)}`;
+}
+
+function baixarICSMedico(titulo, dataStr, horaStr, tipo, local) {
+    const isoData = formatToISODate(dataStr);
+    const d = isoData.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Portal Saude Digital//NONSGML v1.0//PT
+BEGIN:VEVENT
+UID:${Date.now()}@saudefacil.com
+DTSTAMP:${start}
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${titulo}
+DESCRIPTION:Consulta agendada pelo Portal Saúde Digital.\\nModalidade: ${tipo === 'telemedicina' ? 'Remota' : 'Presencial'}\\nLocal: ${local}
+LOCATION:${local}
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'consulta_medico.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+window.gerarLinkGoogleCalendar = gerarLinkGoogleCalendar;
+window.baixarICSMedico = baixarICSMedico;
+
+window.cancelarConsultaMedico = async function(id) {
+    if (typeof API === 'undefined') return;
+
+    const result = await Swal.fire({
+        title: 'Desmarcar Consulta?',
+        text: 'Você tem certeza que deseja cancelar esta consulta agendada?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, Desmarcar',
+        cancelButtonText: 'Não, manter agendamento'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const resp = await API.cancelarConsulta(id);
+        if (resp && resp.sucesso) {
+            // Atualizar cópia local do localStorage se existir
+            try {
+                const localS = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+                const updated = localS.map(a => {
+                    if (a.id == id || a.dataRaw === id) {
+                        a.status = 'cancelada';
+                    }
+                    return a;
+                });
+                localStorage.setItem('agendamentos', JSON.stringify(updated));
+            } catch (e) {
+                console.warn("Erro ao atualizar localStorage na desmarcação:", e);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cancelada!',
+                text: 'A consulta foi desmarcada com sucesso.',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao desmarcar consulta.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao desmarcar',
+            text: err.message || 'Ocorreu um erro ao tentar desmarcar a consulta.'
+        });
+    }
+};
 
 function verificarAcessoMedico() {
     const isLogado = localStorage.getItem('usuarioLogado') === 'true';

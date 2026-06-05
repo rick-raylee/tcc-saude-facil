@@ -1580,6 +1580,7 @@ async function finalizarLogin(event) {
             localStorage.setItem('usuarioCpf', u.cpf);
             localStorage.setItem('usuarioSUS', u.sus || '');
             localStorage.setItem('usuarioId', u.id);
+            localStorage.setItem('usuarioTelefone', u.telefone || '');
 
             Swal.fire({
                 icon: 'success',
@@ -1924,9 +1925,9 @@ async function finalizarCadastro(event) {
             formData.append('cpf', cpf);
             formData.append('senha', senha);
             formData.append('tipo', tipoCadastro);
-            formData.append('telefone', '');
-            formData.append('cidade', '');
-            formData.append('bairro', '');
+            formData.append('telefone', telefone);
+            formData.append('cidade', cidade);
+            formData.append('bairro', bairro);
 
             // Tratar imagem
             const tipoFotoEl = document.querySelector('input[name="tipo-foto"]:checked');
