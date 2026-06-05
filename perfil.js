@@ -394,14 +394,14 @@ function renderizarMinhasConsultas(consultas) {
                     <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; border-top: 1px dashed #ddd; padding-top: 12px;">
                         <div style="display: flex; gap: 6px;">
                             <a href="${googleLink}" target="_blank" style="font-size:0.75rem; padding: 6px 10px; border: 1px solid #4285f4; color: #4285f4; display: flex; align-items: center; gap: 4px; text-decoration: none; font-weight: bold; border-radius: 4px; background: white;">
-                                📅 Google Calendar
+                                <i class="fi fi-rr-calendar"></i> Google Calendar
                             </a>
                             <button onclick="window.baixarICS('${tituloConsulta.replace(/'/g, "\\'")}', '${c.data}', '${c.hora}', '${c.tipo}', '${localConsulta.replace(/'/g, "\\'")}')" style="font-size:0.75rem; padding: 6px 10px; border: 1px solid #888; color: #333; display: flex; align-items: center; gap: 4px; border-radius: 4px; background: white; cursor: pointer;">
-                                📥 .ICS
+                                <i class="fi fi-rr-download"></i> .ICS
                             </button>
                         </div>
                         <button onclick="window.cancelarConsultaPaciente(${c.id})" style="font-size:0.75rem; padding: 6px 10px; border: 1px solid #dc3545; color: #dc3545; background: #fff5f5; font-weight: bold; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 4px;">
-                            ❌ Desmarcar
+                            <i class="fi fi-rr-cross-small"></i> Desmarcar
                         </button>
                     </div>
                 `;
@@ -417,7 +417,7 @@ function renderizarMinhasConsultas(consultas) {
                 <div style="font-size:0.9rem; color:#666; margin-bottom: 8px;"><i class='fi fi-rr-clipboard-list'></i>  ${c.especialidade || 'Consulta Médica'} • ${c.tipo}</div>
                 <div style="display: flex; gap: 20px; margin-bottom: 10px; font-size: 0.95rem; background:#f4f7f6; padding:8px; border-radius:6px;">
                     <div><i class='fi fi-rr-calendar'></i>  <strong>${diaFmt}</strong></div>
-                    <div>⏰ <strong>${c.hora || ''}</strong></div>
+                    <div><i class='fi fi-rr-clock'></i> <strong>${c.hora || ''}</strong></div>
                 </div>
                 ${actionHtml}
                 ${syncAndCancelHtml}

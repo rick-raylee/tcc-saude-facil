@@ -64,8 +64,8 @@
                 <button class="btn-action outline" style="border-color: #0288d1; color: #0288d1; font-weight: bold;" id="btn-registro-telemedicina" onclick="solicitarRegistroTelemedicina()">
                     <i class="fi fi-rr-laptop"></i>  Ativar Telemedicina
                 </button>
-                <button class="btn-action outline" onclick="logout()">
-                    🚪 Sair
+                <button class="btn-action outline" style="border-color: #dc3545; color: #dc3545;" onclick="logout()">
+                    <i class="fi fi-rr-exit" style="margin-right: 6px;"></i>Sair
                 </button>
             </div>
         </section>
@@ -98,7 +98,7 @@
                         <span class="label">Telemedicina</span>
                     </button>
                     <button class="btn-quick" onclick="abrirExames()">
-                        <span class="icon">🧪</span>
+                        <span class="icon"><i class="fi fi-rr-flask"></i></span>
                         <span class="label">Resultados de Exames</span>
                     </button>
                     <button class="btn-quick" onclick="window.location.href='campanhas.html'">
@@ -159,7 +159,7 @@
 
             <!-- HISTÓRICO DE CONSULTAS (TERCEIRO) -->
             <section class="dashboard-card history-card">
-                <h2>📂 Histórico de Atendimentos</h2>
+                <h2><i class="fi fi-rr-folder"></i> Histórico de Atendimentos</h2>
                 <div class="timeline" id="history-list">
                     <!-- Itens do histórico serão inseridos via JS -->
                     <div class="loading-spinner">Carregando histórico...</div>
@@ -213,7 +213,7 @@
                     <span id="booklet-name-small">PACIENTE</span> • <span id="booklet-sus-small">CNS ...</span>
                 </div>
                 <div class="booklet-section-title pending">
-                    <h4>⏳ Próximas Vacinas (Pendentes)</h4>
+                    <h4><i class="fi fi-rr-hourglass" style="margin-right: 6px;"></i>Próximas Vacinas (Pendentes)</h4>
                 </div>
                 <div class="booklet-list" id="booklet-list-pendentes">
                     <!-- Lista de vacinas pendentes preenchida via JS -->
@@ -258,36 +258,36 @@
     <div id="modalExames" class="modal-booklet-overlay">
         <div class="modal-content-simple">
             <button class="btn-fechar-simple" onclick="fecharExames()">✕</button>
-            <h2>📑 Resultados de Exames</h2>
+            <h2><i class="fi fi-rr-document"></i> Resultados de Exames</h2>
             <div class="exam-list-container">
                 <div class="exam-item">
-                    <div class="exam-icon">📄</div>
+                    <div class="exam-icon"><i class="fi fi-rr-file-medical-alt"></i></div>
                     <div class="exam-info">
                         <strong>Hemograma Completo</strong>
                         <span>Data: 20/12/2025 • Lab. Central</span>
                     </div>
-                    <button class="btn-download" onclick="alert('📥 Baixando PDF: Hemograma_Completo.pdf...')">
-                        ⬇ PDF
+                    <button class="btn-download" onclick="alert('Baixando PDF: Hemograma_Completo.pdf...')">
+                        <i class="fi fi-rr-download" style="margin-right: 4px;"></i>PDF
                     </button>
                 </div>
                 <div class="exam-item">
-                    <div class="exam-icon">📄</div>
+                    <div class="exam-icon"><i class="fi fi-rr-file-medical-alt"></i></div>
                     <div class="exam-info">
                         <strong>Raio-X de Tórax</strong>
                         <span>Data: 15/01/2026 • Hospital Municipal</span>
                     </div>
-                    <button class="btn-download" onclick="alert('📥 Baixando PDF: RaioX_Torax.pdf...')">
-                        ⬇ PDF
+                    <button class="btn-download" onclick="alert('Baixando PDF: RaioX_Torax.pdf...')">
+                        <i class="fi fi-rr-download" style="margin-right: 4px;"></i>PDF
                     </button>
                 </div>
                 <div class="exam-item">
-                    <div class="exam-icon">📄</div>
+                    <div class="exam-icon"><i class="fi fi-rr-file-medical-alt"></i></div>
                     <div class="exam-info">
                         <strong>Glicemia em Jejum</strong>
                         <span>Data: 10/02/2026 • Lab. Central</span>
                     </div>
-                    <button class="btn-download" onclick="alert('📥 Baixando PDF: Glicemia_Jejum.pdf...')">
-                        ⬇ PDF
+                    <button class="btn-download" onclick="alert('Baixando PDF: Glicemia_Jejum.pdf...')">
+                        <i class="fi fi-rr-download" style="margin-right: 4px;"></i>PDF
                     </button>
                 </div>
             </div>
