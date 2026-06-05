@@ -2,6 +2,18 @@
 // HOME.JS - JavaScript para Carousel e Modal de Notícias
 // ====================================================================
 
+// Efeito de rolagem na Navbar (Shrink e mudança de estilo)
+window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar') || document.querySelector('.navbar');
+    if (navbar) {
+        if (window.scrollY > 30) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    }
+});
+
 // Inicializar carousel e componentes quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('Página carregada, iniciando componentes...');
