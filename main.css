@@ -5867,11 +5867,32 @@ i[class^='fi'] {
     border-color: #dc3545 !important;
 }
 
+.swal2-icon.swal2-error .swal2-x-mark {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
 .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+    display: block !important;
+    position: absolute !important;
+    top: 37px !important;
+    width: 47px !important;
+    height: 5px !important;
+    border-radius: 2px !important;
     background-color: #dc3545 !important;
     z-index: 100 !important;
-    opacity: 1 !important;
-    display: block !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark-line-left {
+    left: 17px !important;
+    transform: rotate(45deg) !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark-line-right {
+    right: 16px !important;
+    transform: rotate(-45deg) !important;
 }
 
 /* ==========================================================================
