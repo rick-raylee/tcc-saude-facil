@@ -135,12 +135,21 @@ async function initAdmin() {
 } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initAdmin); } else { initAdmin(); }
 
 function logoutAdmin() {
-    if (typeof API !== 'undefined') API.logout();
-    localStorage.removeItem('adminLogado');
-    localStorage.removeItem('usuarioLogado');
-    localStorage.removeItem('usuarioNome');
-    localStorage.removeItem('tipoUsuario');
-    window.location.replace('/');
+    if (typeof API !== 'undefined') {
+        API.logout().finally(() => {
+            localStorage.removeItem('adminLogado');
+            localStorage.removeItem('usuarioLogado');
+            localStorage.removeItem('usuarioNome');
+            localStorage.removeItem('tipoUsuario');
+            window.location.replace('/');
+        });
+    } else {
+        localStorage.removeItem('adminLogado');
+        localStorage.removeItem('usuarioLogado');
+        localStorage.removeItem('usuarioNome');
+        localStorage.removeItem('tipoUsuario');
+        window.location.replace('/');
+    }
 }
 
 async function mudarSecao(secaoId, push = true) {

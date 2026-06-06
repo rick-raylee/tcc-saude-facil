@@ -109,11 +109,19 @@ function carregarDadosEnfermeiro() {
 }
 
 function sairPainel() {
-    if (typeof API !== 'undefined') API.logout();
-    localStorage.removeItem('usuarioLogado');
-    localStorage.removeItem('tipoUsuario');
-    localStorage.removeItem('usuarioNome');
-    window.location.replace('/');
+    if (typeof API !== 'undefined') {
+        API.logout().finally(() => {
+            localStorage.removeItem('usuarioLogado');
+            localStorage.removeItem('tipoUsuario');
+            localStorage.removeItem('usuarioNome');
+            window.location.replace('/');
+        });
+    } else {
+        localStorage.removeItem('usuarioLogado');
+        localStorage.removeItem('tipoUsuario');
+        localStorage.removeItem('usuarioNome');
+        window.location.replace('/');
+    }
 }
 
 let pacienteNovo = false;

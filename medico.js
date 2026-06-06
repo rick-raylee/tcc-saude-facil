@@ -1052,9 +1052,19 @@ function carregarObservacoes() {
 }
 
 function logoutMedico() {
-    localStorage.removeItem('usuarioLogado');
-    localStorage.removeItem('tipoUsuario');
-    window.location.href = 'index.html';
+    if (typeof API !== 'undefined') {
+        API.logout().finally(() => {
+            localStorage.removeItem('usuarioLogado');
+            localStorage.removeItem('tipoUsuario');
+            localStorage.removeItem('usuarioNome');
+            window.location.replace('/');
+        });
+    } else {
+        localStorage.removeItem('usuarioLogado');
+        localStorage.removeItem('tipoUsuario');
+        localStorage.removeItem('usuarioNome');
+        window.location.replace('/');
+    }
 }
 // ... (Existing code)
 
