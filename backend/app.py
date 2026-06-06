@@ -320,6 +320,25 @@ def migrar_schema_admin():
     cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('portal_subtitulo', 'A saúde de Cascavel ao alcance de um clique. Agendamentos, telemedicina, campanhas e muito mais.')")
     cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('google_analytics_id', '')")
 
+    import json
+    especialidades_padrao = [
+        {"id": "clinico", "nome": "Clínica Geral", "icon": "fi fi-rr-stethoscope", "desc": "Atendimento geral, preventivos e exames de rotina."},
+        {"id": "cardiologia", "nome": "Cardiologia", "icon": "fi fi-rr-heart", "desc": "Saúde do coração, eletrocardiogramas e hipertensão."},
+        {"id": "pediatria", "nome": "Pediatria", "icon": "fi fi-rr-teddy-bear", "desc": "Saúde e acompanhamento infantil e de adolescentes."},
+        {"id": "ginecologia", "nome": "Ginecologia", "icon": "fi fi-rr-venus", "desc": "Saúde feminina, preventivo e acompanhamento gestacional."},
+        {"id": "dermatologia", "nome": "Dermatologia", "icon": "fi fi-rr-opacity", "desc": "Cuidados com a pele, alergias, cabelos e unhas."},
+        {"id": "ortopedia", "nome": "Ortopedia", "icon": "fi fi-rr-bone", "desc": "Ossos, articulações e lesões musculoesqueléticas."},
+        {"id": "neurologia", "nome": "Neurologia", "icon": "fi fi-rr-brain", "desc": "Cérebro, sistema nervoso e distúrbios neurológicos."},
+        {"id": "oftalmologia", "nome": "Oftalmologia", "icon": "fi fi-rr-eye", "desc": "Saúde ocular, exames de vista e refração."},
+        {"id": "psicologia", "nome": "Psicologia", "icon": "fi fi-rr-head-side-brain", "desc": "Terapia, suporte emocional e bem-estar mental."},
+        {"id": "nutricao", "nome": "Nutrição", "icon": "fi fi-rr-apple-whole", "desc": "Planos alimentares, emagrecimento e reeducação alimentar."},
+        {"id": "fisioterapia", "nome": "Fisioterapia", "icon": "fi fi-rr-running", "desc": "Reabilitação física, pilates e alívio de dores."},
+        {"id": "odontologia", "nome": "Odontologia", "icon": "fi fi-rr-tooth", "desc": "Saúde bucal, limpeza, tratamento de canal e cáries."},
+        {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia", "icon": "fi fi-rr-ear", "desc": "Tratamento de ouvido, nariz, garganta e labirintite."}
+    ]
+    cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('portal_especialidades', ?)", (json.dumps(especialidades_padrao),))
+
+
     # Seed de campanhas reais se a tabela estiver vazia
     try:
         cur.execute("SELECT COUNT(*) FROM campanhas")

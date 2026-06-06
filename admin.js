@@ -323,6 +323,16 @@ async function carregarSettings() {
         document.getElementById('settings-portal-titulo').value = settings.portal_titulo || '';
         document.getElementById('settings-portal-subtitulo').value = settings.portal_subtitulo || '';
         document.getElementById('settings-ga-id').value = settings.google_analytics_id || '';
+        
+        try {
+            localEspecialidades = JSON.parse(settings.portal_especialidades || '[]');
+        } catch (e) {
+            localEspecialidades = getEspecialidadesPadrao();
+        }
+        if (!localEspecialidades || localEspecialidades.length === 0) {
+            localEspecialidades = getEspecialidadesPadrao();
+        }
+        renderListaEspecialidadesAdmin();
     } else {
         Swal.fire({
             icon: 'error',
@@ -2096,6 +2106,168 @@ async function deletarNotificacaoAdmin(id) {
     }
 }
 
+// --- GERENCIAMENTO DE ESPECIALIDADES ---
+let localEspecialidades = [];
+
+function getEspecialidadesPadrao() {
+    return [
+        {"id": "clinico", "nome": "Clínica Geral", "icon": "fi fi-rr-stethoscope", "desc": "Atendimento geral, preventivos e exames de rotina."},
+        {"id": "cardiologia", "nome": "Cardiologia", "icon": "fi fi-rr-heart", "desc": "Saúde do coração, eletrocardiogramas e hipertensão."},
+        {"id": "pediatria", "nome": "Pediatria", "icon": "fi fi-rr-teddy-bear", "desc": "Saúde e acompanhamento infantil e de adolescentes."},
+        {"id": "ginecologia", "nome": "Ginecologia", "icon": "fi fi-rr-venus", "desc": "Saúde feminina, preventivo e acompanhamento gestacional."},
+        {"id": "dermatologia", "nome": "Dermatologia", "icon": "fi fi-rr-opacity", "desc": "Cuidados com a pele, alergias, cabelos e unhas."},
+        {"id": "ortopedia", "nome": "Ortopedia", "icon": "fi fi-rr-bone", "desc": "Ossos, articulações e lesões musculoesqueléticas."},
+        {"id": "neurologia", "nome": "Neurologia", "icon": "fi fi-rr-brain", "desc": "Cérebro, sistema nervoso e distúrbios neurológicos."},
+        {"id": "oftalmologia", "nome": "Oftalmologia", "icon": "fi fi-rr-eye", "desc": "Saúde ocular, exames de vista e refração."},
+        {"id": "psicologia", "nome": "Psicologia", "icon": "fi fi-rr-head-side-brain", "desc": "Terapia, suporte emocional e bem-estar mental."},
+        {"id": "nutricao", "nome": "Nutrição", "icon": "fi fi-rr-apple-whole", "desc": "Planos alimentares, emagrecimento e reeducação alimentar."},
+        {"id": "fisioterapia", "nome": "Fisioterapia", "icon": "fi fi-rr-running", "desc": "Reabilitação física, pilates e alívio de dores."},
+        {"id": "odontologia", "nome": "Odontologia", "icon": "fi fi-rr-tooth", "desc": "Saúde bucal, limpeza, tratamento de canal e cáries."},
+        {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia", "icon": "fi fi-rr-ear", "desc": "Tratamento de ouvido, nariz, garganta e labirintite."}
+    ];
+}
+
+function renderListaEspecialidadesAdmin() {
+    const listContainer = document.getElementById('lista-especialidades-admin');
+    if (!listContainer) return;
+    
+    if (!localEspecialidades || localEspecialidades.length === 0) {
+        listContainer.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#666;">Nenhuma especialidade cadastrada.</td></tr>';
+        return;
+    }
+    
+    listContainer.innerHTML = '';
+    localEspecialidades.forEach((esp, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="padding:12px; border-bottom:1px solid #eee; text-align:center;"><i class="${esp.icon || 'fi fi-rr-stethoscope'}" style="font-size:1.4rem; color:#00bfa5;"></i></td>
+            <td style="padding:12px; border-bottom:1px solid #eee; font-weight:bold; color:#333;">${esp.nome}</td>
+            <td style="padding:12px; border-bottom:1px solid #eee; font-family:monospace; font-size:0.85rem; color:#666;">${esp.id}</td>
+            <td style="padding:12px; border-bottom:1px solid #eee; font-size:0.85rem; color:#666;">${esp.desc || ''}</td>
+            <td style="padding:12px; border-bottom:1px solid #eee; text-align:center; white-space:nowrap;">
+                <button class="btn-action-admin edit" onclick="editarEspecialidade(${index})" style="background:#e0f2fe; color:#0369a1; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; margin-right:6px;"><i class="fi fi-rr-edit"></i></button>
+                <button class="btn-action-admin delete" onclick="excluirEspecialidade(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;"><i class="fi fi-rr-trash"></i></button>
+            </td>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+function abrirModalEspecialidade(editIndex) {
+    const isEdit = typeof editIndex === 'number';
+    const esp = isEdit ? localEspecialidades[editIndex] : null;
+    
+    const modal = document.getElementById('modal-admin');
+    const form = document.getElementById('form-admin');
+    document.getElementById('modal-title').textContent = isEdit ? 'Editar Especialidade' : 'Nova Especialidade';
+    
+    form.innerHTML = `
+        <input type="hidden" id="esp-index" value="${isEdit ? editIndex : ''}">
+        <div style="margin-bottom: 15px; text-align: left;">
+            <label style="display:block; font-weight:600; margin-bottom:5px; color:#555; font-size:0.85rem;">Nome da Especialidade</label>
+            <input type="text" id="esp-nome" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box;" value="${esp ? esp.nome : ''}" placeholder="Ex: Ginecologia">
+        </div>
+        <div style="margin-bottom: 15px; text-align: left;">
+            <label style="display:block; font-weight:600; margin-bottom:5px; color:#555; font-size:0.85rem;">ID / Chave (lowercase, sem espaços)</label>
+            <input type="text" id="esp-id" required ${isEdit ? 'disabled' : ''} style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box;" value="${esp ? esp.id : ''}" placeholder="Ex: ginecologia">
+        </div>
+        <div style="margin-bottom: 15px; text-align: left;">
+            <label style="display:block; font-weight:600; margin-bottom:5px; color:#555; font-size:0.85rem;">Classe do Ícone FlatIcon</label>
+            <input type="text" id="esp-icon" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box;" value="${esp ? esp.icon : 'fi fi-rr-stethoscope'}" placeholder="Ex: fi fi-rr-heart">
+        </div>
+        <div style="margin-bottom: 20px; text-align: left;">
+            <label style="display:block; font-weight:600; margin-bottom:5px; color:#555; font-size:0.85rem;">Descrição curta</label>
+            <textarea id="esp-desc" rows="3" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box; font-family:inherit;" placeholder="Digite uma breve descrição para a home...">${esp ? esp.desc : ''}</textarea>
+        </div>
+        <div style="text-align: right; gap: 10px; display: flex; justify-content: flex-end; margin-top:20px;">
+            <button type="button" onclick="fecharModalAdmin()" style="background: #e2e8f0; color:#475569; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
+            <button type="submit" style="background: #00bfa5; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">Salvar</button>
+        </div>
+    `;
+    
+    form.onsubmit = function(event) {
+        event.preventDefault();
+        salvarEspecialidade();
+    };
+    
+    modal.style.display = 'flex';
+}
+
+async function salvarEspecialidade() {
+    const indexVal = document.getElementById('esp-index').value;
+    const isEdit = indexVal !== '';
+    const nome = document.getElementById('esp-nome').value.trim();
+    const id = document.getElementById('esp-id').value.trim().toLowerCase().replace(/\s+/g, '-');
+    const icon = document.getElementById('esp-icon').value.trim();
+    const desc = document.getElementById('esp-desc').value.trim();
+    
+    if (isEdit) {
+        const index = parseInt(indexVal);
+        localEspecialidades[index].nome = nome;
+        localEspecialidades[index].icon = icon;
+        localEspecialidades[index].desc = desc;
+    } else {
+        if (localEspecialidades.find(e => e.id === id)) {
+            Swal.fire({ icon: 'error', title: 'Erro', text: 'Já existe uma especialidade cadastrada com esta chave/ID.' });
+            return;
+        }
+        localEspecialidades.push({ id, nome, icon, desc });
+    }
+    
+    try {
+        if (typeof API === 'undefined') return;
+        const resp = await API.salvarSettings({
+            portal_especialidades: JSON.stringify(localEspecialidades)
+        });
+        if (resp && !resp.erro) {
+            Swal.fire({ icon: 'success', title: 'Sucesso', text: 'Especialidade salva com sucesso!' });
+            fecharModalAdmin();
+            renderListaEspecialidadesAdmin();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Erro', text: resp.erro || 'Falha ao salvar no banco.' });
+        }
+    } catch (err) {
+        console.error("Falha ao salvar especialidades:", err);
+        Swal.fire({ icon: 'error', title: 'Falha na Conexão', text: err.message });
+    }
+}
+
+function editarEspecialidade(index) {
+    abrirModalEspecialidade(index);
+}
+
+function excluirEspecialidade(index) {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Tem certeza?',
+        text: `Deseja remover a especialidade "${localEspecialidades[index].nome}"? Isso a removerá de todos os agendamentos.`,
+        showCancelButton: true,
+        confirmButtonText: 'Sim, Excluir',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#b91c1c',
+        cancelButtonColor: '#888'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            localEspecialidades.splice(index, 1);
+            try {
+                if (typeof API === 'undefined') return;
+                const resp = await API.salvarSettings({
+                    portal_especialidades: JSON.stringify(localEspecialidades)
+                });
+                if (resp && !resp.erro) {
+                    Swal.fire({ icon: 'success', title: 'Excluído', text: 'Especialidade removida com sucesso!' });
+                    renderListaEspecialidadesAdmin();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Erro', text: resp.erro || 'Falha ao excluir.' });
+                }
+            } catch (err) {
+                console.error("Erro ao excluir especialidade:", err);
+                Swal.fire({ icon: 'error', title: 'Falha', text: err.message });
+            }
+        }
+    });
+}
+
 // Expor todas as funções globais necessárias ao escopo window para garantir a correta execução dos onclicks inline
 window.deletarNoticia = deletarNoticia;
 window.deletarSlide = deletarSlide;
@@ -2105,3 +2277,6 @@ window.rejeitarComentario = rejeitarComentario;
 window.abrirModalDoenca = abrirModalDoenca;
 window.excluirDoenca = excluirDoenca;
 window.deletarNotificacaoAdmin = deletarNotificacaoAdmin;
+window.abrirModalEspecialidade = abrirModalEspecialidade;
+window.editarEspecialidade = editarEspecialidade;
+window.excluirEspecialidade = excluirEspecialidade;

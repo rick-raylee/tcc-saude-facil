@@ -38,6 +38,19 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // 5. Verificações secundárias
         checkAppointments();
+
+        // Popular dropdowns e wizard a partir do cache imediatamente, se disponível
+        try {
+            const cached = sessionStorage.getItem('cachedSettings');
+            if (cached) {
+                const config = JSON.parse(cached);
+                popularDropdownsEspecialidades(config);
+                popularEspecialidadesWizard(config);
+            }
+        } catch (e) {
+            console.error("Falha ao carregar especialidades do cache na inicialização:", e);
+        }
+
         carregarConfiguracoesPortal().catch(err => console.error('Falha ao carregar config identidade:', err));
 
         // 6. Verificar se veio busca da URL (para a página de dúvidas)
@@ -424,6 +437,30 @@ async function carregarConfiguracoesPortal() {
                 }
                 if (subtituloEl && config.portal_subtitulo && config.portal_subtitulo.trim() !== '') {
                     subtituloEl.textContent = config.portal_subtitulo;
+                }
+                
+                // Cache settings in session storage for other pages to use without API request overhead
+                sessionStorage.setItem('cachedSettings', JSON.stringify(config));
+                
+                // Carregar especialidades dinâmicas na home
+                try {
+                    await carregarEspecialidadesDinamicas(config);
+                } catch (e) {
+                    console.error("Falha ao carregar especialidades dinâmicas:", e);
+                }
+                
+                // Popular dropdowns de especialidades nas outras páginas
+                try {
+                    popularDropdownsEspecialidades(config);
+                } catch (e) {
+                    console.error("Falha ao popular dropdowns:", e);
+                }
+
+                // Popular cards do wizard de telemedicina
+                try {
+                    popularEspecialidadesWizard(config);
+                } catch (e) {
+                    console.error("Falha ao popular especialidades no wizard:", e);
                 }
             }
         }
@@ -2059,7 +2096,7 @@ async function finalizarCadastro(event) {
             if (tipoCadastro === 'medico' || tipoCadastro === 'medico_tele') {
                 formData.set('tipo', 'medico'); // O backend recebe como base 'medico'
                 const crmEl = document.getElementById('crm');
-                const especEl = document.getElementById('especialidade');
+                const especEl = document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
                 if (crmEl) formData.append('crm', crmEl.value || '');
                 if (especEl) formData.append('especialidade', especEl.value || '');
                 
@@ -2154,7 +2191,7 @@ async function finalizarCadastro(event) {
         if (tipoCadastro === 'medico') {
             const crmEl = document.getElementById('crm');
             const crm = crmEl ? crmEl.value : '';
-            const especialidadeEl = document.getElementById('especialidade');
+            const especialidadeEl = document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
             const especialidade = especialidadeEl ? especialidadeEl.value : '';
             const tipoAtendimentoEl = document.querySelector('input[name="tipo_atendimento"]:checked');
             const tipo_atendimento = tipoAtendimentoEl ? tipoAtendimentoEl.value : 'presencial';
@@ -3450,3 +3487,138 @@ function selecionarEspecialidadeHome(especialidade) {
         });
     }
 }
+
+async function carregarEspecialidadesDinamicas(config) {
+    try {
+        const grid = document.querySelector('.especialidades-grid');
+        if (!grid) return;
+        
+        let especialidades = [];
+        if (config && config.portal_especialidades) {
+            especialidades = JSON.parse(config.portal_especialidades);
+        }
+        
+        if (!especialidades || especialidades.length === 0) {
+            return; // Se estiver vazio, usa o fallback HTML hardcoded do index
+        }
+        
+        grid.innerHTML = '';
+        especialidades.forEach(esp => {
+            const card = document.createElement('div');
+            card.className = 'especialidade-card-premium';
+            card.setAttribute('onclick', `selecionarEspecialidadeHome('${esp.id}')`);
+            
+            card.innerHTML = `
+                <div class="especialidade-icon-wrapper"><i class="${esp.icon || 'fi fi-rr-stethoscope'}"></i></div>
+                <h3>${esp.nome}</h3>
+                <p>${esp.desc || ''}</p>
+            `;
+            grid.appendChild(card);
+        });
+    } catch (e) {
+        console.error("Erro ao carregar especialidades dinâmicas:", e);
+    }
+}
+
+function popularDropdownsEspecialidades(config) {
+    let especialidades = [];
+    if (config && config.portal_especialidades) {
+        try {
+            especialidades = JSON.parse(config.portal_especialidades);
+        } catch (e) {
+            console.error("Erro ao fazer parse de portal_especialidades:", e);
+        }
+    }
+    
+    if (!especialidades || especialidades.length === 0) {
+        return;
+    }
+    
+    // 1. Popular o select de agendamento (ID especialidade, mas que NÃO seja o do cadastro)
+    const schedulingSelects = Array.from(document.querySelectorAll('select#especialidade')).filter(s => {
+        return !s.closest('#campos-medico') && !s.closest('#formCadastro');
+    });
+    
+    // Ler o parâmetro da URL para seleção
+    const urlParams = new URLSearchParams(window.location.search);
+    const espParam = urlParams.get('especialidade');
+    
+    schedulingSelects.forEach(select => {
+        const currentValue = select.value || (select.id === 'especialidade' && espParam);
+        select.innerHTML = '<option value="">Selecione...</option>';
+        especialidades.forEach(esp => {
+            const option = document.createElement('option');
+            option.value = esp.id;
+            option.textContent = esp.nome;
+            select.appendChild(option);
+        });
+        if (currentValue) {
+            select.value = currentValue;
+            // Se mudou o valor e a função de atualizar filtro existe, chama
+            if (currentValue === espParam) {
+                const selectTipo = document.getElementById('tipo-atendimento');
+                if (selectTipo) {
+                    selectTipo.value = 'consulta';
+                }
+                if (typeof atualizarFiltroMedicos === 'function') {
+                    atualizarFiltroMedicos();
+                }
+            }
+        }
+    });
+
+    // 2. Popular o select do formulário de cadastro de médicos:
+    const signupSelects = Array.from(document.querySelectorAll('select#especialidade')).filter(s => {
+        return s.closest('#campos-medico') || s.closest('#formCadastro');
+    });
+
+    signupSelects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Selecione...</option>';
+        especialidades.forEach(esp => {
+            const option = document.createElement('option');
+            option.value = esp.nome; 
+            option.textContent = esp.nome;
+            select.appendChild(option);
+        });
+        if (currentValue) {
+            select.value = currentValue;
+        }
+    });
+}
+
+function popularEspecialidadesWizard(config) {
+    const grid = document.querySelector('.grid-specialty');
+    if (!grid) return;
+
+    let especialidades = [];
+    if (config && config.portal_especialidades) {
+        try {
+            especialidades = JSON.parse(config.portal_especialidades);
+        } catch (e) {
+            console.error("Erro ao fazer parse de portal_especialidades para wizard:", e);
+        }
+    }
+
+    if (!especialidades || especialidades.length === 0) {
+        return;
+    }
+
+    grid.innerHTML = '';
+    especialidades.forEach(esp => {
+        const card = document.createElement('div');
+        card.className = 'specialty-card';
+        const escapedNome = esp.nome.replace(/'/g, "\\'");
+        card.setAttribute('onclick', `selectSpecialty('${escapedNome}')`);
+
+        card.innerHTML = `
+            <div class="specialty-icon"><i class="${esp.icon || 'fi fi-rr-stethoscope'}"></i> </div>
+            <h3>${esp.nome}</h3>
+            <p>${esp.desc || ''}</p>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+window.popularDropdownsEspecialidades = popularDropdownsEspecialidades;
+window.popularEspecialidadesWizard = popularEspecialidadesWizard;

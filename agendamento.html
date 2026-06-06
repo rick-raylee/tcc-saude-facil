@@ -706,19 +706,41 @@
             }
             
             let espDB = '';
-            if (espFiltrar === 'clinico') espDB = 'Clínico Geral';
-            else if (espFiltrar === 'cardiologia') espDB = 'Cardiologia';
-            else if (espFiltrar === 'pediatria') espDB = 'Pediatria';
-            else if (espFiltrar === 'ginecologia') espDB = 'Ginecologia';
-            else if (espFiltrar === 'dermatologia') espDB = 'Dermatologia';
-            else if (espFiltrar === 'ortopedia') espDB = 'Ortopedia';
-            else if (espFiltrar === 'neurologia') espDB = 'Neurologia';
-            else if (espFiltrar === 'oftalmologia') espDB = 'Oftalmologia';
-            else if (espFiltrar === 'psicologia') espDB = 'Psicologia';
-            else if (espFiltrar === 'nutricao') espDB = 'Nutrição';
-            else if (espFiltrar === 'fisioterapia') espDB = 'Fisioterapia';
-            else if (espFiltrar === 'odontologia') espDB = 'Odontologia';
-            else if (espFiltrar === 'otorrinolaringologia') espDB = 'Otorrinolaringologia';
+            // Obter especialidades dinâmicas do cachedSettings ou usar padrão
+            let especialidades = [];
+            try {
+                const cached = sessionStorage.getItem('cachedSettings');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (parsed && parsed.portal_especialidades) {
+                        especialidades = JSON.parse(parsed.portal_especialidades);
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao obter especialidades para filtro:", e);
+            }
+            
+            // Se não encontrou no cache, usa o fallback padrão
+            if (!especialidades || especialidades.length === 0) {
+                especialidades = [
+                    {"id": "clinico", "nome": "Clínica Geral"},
+                    {"id": "cardiologia", "nome": "Cardiologia"},
+                    {"id": "pediatria", "nome": "Pediatria"},
+                    {"id": "ginecologia", "nome": "Ginecologia"},
+                    {"id": "dermatologia", "nome": "Dermatologia"},
+                    {"id": "ortopedia", "nome": "Ortopedia"},
+                    {"id": "neurologia", "nome": "Neurologia"},
+                    {"id": "oftalmologia", "nome": "Oftalmologia"},
+                    {"id": "psicologia", "nome": "Psicologia"},
+                    {"id": "nutricao", "nome": "Nutrição"},
+                    {"id": "fisioterapia", "nome": "Fisioterapia"},
+                    {"id": "odontologia", "nome": "Odontologia"},
+                    {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia"}
+                ];
+            }
+
+            const matchEsp = especialidades.find(e => e.id === espFiltrar);
+            espDB = matchEsp ? matchEsp.nome : espFiltrar;
             
             try {
                 if (typeof API === 'undefined') return;

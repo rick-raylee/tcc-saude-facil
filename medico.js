@@ -301,6 +301,28 @@ function verificarAcessoMedico() {
     if (oldNome) oldNome.textContent = nome;
     const oldCrm = document.getElementById('crm-medico');
     if (oldCrm) oldCrm.textContent = `CRM: ${medicoData.crm || '---'} | ${medicoData.especialidade || ''}`;
+
+    // Popular encaminhamento dinamicamente a partir das especialidades cadastradas
+    const selectEncaminh = document.getElementById('encaminh-especialidade');
+    if (selectEncaminh && typeof API !== 'undefined') {
+        try {
+            const config = await API.settingsPublic();
+            if (config && config.portal_especialidades) {
+                const especialidades = JSON.parse(config.portal_especialidades);
+                if (especialidades && especialidades.length > 0) {
+                    selectEncaminh.innerHTML = '';
+                    especialidades.forEach(esp => {
+                        const option = document.createElement('option');
+                        option.value = esp.nome;
+                        option.textContent = esp.nome;
+                        selectEncaminh.appendChild(option);
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Falha ao carregar especialidades para encaminhamento:", e);
+        }
+    }
 }
 
 async function buscarPaciente() {
