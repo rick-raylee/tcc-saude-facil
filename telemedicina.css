@@ -477,8 +477,10 @@ body.font-large .btn-primary {
 
 .specialty-card h3 {
     color: var(--primary-color);
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-bottom: 10px;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* --- STEP CONTENT: DOCTOR --- */
