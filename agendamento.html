@@ -143,11 +143,18 @@
                     <select id="especialidade" onchange="atualizarFiltroMedicos()">
                         <option value="">Selecione...</option>
                         <option value="clinico">Clínico Geral</option>
+                        <option value="cardiologia">Cardiologia</option>
                         <option value="pediatria">Pediatria</option>
                         <option value="ginecologia">Ginecologia</option>
-                        <option value="cardiologia">Cardiologia</option>
-                        <option value="ortopedia">Ortopedia</option>
                         <option value="dermatologia">Dermatologia</option>
+                        <option value="ortopedia">Ortopedia</option>
+                        <option value="neurologia">Neurologia</option>
+                        <option value="oftalmologia">Oftalmologia</option>
+                        <option value="psicologia">Psicologia</option>
+                        <option value="nutricao">Nutrição</option>
+                        <option value="fisioterapia">Fisioterapia</option>
+                        <option value="odontologia">Odontologia</option>
+                        <option value="otorrinolaringologia">Otorrinolaringologia</option>
                     </select>
                 </div>
 
@@ -528,6 +535,21 @@
                     panelPlantao.style.display = 'block';
                     carregarPlantaoPresencial();
                 }
+
+                // Tratar parâmetro especialidade vindo da URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const espParam = urlParams.get('especialidade');
+                if (espParam) {
+                    const selectEsp = document.getElementById('especialidade');
+                    const selectTipo = document.getElementById('tipo-atendimento');
+                    if (selectEsp && selectTipo) {
+                        selectTipo.value = 'consulta';
+                        selectEsp.value = espParam;
+                        
+                        // Forçar evento onchange para atualizar médicos
+                        atualizarFiltroMedicos();
+                    }
+                }
             }
         });
 
@@ -675,11 +697,18 @@
             
             let espDB = '';
             if (espFiltrar === 'clinico') espDB = 'Clínico Geral';
-            else if (espFiltrar === 'cardiologia') espDB = 'Cardiologista';
+            else if (espFiltrar === 'cardiologia') espDB = 'Cardiologia';
             else if (espFiltrar === 'pediatria') espDB = 'Pediatria';
             else if (espFiltrar === 'ginecologia') espDB = 'Ginecologia';
-            else if (espFiltrar === 'ortopedia') espDB = 'Ortopedia';
             else if (espFiltrar === 'dermatologia') espDB = 'Dermatologia';
+            else if (espFiltrar === 'ortopedia') espDB = 'Ortopedia';
+            else if (espFiltrar === 'neurologia') espDB = 'Neurologia';
+            else if (espFiltrar === 'oftalmologia') espDB = 'Oftalmologia';
+            else if (espFiltrar === 'psicologia') espDB = 'Psicologia';
+            else if (espFiltrar === 'nutricao') espDB = 'Nutrição';
+            else if (espFiltrar === 'fisioterapia') espDB = 'Fisioterapia';
+            else if (espFiltrar === 'odontologia') espDB = 'Odontologia';
+            else if (espFiltrar === 'otorrinolaringologia') espDB = 'Otorrinolaringologia';
             
             try {
                 if (typeof API === 'undefined') return;

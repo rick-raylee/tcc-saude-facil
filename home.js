@@ -1716,7 +1716,13 @@ async function finalizarLogin(event) {
             }
             
             // Default: Paciente
-            window.location.replace('perfil.html');
+            const redirEsp = sessionStorage.getItem('redirEspecialidade');
+            if (redirEsp) {
+                sessionStorage.removeItem('redirEspecialidade');
+                window.location.replace('agendamento.html?especialidade=' + encodeURIComponent(redirEsp));
+            } else {
+                window.location.replace('perfil.html');
+            }
             return;
         }
         // Se o backend respondeu com erro, validamos o erro. 
@@ -1857,7 +1863,13 @@ async function finalizarLogin(event) {
         localStorage.setItem('usuarioDoencas', JSON.stringify(['Diabético', 'Hipertenso', 'Asma']));
     }
 
-    window.location.replace('/dashboard');
+    const redirEsp = sessionStorage.getItem('redirEspecialidade');
+    if (redirEsp) {
+        sessionStorage.removeItem('redirEspecialidade');
+        window.location.replace('agendamento.html?especialidade=' + encodeURIComponent(redirEsp));
+    } else {
+        window.location.replace('/dashboard');
+    }
 }
 
 // function finalizarCadastro... (Integrado com Backend API)
@@ -2108,7 +2120,15 @@ async function finalizarCadastro(event) {
                 else if (tipo === 'medico') window.location.replace('/painel-medico');
                 else if (tipo === 'enfermeiro') window.location.replace('/painel-enfermeiro');
                 else if (tipo === 'ti') window.location.replace('/painel-ti');
-                else window.location.replace('/dashboard');
+                else {
+                    const redirEsp = sessionStorage.getItem('redirEspecialidade');
+                    if (redirEsp) {
+                        sessionStorage.removeItem('redirEspecialidade');
+                        window.location.replace('agendamento.html?especialidade=' + encodeURIComponent(redirEsp));
+                    } else {
+                        window.location.replace('/dashboard');
+                    }
+                }
 
                 return;
             }
@@ -3406,3 +3426,27 @@ document.addEventListener('click', function(event) {
         if (input) input.value = '';
     }
 });
+
+// Função de Redirecionamento Inteligente da Home (Serviços Especializados)
+function selecionarEspecialidadeHome(especialidade) {
+    const logado = localStorage.getItem('usuarioLogado') === 'true';
+    if (logado) {
+        window.location.href = `agendamento.html?especialidade=${encodeURIComponent(especialidade)}`;
+    } else {
+        sessionStorage.setItem('redirEspecialidade', especialidade);
+        Swal.fire({
+            icon: 'info',
+            title: 'Acesso Restrito',
+            text: 'Por favor, realize login ou cadastre-se para agendar uma consulta.',
+            showCancelButton: true,
+            confirmButtonText: 'Fazer Login',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#004b82',
+            cancelButtonColor: '#888'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                abrirModalAuth('login');
+            }
+        });
+    }
+}

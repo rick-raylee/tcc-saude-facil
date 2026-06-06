@@ -490,12 +490,28 @@ def listar_medicos():
         db = get_db_connection()
         cur = db.cursor()
         if especialidade:
-            cur.execute("""
-                SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
-                FROM usuarios u
-                JOIN medico_info m ON m.usuario_id = u.id
-                WHERE u.tipo = 'medico' AND m.especialidade = ?
-            """, (especialidade,))
+            esp_lower = especialidade.lower()
+            if esp_lower in ['cardiologia', 'cardiologista']:
+                cur.execute("""
+                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
+                    FROM usuarios u
+                    JOIN medico_info m ON m.usuario_id = u.id
+                    WHERE u.tipo = 'medico' AND (m.especialidade = 'Cardiologia' OR m.especialidade = 'Cardiologista')
+                """)
+            elif esp_lower in ['clínica geral', 'clinico geral', 'clínico geral', 'clinica geral']:
+                cur.execute("""
+                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
+                    FROM usuarios u
+                    JOIN medico_info m ON m.usuario_id = u.id
+                    WHERE u.tipo = 'medico' AND (m.especialidade = 'Clínica Geral' OR m.especialidade = 'Clínico Geral' OR m.especialidade = 'Clinica Geral')
+                """)
+            else:
+                cur.execute("""
+                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
+                    FROM usuarios u
+                    JOIN medico_info m ON m.usuario_id = u.id
+                    WHERE u.tipo = 'medico' AND m.especialidade = ?
+                """, (especialidade,))
         else:
             cur.execute("""
                 SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo

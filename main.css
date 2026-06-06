@@ -6117,5 +6117,127 @@ i[class^='fi'] {
     height: 2px !important;
 }
 
+/* ====================================================================
+   SEÇÃO DE SERVIÇOS ESPECIALIZADOS - HOME PREMIUM
+   ==================================================================== */
+.servicos-especializados-section {
+    padding: 40px;
+    margin-bottom: 40px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
+}
+
+.servicos-especializados-section h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #004b82;
+    margin-bottom: 10px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.servicos-especializados-section h2 i {
+    color: #00bfa5;
+    filter: drop-shadow(0 0 8px rgba(0, 191, 165, 0.4));
+}
+
+.especialidades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.especialidade-card-premium {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.especialidade-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 75, 130, 0.08) 0%, rgba(0, 191, 165, 0.08) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.especialidade-card-premium:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 191, 165, 0.3);
+    box-shadow: 0 15px 30px rgba(0, 75, 130, 0.15);
+}
+
+.especialidade-card-premium:hover::before {
+    opacity: 1;
+}
+
+.especialidade-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: rgba(0, 75, 130, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: #004b82;
+    margin-bottom: 16px;
+    transition: all 0.4s ease;
+    z-index: 1;
+}
+
+.especialidade-card-premium:hover .especialidade-icon-wrapper {
+    background: #00bfa5;
+    color: white;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 8px 20px rgba(0, 191, 165, 0.3);
+}
+
+.especialidade-card-premium h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
+    z-index: 1;
+}
+
+.especialidade-card-premium:hover h3 {
+    color: #004b82;
+}
+
+.especialidade-card-premium p {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+    margin: 0;
+    z-index: 1;
+}
+
+
 
 
