@@ -1782,10 +1782,23 @@ window.togglePresencaPresencial = async function(checkbox) {
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
-                    icon: 'success',
-                    title: isChecked ? 'Presença confirmada na clínica!' : 'Status alterado para Ausente.',
                     showConfirmButton: false,
-                    timer: 2500
+                    timer: 2500,
+                    timerProgressBar: true,
+                    background: '#0f172a',
+                    color: '#f8fafc',
+                    customClass: {
+                        popup: 'swal-premium-toast'
+                    },
+                    title: isChecked 
+                        ? `<div style="display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;">
+                             <i class="fi fi-rr-check-circle" style="color: #00ff88; font-size: 1.15rem; display: flex; align-items: center;"></i>
+                             <span>Presença confirmada na clínica!</span>
+                           </div>`
+                        : `<div style="display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;">
+                             <i class="fi fi-rr-cross-circle" style="color: #ff7675; font-size: 1.15rem; display: flex; align-items: center;"></i>
+                             <span>Status alterado para Ausente.</span>
+                           </div>`
                 });
             } else {
                 throw new Error(resp.erro || 'Falha ao atualizar.');

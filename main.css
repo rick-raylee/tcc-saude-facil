@@ -6093,5 +6093,29 @@ i[class^='fi'] {
     }
 }
 
+/* Premium Compact Toast Styles */
+.swal2-popup.swal-premium-toast {
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    width: auto !important;
+    min-width: 250px !important;
+    max-width: 320px !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+.swal2-popup.swal-premium-toast .swal2-title {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+.swal2-popup.swal-premium-toast .swal2-timer-progress-bar {
+    background: linear-gradient(90deg, #00f2ff, #00ff88) !important;
+    height: 2px !important;
+}
+
 
 
