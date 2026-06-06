@@ -5790,11 +5790,11 @@ i[class^='fi'] {
     box-sizing: content-box !important;
 }
 
-.swal2-icon.swal2-success {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success {
     border-color: #28a745 !important;
 }
 
-.swal2-icon.swal2-success [class^='swal2-success-line'] {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success [class^='swal2-success-line'] {
     display: block !important;
     position: absolute !important;
     z-index: 100 !important;
@@ -5804,21 +5804,21 @@ i[class^='fi'] {
     opacity: 1 !important;
 }
 
-.swal2-icon.swal2-success .swal2-success-line-tip {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success .swal2-success-line-tip {
     top: 46px !important;
     left: 14px !important;
     width: 25px !important;
     transform: rotate(45deg) !important;
 }
 
-.swal2-icon.swal2-success .swal2-success-line-long {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success .swal2-success-line-long {
     top: 38px !important;
     right: 8px !important;
     width: 47px !important;
     transform: rotate(-45deg) !important;
 }
 
-.swal2-icon.swal2-success .swal2-success-ring {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success .swal2-success-ring {
     position: absolute !important;
     z-index: 2 !important;
     box-sizing: content-box !important;
@@ -5828,7 +5828,7 @@ i[class^='fi'] {
     border-radius: 50% !important;
 }
 
-.swal2-icon.swal2-success .swal2-success-fix {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success .swal2-success-fix {
     position: absolute !important;
     z-index: 1 !important;
     top: 8px !important;
@@ -5839,7 +5839,7 @@ i[class^='fi'] {
     background-color: #fff !important;
 }
 
-.swal2-icon.swal2-success [class^='swal2-success-circular-line'] {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success [class^='swal2-success-circular-line'] {
     position: absolute !important;
     z-index: 1 !important;
     width: 60px !important;
@@ -5849,32 +5849,32 @@ i[class^='fi'] {
     background-color: #fff !important;
 }
 
-.swal2-icon.swal2-success .swal2-success-circular-line-left {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success .swal2-success-circular-line-left {
     top: -7px !important;
     left: -33px !important;
     transform-origin: 60px 60px !important;
     border-radius: 120px 0 0 120px !important;
 }
 
-.swal2-icon.swal2-success .swal2-success-circular-line-right {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-success .swal2-success-circular-line-right {
     top: -11px !important;
     left: 30px !important;
     transform-origin: 0px 60px !important;
     border-radius: 0 120px 120px 0 !important;
 }
 
-.swal2-icon.swal2-error {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-error {
     border-color: #dc3545 !important;
 }
 
-.swal2-icon.swal2-error .swal2-x-mark {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-error .swal2-x-mark {
     display: block !important;
     position: relative !important;
     width: 100% !important;
     height: 100% !important;
 }
 
-.swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
     display: block !important;
     position: absolute !important;
     top: 37px !important;
@@ -5885,12 +5885,12 @@ i[class^='fi'] {
     z-index: 100 !important;
 }
 
-.swal2-icon.swal2-error .swal2-x-mark-line-left {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-error .swal2-x-mark-line-left {
     left: 17px !important;
     transform: rotate(45deg) !important;
 }
 
-.swal2-icon.swal2-error .swal2-x-mark-line-right {
+.swal2-popup:not(.swal2-toast) .swal2-icon.swal2-error .swal2-x-mark-line-right {
     right: 16px !important;
     transform: rotate(-45deg) !important;
 }
