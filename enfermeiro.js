@@ -39,6 +39,7 @@ async function initEnf() {
         carregarResumoEnfermeiro();
         carregarPrescricoesPendentes();
     }, 10000);
+    atualizarLayoutEstado();
 }
 
 // Inicialização robusta
@@ -145,6 +146,7 @@ async function buscarPacienteEnf() {
             document.getElementById('enf-novo-paciente').style.display = 'block';
             document.getElementById('enf-welcome').style.display = 'none';
             document.getElementById('enf-novo-cpf').value = cpfInput; // Pre-fill CPF
+            atualizarLayoutEstado();
             return;
         }
     }
@@ -162,6 +164,7 @@ async function buscarPacienteEnf() {
     document.getElementById('enf-novo-paciente').style.display = 'block';
     document.getElementById('enf-welcome').style.display = 'none';
     document.getElementById('enf-novo-cpf').value = cpfInput; // Pre-fill CPF
+    atualizarLayoutEstado();
 }
 
 function abrirCadastroManual() {
@@ -181,6 +184,7 @@ function abrirCadastroManual() {
     document.getElementById('enf-novo-nasc').value = '';
     
     pacienteNovo = true;
+    atualizarLayoutEstado();
 }
 
 function prepararTriagemNova() {
@@ -215,6 +219,7 @@ function prepararTriagemNova() {
     
     // Mudar para aba triagem
     mudarAbaEnf('triagem');
+    atualizarLayoutEstado();
 }
 
 async function exibirFichaPaciente(paciente) {
@@ -231,6 +236,7 @@ async function exibirFichaPaciente(paciente) {
     // Carregar dados
     await carregarVacinasPaciente();
     await carregarHistoricoPaciente();
+    atualizarLayoutEstado();
 }
 
 function calcularIdade(dataNasc) {
@@ -701,6 +707,20 @@ async function aplicarMedicamento(id) {
             carregarPrescricoesPendentes();
         } else {
             Swal.fire({ icon: 'error', title: 'Erro', text: 'Erro ao registrar aplicação do medicamento.' });
+        }
+    }
+}
+
+function atualizarLayoutEstado() {
+    const container = document.querySelector('.enf-container');
+    const tabs = document.getElementById('enf-tabs-container');
+    if (container && tabs) {
+        if (tabs.style.display === 'block') {
+            container.classList.remove('no-patient');
+            container.classList.add('patient-active');
+        } else {
+            container.classList.remove('patient-active');
+            container.classList.add('no-patient');
         }
     }
 }
