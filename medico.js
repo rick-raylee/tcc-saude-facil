@@ -899,15 +899,17 @@ function mudarTab(tabName) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
     // Mostrar o selecionado
-    document.getElementById(`tab-${tabName}`).style.display = 'block';
+    const targetContent = document.getElementById(`tab-${tabName}`);
+    if (targetContent) {
+        targetContent.style.display = 'block';
+    }
 
-    // Ativar botão (precisa pegar o botão clicado, mas aqui faremos via seletor para simplificar)
-    // Na prática, o onclick passa o evento ou o elemento, mas vamos simplificar
-    const buttons = document.querySelectorAll('.tab-btn');
-    if (tabName === 'diagnostico') buttons[0].classList.add('active');
-    if (tabName === 'historico') buttons[1].classList.add('active');
-    if (tabName === 'exames') buttons[2].classList.add('active');
-    if (tabName === 'observacoes') buttons[3].classList.add('active');
+    // Ativar o botão correspondente dinamicamente pelo onclick
+    const targetBtn = document.querySelector(`.tab-btn[onclick*="'${tabName}'"]`) || 
+                      document.querySelector(`.tab-btn[onclick*='"${tabName}"']`);
+    if (targetBtn) {
+        targetBtn.classList.add('active');
+    }
 }
 
 function processarArquivos(input) {
