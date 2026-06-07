@@ -19,10 +19,15 @@ def buscar_paciente():
     try:
         db = get_db_connection()
         cur = db.cursor()
+        
+        # Normalizar CPF de busca
+        cpf_limpo = "".join(filter(str.isdigit, cpf))
+        
         cur.execute("""
             SELECT id, nome, cpf, sus, email, telefone, cidade, bairro, data_nascimento
-            FROM usuarios WHERE cpf = ?
-        """, (cpf,))
+            FROM usuarios 
+            WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?
+        """, (cpf_limpo,))
         u = cur.fetchone()
         db.close()
 
@@ -52,7 +57,8 @@ def salvar_triagem():
         cur = db.cursor()
 
         # Buscar paciente
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (paciente_cpf,))
+        paciente_cpf_limpo = "".join(filter(str.isdigit, paciente_cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (paciente_cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             # Tentar Cadastro Rápido se dados forem fornecidos
@@ -154,7 +160,8 @@ def registrar_vacina():
         cur = db.cursor()
 
         # Buscar paciente
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (paciente_cpf,))
+        paciente_cpf_limpo = "".join(filter(str.isdigit, paciente_cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (paciente_cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             db.close()
@@ -320,7 +327,8 @@ def listar_triagens():
     try:
         db = get_db_connection()
         cur = db.cursor()
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (cpf,))
+        cpf_limpo = "".join(filter(str.isdigit, cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             db.close()
@@ -363,7 +371,8 @@ def vacinas_paciente():
     try:
         db = get_db_connection()
         cur = db.cursor()
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (cpf,))
+        cpf_limpo = "".join(filter(str.isdigit, cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             db.close()

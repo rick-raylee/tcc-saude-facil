@@ -228,10 +228,15 @@ def buscar_paciente():
     try:
         db = get_db_connection()
         cur = db.cursor()
+        
+        # Normalizar CPF de busca (remover pontos, hifens e espaços)
+        cpf_limpo = "".join(filter(str.isdigit, cpf))
+        
         cur.execute("""
             SELECT id, nome, cpf, sus, email, telefone, cidade, bairro, data_nascimento
-            FROM usuarios WHERE cpf = ?
-        """, (cpf,))
+            FROM usuarios 
+            WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?
+        """, (cpf_limpo,))
         u = cur.fetchone()
 
         if not u:
