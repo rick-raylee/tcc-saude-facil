@@ -64,7 +64,11 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     }
 
     try {
-        const url = API_BASE + endpoint;
+        let url = API_BASE + endpoint;
+        if (method === 'GET') {
+            const sep = url.includes('?') ? '&' : '?';
+            url += `${sep}_=${Date.now()}`;
+        }
         const resp = await fetch(url, opts);
         
         // Verifica se a resposta é JSON antes de parsear
@@ -144,6 +148,7 @@ const API = {
     resumoEnf: () => apiCall('/api/enfermeiro/resumo'),
     prescricoesPendentes: () => apiCall('/api/enfermeiro/prescricoes-pendentes'),
     aplicarPrescricao: (dados) => apiCall('/api/enfermeiro/aplicar-prescricao', 'POST', dados),
+    atendimentosHoje: () => apiCall('/api/enfermeiro/atendimentos-hoje'),
 
     // Consultas
     agendar: (dados) => apiCall('/api/consultas/agendar', 'POST', dados),

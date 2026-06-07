@@ -8,17 +8,17 @@
     <link rel="icon" type="image/png" href="logo-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="main.css?v=20260529-5005">
-    <link rel="stylesheet" href="home.css?v=20260529-5005">
+    <link rel="stylesheet" href="home.css?v=20260606-1952">
     <link rel="stylesheet" href="responsive.css?v=20260529-5005">
 
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- amCharts 4 -->
-    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
-    <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
-    <script src="https://cdn.amcharts.com/lib/4/geodata/brazilLow.js"></script>
-    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/core.js" defer></script>
+    <script src="https://cdn.amcharts.com/lib/4/maps.js" defer></script>
+    <script src="https://cdn.amcharts.com/lib/4/geodata/brazilLow.js" defer></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js" defer></script>
 
 </head>
 
@@ -50,7 +50,7 @@
             <div class="nav-bell-container" id="navBellContainer">
                 <div class="nav-bell-icon" onclick="toggleNotificacoes(event)">
                     <i class="fi fi-rr-bell"></i> 
-                    <span class="nav-bell-badge" id="nav-notif-count">0</span>
+                    <span class="nav-bell-badge" id="nav-notif-count" style="display: none;">0</span>
                 </div>
                 <!-- Dropdown de Notificações -->
                 <div class="nav-notif-dropdown glass-card" id="navNotifDropdown">
@@ -66,8 +66,25 @@
         </nav>
 
         <div class="nav-auth">
-            <button class="btn-auth btn-login" onclick="abrirModalLogin()">LOGIN</button>
-            <button class="btn-auth btn-cadastro" onclick="abrirModalCadastro()">CADASTRE-SE</button>
+            <!-- Lupa de Busca Expansível -->
+            <div class="nav-search-container" id="navSearchContainer">
+                <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar no portal..." onkeydown="handleSearchKey(event)">
+                <button class="btn-search-toggle" id="navSearchToggle" onclick="toggleNavbarSearch(event)"><i class="fi fi-rr-search"></i></button>
+                <!-- Dropdown de resultados -->
+                <div class="search-results-dropdown" id="searchResultsDropdown">
+                    <div class="search-results-header">Resultados da Busca</div>
+                    <div class="search-results-list" id="searchResultsList"></div>
+                </div>
+            </div>
+            <!-- Botão de Login Modernizado Verde -->
+            <button class="btn-auth btn-login-modern" onclick="abrirModalLogin()">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>
+                <span style="margin-left: 2px;">Login</span>
+            </button>
+            <!-- Botão de Cadastro -->
+            <button class="btn-auth btn-cadastro" onclick="abrirModalCadastro()">
+                <i class="fi fi-rr-user-add" style="margin-right: 8px; font-size: 0.95rem; vertical-align: middle;"></i>CADASTRE-SE
+            </button>
         </div>
     </header>
 
@@ -112,6 +129,82 @@
             <!-- PONTOS DE NAVEGAÇÃO (DOTS) E CONTADOR -->
             <div id="carousel3dDots" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 25px;"></div>
         </section>
+
+        <!-- SEÇÃO DE SERVIÇOS ESPECIALIZADOS -->
+        <section class="servicos-especializados-section glass-card" style="margin-top: 30px;">
+            <h2><i class="fi fi-rr-briefcase-medical"></i> Serviços Especializados</h2>
+            <p style="text-align: center; color: #555; margin-bottom: 30px;">
+                Selecione uma especialidade médica abaixo para iniciar seu agendamento inteligente.
+            </p>
+            <div class="especialidades-grid">
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('clinico')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-stethoscope"></i></div>
+                    <h3>Clínica Geral</h3>
+                    <p>Atendimento geral, preventivos e exames de rotina.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('cardiologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-heart"></i></div>
+                    <h3>Cardiologia</h3>
+                    <p>Saúde do coração, eletrocardiogramas e hipertensão.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('pediatria')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-teddy-bear"></i></div>
+                    <h3>Pediatria</h3>
+                    <p>Saúde e acompanhamento infantil e de adolescentes.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('ginecologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-venus"></i></div>
+                    <h3>Ginecologia</h3>
+                    <p>Saúde feminina, preventivo e acompanhamento gestacional.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('dermatologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-opacity"></i></div>
+                    <h3>Dermatologia</h3>
+                    <p>Cuidados com a pele, alergias, cabelos e unhas.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('ortopedia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-bone"></i></div>
+                    <h3>Ortopedia</h3>
+                    <p>Ossos, articulações e lesões musculoesqueléticas.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('neurologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-brain"></i></div>
+                    <h3>Neurologia</h3>
+                    <p>Cérebro, sistema nervoso e distúrbios neurológicos.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('oftalmologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-eye"></i></div>
+                    <h3>Oftalmologia</h3>
+                    <p>Saúde ocular, exames de vista e refração.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('psicologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-head-side-brain"></i></div>
+                    <h3>Psicologia</h3>
+                    <p>Terapia, suporte emocional e bem-estar mental.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('nutricao')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-apple-whole"></i></div>
+                    <h3>Nutrição</h3>
+                    <p>Planos alimentares, emagrecimento e reeducação alimentar.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('fisioterapia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-running"></i></div>
+                    <h3>Fisioterapia</h3>
+                    <p>Reabilitação física, pilates e alívio de dores.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('odontologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-tooth"></i></div>
+                    <h3>Odontologia</h3>
+                    <p>Saúde bucal, limpeza, tratamento de canal e cáries.</p>
+                </div>
+                <div class="especialidade-card-premium" onclick="selecionarEspecialidadeHome('otorrinolaringologia')">
+                    <div class="especialidade-icon-wrapper"><i class="fi fi-rr-ear"></i></div>
+                    <h3>Otorrinolaringologia</h3>
+                    <p>Tratamento de ouvido, nariz, garganta e labirintite.</p>
+                </div>
+            </div>
+        </section>
+
 
     <!-- ESTATÍSTICAS - DASHBOARD DE ELITE -->
     <section class="estatisticas-section glass-card">

@@ -2,6 +2,18 @@
 // HOME.JS - JavaScript para Carousel e Modal de Notícias
 // ====================================================================
 
+// Efeito de rolagem na Navbar (Shrink e mudança de estilo)
+window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar') || document.querySelector('.navbar');
+    if (navbar) {
+        if (window.scrollY > 30) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    }
+});
+
 // Inicializar carousel e componentes quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('Página carregada, iniciando componentes...');
@@ -26,7 +38,37 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // 5. Verificações secundárias
         checkAppointments();
+
+        // Popular dropdowns e wizard a partir do cache imediatamente, se disponível
+        try {
+            const cached = sessionStorage.getItem('cachedSettings');
+            if (cached) {
+                const config = JSON.parse(cached);
+                popularDropdownsEspecialidades(config);
+                popularEspecialidadesWizard(config);
+            }
+        } catch (e) {
+            console.error("Falha ao carregar especialidades do cache na inicialização:", e);
+        }
+
         carregarConfiguracoesPortal().catch(err => console.error('Falha ao carregar config identidade:', err));
+
+        // 6. Verificar se veio busca da URL (para a página de dúvidas)
+        if (window.location.pathname.includes('duvidas.html')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const busca = urlParams.get('busca');
+            if (busca) {
+                const searchInput = document.getElementById('search-faq');
+                if (searchInput) {
+                    searchInput.value = busca;
+                    setTimeout(() => {
+                        if (typeof buscarDuvida === 'function') {
+                            buscarDuvida();
+                        }
+                    }, 300);
+                }
+            }
+        }
     } catch (err) {
         console.error('ERRO CRÍTICO NA INICIALIZAÇÃO:', err);
         // Fallback: Tentar iniciar ao menos a lógica básica do carrossel para não quebrar a UI
@@ -249,6 +291,16 @@ async function checkAppointments() {
     let isTime = false;
     let buttonHtml = '';
 
+    // Botão de desmarcar para o paciente na home
+    let cancelBtnHtml = '';
+    if (isLogged) {
+        cancelBtnHtml = `
+            <button onclick="window.cancelarConsultaPacienteHome(${ultimo.id})" style="padding: 10px 15px; background: #fff5f5; border: 1px solid #ffa39e; color: #cf1322; font-weight: bold; border-radius: 20px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+                ❌ Desmarcar
+            </button>
+        `;
+    }
+
     if (dataParaComparar && ultimo.hora) {
         const appointmentTime = new Date(`${dataParaComparar}T${ultimo.hora}:00`);
         const now = new Date();
@@ -273,16 +325,73 @@ async function checkAppointments() {
 
     container.style.display = 'block';
     container.innerHTML = `
-        <div class="appointment-alert-card" style="margin-top: 10px; margin-bottom: 10px;">
-            <div class="appointment-info">
+        <div class="appointment-alert-card" style="margin-top: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div class="appointment-info" style="flex: 1; min-width: 280px;">
                 <h3><i class='fi fi-rr-calendar'></i> Próxima Consulta: ${ultimo.medico}</h3>
                 <p>${ultimo.especialidade} • ${diaExibicao || 'Data pendente'} às ${ultimo.hora || 'Horário pendente'}</p>
                 <small>${(ultimo.tipo || '').toLowerCase() === 'telemedicina' ? 'Realize sua consulta de onde estiver.' : 'Compareça à unidade de saúde com antecedência.'}</small>
             </div>
-            ${buttonHtml}
+            <div style="display: flex; gap: 10px; align-items: center;">
+                ${buttonHtml}
+                ${cancelBtnHtml}
+            </div>
         </div>
     `;
 }
+
+window.cancelarConsultaPacienteHome = async function(id) {
+    if (typeof API === 'undefined') return;
+
+    const result = await Swal.fire({
+        title: 'Desmarcar Consulta?',
+        text: 'Você tem certeza que deseja cancelar esta próxima consulta agendada?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, Desmarcar',
+        cancelButtonText: 'Não, manter agendamento'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const resp = await API.cancelarConsulta(id);
+        if (resp && resp.sucesso) {
+            // Atualiza cópia local do localStorage se existir
+            try {
+                const localS = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+                const updated = localS.map(a => {
+                    if (a.id == id || a.dataRaw === id) {
+                        a.status = 'cancelada';
+                    }
+                    return a;
+                });
+                localStorage.setItem('agendamentos', JSON.stringify(updated));
+            } catch (e) {
+                console.warn("Erro ao atualizar localStorage na desmarcação:", e);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cancelada!',
+                text: 'Sua consulta foi desmarcada com sucesso.',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao desmarcar consulta.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao desmarcar',
+            text: err.message || 'Ocorreu um erro ao tentar desmarcar a consulta.'
+        });
+    }
+};
 
 // ====================================================================
 // MODAL DE NOTÍCIAS
@@ -328,6 +437,30 @@ async function carregarConfiguracoesPortal() {
                 }
                 if (subtituloEl && config.portal_subtitulo && config.portal_subtitulo.trim() !== '') {
                     subtituloEl.textContent = config.portal_subtitulo;
+                }
+                
+                // Cache settings in session storage for other pages to use without API request overhead
+                sessionStorage.setItem('cachedSettings', JSON.stringify(config));
+                
+                // Carregar especialidades dinâmicas na home
+                try {
+                    await carregarEspecialidadesDinamicas(config);
+                } catch (e) {
+                    console.error("Falha ao carregar especialidades dinâmicas:", e);
+                }
+                
+                // Popular dropdowns de especialidades nas outras páginas
+                try {
+                    popularDropdownsEspecialidades(config);
+                } catch (e) {
+                    console.error("Falha ao popular dropdowns:", e);
+                }
+
+                // Popular cards do wizard de telemedicina
+                try {
+                    popularEspecialidadesWizard(config);
+                } catch (e) {
+                    console.error("Falha ao popular especialidades no wizard:", e);
                 }
             }
         }
@@ -395,7 +528,6 @@ async function carregarCarouselDinamico() {
     slidesLocal.forEach(sl => { if(!todosSlides.find(s => s.id === sl.id)) todosSlides.push(sl); });
 
     let slides = [...todosSlides, ...destaquesNoticias];
-
 
     slides3D = slides.filter(s => parseInt(s.ativo) === 1 || parseInt(s.status) === 1 || String(s.status) === 'publicado' || s.ativo === undefined);
 
@@ -563,10 +695,15 @@ async function carregarNoticiasDinamicas() {
 
     let noticiasLocal = safeParseArray(localStorage.getItem('admin_noticias'));
 
-    if (noticiasAPI.length > 0) {
-        noticias = noticiasAPI;
-    } else if (noticiasLocal.length > 0) {
-        noticias = noticiasLocal;
+    let todasNoticias = [...noticiasAPI];
+    noticiasLocal.forEach(nl => {
+        if (!todasNoticias.find(n => n.id === nl.id || n.titulo === nl.titulo)) {
+            todasNoticias.push(nl);
+        }
+    });
+
+    if (todasNoticias.length > 0) {
+        noticias = todasNoticias;
     } else {
         noticias = [];
     }
@@ -928,7 +1065,7 @@ function exibirNoticia() {
             <img src="${imagemUrl}" alt="${noticia.titulo || 'Notícia'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
         </div>
         ` : ''}
-        <div class="noticia-texto-completo" style="line-height: 1.8; color: #444; font-size: 1.05rem; margin-top: 20px;">
+        <div class="noticia-texto-completo" style="line-height: 1.8; color: #444; font-size: 1.05rem; margin-top: 20px; white-space: pre-wrap; text-align: justify;">
             ${noticia.conteudo || noticia.texto || noticia.descricao || 'Conteúdo indisponível.'}
         </div>
     `;
@@ -1023,7 +1160,7 @@ async function carregarCampanhasPublicas() {
         campanhas = [{ id: 0, titulo: "Portal Saúde Fácil", descricao: "Bem-vindo ao portal!", imagem: "health_campaign_art_branded.png", status: "ativa" }];
     }
 
-    campanhas = campanhas.filter(c => c.status == 1 || String(c.status).toLowerCase() === 'ativa');
+    campanhas = campanhas.filter(c => c.status == 1 || String(c.status).toLowerCase() === 'ativa' || String(c.status).toLowerCase() === 'ativo');
 
     // Welcome Card
     let welcomeCamp = campanhas.find(c => (c.titulo && c.titulo.toLowerCase().includes("bem-vindo")) || c.id == 0) || campanhas[0];
@@ -1098,6 +1235,15 @@ window.toggleNotificacoes = function(event) {
     event.stopPropagation();
     const dropdown = document.getElementById('navNotifDropdown');
     dropdown.classList.toggle('show');
+    
+    // Ocultar o badge do número de notificações quando aberto
+    if (dropdown.classList.contains('show')) {
+        const badge = document.getElementById('nav-notif-count');
+        if (badge) {
+            badge.style.display = 'none';
+            badge.innerText = '0';
+        }
+    }
 }
 
 window.marcarNotifLida = async function(id, event) {
@@ -1572,6 +1718,7 @@ async function finalizarLogin(event) {
             localStorage.setItem('usuarioCpf', u.cpf);
             localStorage.setItem('usuarioSUS', u.sus || '');
             localStorage.setItem('usuarioId', u.id);
+            localStorage.setItem('usuarioTelefone', u.telefone || '');
 
             Swal.fire({
                 icon: 'success',
@@ -1611,7 +1758,13 @@ async function finalizarLogin(event) {
             }
             
             // Default: Paciente
-            window.location.replace('perfil.html');
+            const redirEsp = sessionStorage.getItem('redirEspecialidade');
+            if (redirEsp) {
+                sessionStorage.removeItem('redirEspecialidade');
+                window.location.replace('agendamento.html?especialidade=' + encodeURIComponent(redirEsp));
+            } else {
+                window.location.replace('perfil.html');
+            }
             return;
         }
         // Se o backend respondeu com erro, validamos o erro. 
@@ -1752,7 +1905,13 @@ async function finalizarLogin(event) {
         localStorage.setItem('usuarioDoencas', JSON.stringify(['Diabético', 'Hipertenso', 'Asma']));
     }
 
-    window.location.replace('/dashboard');
+    const redirEsp = sessionStorage.getItem('redirEspecialidade');
+    if (redirEsp) {
+        sessionStorage.removeItem('redirEspecialidade');
+        window.location.replace('agendamento.html?especialidade=' + encodeURIComponent(redirEsp));
+    } else {
+        window.location.replace('/dashboard');
+    }
 }
 
 // function finalizarCadastro... (Integrado com Backend API)
@@ -1916,9 +2075,9 @@ async function finalizarCadastro(event) {
             formData.append('cpf', cpf);
             formData.append('senha', senha);
             formData.append('tipo', tipoCadastro);
-            formData.append('telefone', '');
-            formData.append('cidade', '');
-            formData.append('bairro', '');
+            formData.append('telefone', telefone);
+            formData.append('cidade', cidade);
+            formData.append('bairro', bairro);
 
             // Tratar imagem
             const tipoFotoEl = document.querySelector('input[name="tipo-foto"]:checked');
@@ -1942,7 +2101,7 @@ async function finalizarCadastro(event) {
             if (tipoCadastro === 'medico' || tipoCadastro === 'medico_tele') {
                 formData.set('tipo', 'medico'); // O backend recebe como base 'medico'
                 const crmEl = document.getElementById('crm');
-                const especEl = document.getElementById('especialidade');
+                const especEl = document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
                 if (crmEl) formData.append('crm', crmEl.value || '');
                 if (especEl) formData.append('especialidade', especEl.value || '');
                 
@@ -2003,7 +2162,15 @@ async function finalizarCadastro(event) {
                 else if (tipo === 'medico') window.location.replace('/painel-medico');
                 else if (tipo === 'enfermeiro') window.location.replace('/painel-enfermeiro');
                 else if (tipo === 'ti') window.location.replace('/painel-ti');
-                else window.location.replace('/dashboard');
+                else {
+                    const redirEsp = sessionStorage.getItem('redirEspecialidade');
+                    if (redirEsp) {
+                        sessionStorage.removeItem('redirEspecialidade');
+                        window.location.replace('agendamento.html?especialidade=' + encodeURIComponent(redirEsp));
+                    } else {
+                        window.location.replace('/dashboard');
+                    }
+                }
 
                 return;
             }
@@ -2029,7 +2196,7 @@ async function finalizarCadastro(event) {
         if (tipoCadastro === 'medico') {
             const crmEl = document.getElementById('crm');
             const crm = crmEl ? crmEl.value : '';
-            const especialidadeEl = document.getElementById('especialidade');
+            const especialidadeEl = document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
             const especialidade = especialidadeEl ? especialidadeEl.value : '';
             const tipoAtendimentoEl = document.querySelector('input[name="tipo_atendimento"]:checked');
             const tipo_atendimento = tipoAtendimentoEl ? tipoAtendimentoEl.value : 'presencial';
@@ -2338,8 +2505,19 @@ async function verificarSessao() {
     const logado = localStorage.getItem('usuarioLogado') === 'true';
     const nome = localStorage.getItem('usuarioNome') || 'Usuário';
 
-    // Limpar conteúdo atual da nav-auth
-    navAuth.innerHTML = '';
+    // Limpar conteúdo atual da nav-auth e injetar o contêiner de busca que sempre aparece
+    navAuth.innerHTML = `
+        <!-- Lupa de Busca Expansível -->
+        <div class="nav-search-container" id="navSearchContainer">
+            <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar no portal..." onkeydown="handleSearchKey(event)">
+            <button class="btn-search-toggle" id="navSearchToggle" onclick="toggleNavbarSearch(event)"><i class="fi fi-rr-search"></i></button>
+            <!-- Dropdown de resultados -->
+            <div class="search-results-dropdown" id="searchResultsDropdown">
+                <div class="search-results-header">Resultados da Busca</div>
+                <div class="search-results-list" id="searchResultsList"></div>
+            </div>
+        </div>
+    `;
 
     // Remover link "Meu Portal Saúde" se já existir (para evitar duplicatas)
     const existingLink = document.getElementById('nav-meu-sus');
@@ -2481,11 +2659,35 @@ async function verificarSessao() {
         // Carregar alertas/campanhas apenas após login
         carregarCampanhasHome();
     } else {
-        // Criar botões de login/cadastro padrão
-        const buttonsHTML = `
-            <button class="btn-auth btn-login" onclick="abrirModalLogin()"> LOGIN</button>
-        <button class="btn-auth btn-cadastro" onclick="abrirModalCadastro()">CADASTRE-SE</button>
+        // Criar botões de login padrão e cadastro
+        const isIndex = window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
+        const isMapas = window.location.pathname.includes('mapas.html');
+        
+        let loginClick = "abrirModalAuth();";
+        let cadastroClick = "abrirModalAuth('cadastro');";
+        
+        if (isIndex) {
+            loginClick = "abrirModalLogin();";
+            cadastroClick = "abrirModalCadastro();";
+        } else if (isMapas) {
+            loginClick = "window.location.href='index.html';";
+        }
+        
+        let buttonsHTML = `
+            <button class="btn-auth btn-login-modern" onclick="${loginClick}">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>
+                <span style="margin-left: 2px;">Login</span>
+            </button>
         `;
+        
+        if (!isMapas) {
+            buttonsHTML += `
+                <button class="btn-auth btn-cadastro" onclick="${cadastroClick}">
+                    <i class="fi fi-rr-user-add" style="margin-right: 8px; font-size: 0.95rem; vertical-align: middle;"></i>CADASTRE-SE
+                </button>
+            `;
+        }
+        
         navAuth.insertAdjacentHTML('beforeend', buttonsHTML);
     }
 }
@@ -2900,19 +3102,20 @@ async function carregarCampanhasHome() {
         const campanhas = await API.campanhasPublic();
         if (!campanhas || !Array.isArray(campanhas) || campanhas.length === 0) {
             container.innerHTML = '';
+            container.style.display = 'none';
             return;
         }
 
-        // Filtra para mostrar apenas a primeira campanha "Ativa" (status 1 ou 'Ativa')
-        // (O backend já filtra, mas por garantia pegamos a 1ª)
-        const c = campanhas[0];
+        // Filtra para mostrar apenas a primeira campanha "Ativa" (status 1, 'Ativa' ou 'ativo')
+        const c = campanhas.find(x => x.status == 1 || String(x.status).toLowerCase() === 'ativa' || String(x.status).toLowerCase() === 'ativo') || campanhas[0];
         
+        container.style.display = 'block';
         container.innerHTML = `
             <div class="home-campanha-banner">
                 <div class="home-campanha-icon">📢</div>
                 <div class="home-campanha-content">
-                    <h4>Campanha Ativa: ${c.nome || c.titulo}</h4>
-                    <p>${c.descricao || 'Fique atento às nossas campanhas de saúde.'}</p>
+                    <h4>Campanha Ativa: ${c.titulo || c.nome || 'Campanha de Saúde'}</h4>
+                    <p>${c.resumo || c.descricao || 'Fique atento às nossas campanhas de saúde.'}</p>
                 </div>
             </div>
         `;
@@ -3094,3 +3297,333 @@ window.salvarEdicaoPerfil = function(event) {
         window.location.reload();
     }
 }
+
+// Funções da Lupa de Busca na Navbar
+function toggleNavbarSearch(event) {
+    if (event) event.stopPropagation();
+    const container = document.getElementById('navSearchContainer');
+    const input = document.getElementById('navSearchInput');
+    const dropdown = document.getElementById('searchResultsDropdown');
+    
+    if (!container || !input) return;
+    
+    const isActivating = !container.classList.contains('active');
+    
+    if (isActivating) {
+        container.classList.add('active');
+        setTimeout(() => input.focus(), 100);
+    } else {
+        const query = input.value.trim();
+        if (query) {
+            executarBusca(query);
+        } else {
+            container.classList.remove('active');
+            if (dropdown) dropdown.classList.remove('show');
+        }
+    }
+}
+
+function handleSearchKey(event) {
+    const input = event.target;
+    const dropdown = document.getElementById('searchResultsDropdown');
+    const query = input.value.trim();
+    
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        if (query) {
+            executarBusca(query);
+        }
+    } else if (event.key === 'Escape') {
+        const container = document.getElementById('navSearchContainer');
+        if (container) container.classList.remove('active');
+        if (dropdown) dropdown.classList.remove('show');
+        input.value = '';
+    } else {
+        // Busca em tempo real após pequena espera (debounce manual simples)
+        setTimeout(() => {
+            const updatedQuery = input.value.trim();
+            buscarSugestoes(updatedQuery);
+        }, 100);
+    }
+}
+
+const PORTAL_PAGES = [
+    {
+        title: "Agendamento de Consultas",
+        desc: "Marcar consultas presenciais ou remotas.",
+        url: "agendamento.html",
+        icon: "fi-rr-calendar",
+        keywords: ["agendar", "agendamento", "consulta", "marcar", "medico", "agenda", "data", "hora"]
+    },
+    {
+        title: "Telemedicina",
+        desc: "Consultas virtuais via videoconferência.",
+        url: "telemedicina.html",
+        icon: "fi-rr-laptop",
+        keywords: ["telemedicina", "remoto", "video", "chamada", "consulta online", "virtual", "camera"]
+    },
+    {
+        title: "Campanhas de Saúde",
+        desc: "Campanhas ativas de vacinação e alertas.",
+        url: "campanhas.html",
+        icon: "fi-rr-syringe",
+        keywords: ["vacina", "vacinacao", "campanhas", "prevencao", "gripe", "dengue", "febre amarela", "covid"]
+    },
+    {
+        title: "Mapas das Unidades (UBS)",
+        desc: "Localizar postos de saúde em Cascavel.",
+        url: "mapas.html",
+        icon: "fi-rr-map",
+        keywords: ["postos", "posto", "ubs", "mapa", "unidade", "localizacao", "onde", "endereço"]
+    },
+    {
+        title: "Dúvidas Frequentes",
+        desc: "Respostas para perguntas frequentes (FAQ).",
+        url: "duvidas.html",
+        icon: "fi-rr-interrogation",
+        keywords: ["duvidas", "perguntas", "faq", "ajuda", "como fazer", "cancelar", "desmarcar", "gratis"]
+    },
+    {
+        title: "Meu Portal Saúde",
+        desc: "Visualizar seus dados e consultas.",
+        url: "perfil.html",
+        icon: "fi-rr-user",
+        keywords: ["perfil", "meu portal", "meus dados", "historico", "minhas consultas", "dados", "logout"]
+    }
+];
+
+function buscarSugestoes(query) {
+    const dropdown = document.getElementById('searchResultsDropdown');
+    const list = document.getElementById('searchResultsList');
+    if (!dropdown || !list) return;
+    
+    if (!query || query.length < 2) {
+        dropdown.classList.remove('show');
+        return;
+    }
+    
+    const searchTerms = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(" ");
+    
+    const matches = PORTAL_PAGES.filter(page => {
+        return searchTerms.some(term => {
+            const matchTitle = page.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term);
+            const matchDesc = page.desc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term);
+            const matchKeywords = page.keywords.some(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term));
+            return matchTitle || matchDesc || matchKeywords;
+        });
+    });
+    
+    list.innerHTML = '';
+    
+    if (matches.length === 0) {
+        list.innerHTML = '<div class="search-results-empty">Nenhum resultado encontrado</div>';
+    } else {
+        matches.forEach(match => {
+            const item = document.createElement('a');
+            item.className = 'search-result-item';
+            item.href = match.url;
+            item.innerHTML = `
+                <i class="fi ${match.icon}"></i>
+                <div class="item-info">
+                    <span class="item-title">${match.title}</span>
+                    <span class="item-desc">${match.desc}</span>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+    
+    dropdown.classList.add('show');
+}
+
+function executarBusca(query) {
+    if (!query) return;
+    
+    // Tenta achar a melhor correspondência direta
+    const searchTerms = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(" ");
+    const bestMatch = PORTAL_PAGES.find(page => {
+        return searchTerms.some(term => {
+            return page.keywords.some(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === term) ||
+                   page.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(term);
+        });
+    });
+    
+    if (bestMatch) {
+        window.location.href = bestMatch.url;
+    } else {
+        // Redireciona para dúvidas (FAQ) como backup, passando a query como parâmetro
+        window.location.href = `duvidas.html?busca=${encodeURIComponent(query)}`;
+    }
+}
+
+// Fechar busca ao clicar fora
+document.addEventListener('click', function(event) {
+    const container = document.getElementById('navSearchContainer');
+    const dropdown = document.getElementById('searchResultsDropdown');
+    const input = document.getElementById('navSearchInput');
+    
+    if (container && !container.contains(event.target)) {
+        container.classList.remove('active');
+        if (dropdown) dropdown.classList.remove('show');
+        if (input) input.value = '';
+    }
+});
+
+// Função de Redirecionamento Inteligente da Home (Serviços Especializados)
+function selecionarEspecialidadeHome(especialidade) {
+    const logado = localStorage.getItem('usuarioLogado') === 'true';
+    if (logado) {
+        window.location.href = `agendamento.html?especialidade=${encodeURIComponent(especialidade)}`;
+    } else {
+        sessionStorage.setItem('redirEspecialidade', especialidade);
+        Swal.fire({
+            icon: 'info',
+            title: 'Acesso Restrito',
+            text: 'Por favor, realize login ou cadastre-se para agendar uma consulta.',
+            showCancelButton: true,
+            confirmButtonText: 'Fazer Login',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#004b82',
+            cancelButtonColor: '#888'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                abrirModalAuth('login');
+            }
+        });
+    }
+}
+
+async function carregarEspecialidadesDinamicas(config) {
+    try {
+        const grid = document.querySelector('.especialidades-grid');
+        if (!grid) return;
+        
+        let especialidades = [];
+        if (config && config.portal_especialidades) {
+            especialidades = JSON.parse(config.portal_especialidades);
+        }
+        
+        if (!especialidades || especialidades.length === 0) {
+            return; // Se estiver vazio, usa o fallback HTML hardcoded do index
+        }
+        
+        grid.innerHTML = '';
+        especialidades.forEach(esp => {
+            const card = document.createElement('div');
+            card.className = 'especialidade-card-premium';
+            card.setAttribute('onclick', `selecionarEspecialidadeHome('${esp.id}')`);
+            
+            card.innerHTML = `
+                <div class="especialidade-icon-wrapper"><i class="${esp.icon || 'fi fi-rr-stethoscope'}"></i></div>
+                <h3>${esp.nome}</h3>
+                <p>${esp.desc || ''}</p>
+            `;
+            grid.appendChild(card);
+        });
+    } catch (e) {
+        console.error("Erro ao carregar especialidades dinâmicas:", e);
+    }
+}
+
+function popularDropdownsEspecialidades(config) {
+    let especialidades = [];
+    if (config && config.portal_especialidades) {
+        try {
+            especialidades = JSON.parse(config.portal_especialidades);
+        } catch (e) {
+            console.error("Erro ao fazer parse de portal_especialidades:", e);
+        }
+    }
+    
+    if (!especialidades || especialidades.length === 0) {
+        return;
+    }
+    
+    // 1. Popular o select de agendamento (ID especialidade, mas que NÃO seja o do cadastro)
+    const schedulingSelects = Array.from(document.querySelectorAll('select#especialidade')).filter(s => {
+        return !s.closest('#campos-medico') && !s.closest('#formCadastro');
+    });
+    
+    // Ler o parâmetro da URL para seleção
+    const urlParams = new URLSearchParams(window.location.search);
+    const espParam = urlParams.get('especialidade');
+    
+    schedulingSelects.forEach(select => {
+        const currentValue = select.value || (select.id === 'especialidade' && espParam);
+        select.innerHTML = '<option value="">Selecione...</option>';
+        especialidades.forEach(esp => {
+            const option = document.createElement('option');
+            option.value = esp.id;
+            option.textContent = esp.nome;
+            select.appendChild(option);
+        });
+        if (currentValue) {
+            select.value = currentValue;
+            // Se mudou o valor e a função de atualizar filtro existe, chama
+            if (currentValue === espParam) {
+                const selectTipo = document.getElementById('tipo-atendimento');
+                if (selectTipo) {
+                    selectTipo.value = 'consulta';
+                }
+                if (typeof atualizarFiltroMedicos === 'function') {
+                    atualizarFiltroMedicos();
+                }
+            }
+        }
+    });
+
+    // 2. Popular o select do formulário de cadastro de médicos:
+    const signupSelects = Array.from(document.querySelectorAll('select#especialidade')).filter(s => {
+        return s.closest('#campos-medico') || s.closest('#formCadastro');
+    });
+
+    signupSelects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Selecione...</option>';
+        especialidades.forEach(esp => {
+            const option = document.createElement('option');
+            option.value = esp.nome; 
+            option.textContent = esp.nome;
+            select.appendChild(option);
+        });
+        if (currentValue) {
+            select.value = currentValue;
+        }
+    });
+}
+
+function popularEspecialidadesWizard(config) {
+    const grid = document.querySelector('.grid-specialty');
+    if (!grid) return;
+
+    let especialidades = [];
+    if (config && config.portal_especialidades) {
+        try {
+            especialidades = JSON.parse(config.portal_especialidades);
+        } catch (e) {
+            console.error("Erro ao fazer parse de portal_especialidades para wizard:", e);
+        }
+    }
+
+    if (!especialidades || especialidades.length === 0) {
+        return;
+    }
+
+    grid.innerHTML = '';
+    especialidades.forEach(esp => {
+        const card = document.createElement('div');
+        card.className = 'specialty-card';
+        const escapedNome = esp.nome.replace(/'/g, "\\'");
+        card.setAttribute('onclick', `selectSpecialty('${escapedNome}')`);
+
+        card.innerHTML = `
+            <div class="specialty-icon"><i class="${esp.icon || 'fi fi-rr-stethoscope'}"></i> </div>
+            <h3>${esp.nome}</h3>
+            <p>${esp.desc || ''}</p>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+window.popularDropdownsEspecialidades = popularDropdownsEspecialidades;
+window.popularEspecialidadesWizard = popularEspecialidadesWizard;

@@ -24,10 +24,10 @@
     <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- amCharts 4 -->
-    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
-    <script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
-    <script src="https://cdn.amcharts.com/lib/4/geodata/brazilLow.js"></script>
-    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/core.js" defer></script>
+    <script src="https://cdn.amcharts.com/lib/4/maps.js" defer></script>
+    <script src="https://cdn.amcharts.com/lib/4/geodata/brazilLow.js" defer></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/animated.js" defer></script>
 
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -323,6 +323,35 @@
                         <div style="margin-top: 25px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800; font-size: 0.8rem; color: #555; text-align: left; line-height: 1.35;">
                             <strong>Como funciona:</strong> Ao salvar o ID de medição, o portal injetará automaticamente a tag <code>gtag.js</code> em todas as páginas públicas do portal do SUS para realizar o rastreamento em tempo real.
                         </div>
+                    </div>
+                </div>
+
+                <!-- Card de Especialidades -->
+                <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea; grid-column: span 2; margin-top: 25px; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: #333; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fi fi-rr-briefcase-medical" style="color: #00bfa5;"></i> Especialidades Médicas e Serviços da Home
+                        </h3>
+                        <button type="button" class="btn-add" onclick="abrirModalEspecialidade()" style="background:#00bfa5; border:none; padding:8px 16px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">+ Nova Especialidade</button>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px; line-height: 1.45;">
+                        Gerencie a lista de especialidades médicas exibidas na home page, no formulário de agendamento e no wizard de telemedicina. Qualquer nova especialidade cadastrada aqui sincroniza automaticamente em todos os fluxos.
+                    </p>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th style="padding: 12px; border-bottom: 2px solid #eee; text-align: center; color: #555; font-size: 0.85rem; font-weight: bold; width: 60px;">Ícone</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid #eee; color: #555; font-size: 0.85rem; font-weight: bold;">Especialidade</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid #eee; color: #555; font-size: 0.85rem; font-weight: bold; width: 150px;">Chave/ID</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid #eee; color: #555; font-size: 0.85rem; font-weight: bold;">Descrição</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid #eee; text-align: center; color: #555; font-size: 0.85rem; font-weight: bold; width: 120px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-especialidades-admin">
+                                <!-- Preenchido dinamicamente -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>

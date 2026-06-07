@@ -39,8 +39,25 @@
             <a href="duvidas.html">Dúvidas</a>
         </nav>
         <div class="nav-auth">
-            <button class="btn-auth btn-login" onclick="abrirModalAuth()">LOGIN</button>
-            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">CADASTRE-SE</button>
+            <!-- Lupa de Busca Expansível -->
+            <div class="nav-search-container" id="navSearchContainer">
+                <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar no portal..." onkeydown="handleSearchKey(event)">
+                <button class="btn-search-toggle" id="navSearchToggle" onclick="toggleNavbarSearch(event)"><i class="fi fi-rr-search"></i></button>
+                <!-- Dropdown de resultados -->
+                <div class="search-results-dropdown" id="searchResultsDropdown">
+                    <div class="search-results-header">Resultados da Busca</div>
+                    <div class="search-results-list" id="searchResultsList"></div>
+                </div>
+            </div>
+            <!-- Botão de Login Modernizado Verde -->
+            <button class="btn-auth btn-login-modern" onclick="abrirModalAuth()">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>
+                <span style="margin-left: 2px;">Login</span>
+            </button>
+            <!-- Botão de Cadastro -->
+            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">
+                <i class="fi fi-rr-user-add" style="margin-right: 8px; font-size: 0.95rem; vertical-align: middle;"></i>CADASTRE-SE
+            </button>
         </div>
     </header>
 
@@ -59,7 +76,7 @@
                 <h2>Acesso Restrito</h2>
                 <p>Para agendar ou participar de uma teleconsulta, você precisa estar logado no portal.</p>
                 <div style="margin-top: 25px; display: flex; gap: 15px; justify-content: center;">
-                    <button class="btn-neon-health" onclick="abrirModalAuth('login')">ENTRAR AGORA</button>
+                    <button class="btn-neon-health" onclick="window.location.href='telemedicina_login.html'">ENTRAR AGORA</button>
                     <button class="btn-neon-health" style="background: var(--accent-light);"
                         onclick="abrirModalAuth('cadastro')">CRIAR CONTA</button>
                 </div>
@@ -96,15 +113,65 @@
                             <h3>Clínico Geral</h3>
                             <p>Para sintomas gerais como gripe, dor de cabeça, mal-estar.</p>
                         </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Cardiologia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-heart"></i> </div>
+                            <h3>Cardiologia</h3>
+                            <p>Saúde do coração, arritmias e controle de pressão arterial.</p>
+                        </div>
                         <div class="specialty-card" onclick="selectSpecialty('Pediatria')">
                             <div class="specialty-icon"><i class="fi fi-rr-teddy-bear"></i> </div>
                             <h3>Pediatria</h3>
                             <p>Atendimento especializado para crianças e adolescentes.</p>
                         </div>
-                        <div class="specialty-card" onclick="selectSpecialty('Psicologia')">
+                        <div class="specialty-card" onclick="selectSpecialty('Ginecologia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-venus"></i> </div>
+                            <h3>Ginecologia</h3>
+                            <p>Acompanhamento preventivo feminino e saúde reprodutiva.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Dermatologia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-opacity"></i> </div>
+                            <h3>Dermatologia</h3>
+                            <p>Tratamento de doenças da pele, cabelos, unhas e alergias.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Ortopedia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-bone"></i> </div>
+                            <h3>Ortopedia</h3>
+                            <p>Dores nas articulações, ossos e lesões musculares.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Neurologia')">
                             <div class="specialty-icon"><i class="fi fi-rr-brain"></i> </div>
+                            <h3>Neurologia</h3>
+                            <p>Cérebro, cefaleia, distúrbios do sono e sistema nervoso.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Oftalmologia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-eye"></i> </div>
+                            <h3>Oftalmologia</h3>
+                            <p>Problemas de visão, acompanhamento e exames oculares.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Psicologia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-head-side-brain"></i> </div>
                             <h3>Psicologia</h3>
-                            <p>Apoio emocional, ansiedade, depressão e saúde mental.</p>
+                            <p>Apoio emocional, ansiedade, depressão e bem-estar mental.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Nutrição')">
+                            <div class="specialty-icon"><i class="fi fi-rr-apple-whole"></i> </div>
+                            <h3>Nutrição</h3>
+                            <p>Acompanhamento alimentar, reeducação e dietas.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Fisioterapia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-running"></i> </div>
+                            <h3>Fisioterapia</h3>
+                            <p>Reabilitação física de movimentos, postura e dores corporais.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Odontologia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-tooth"></i> </div>
+                            <h3>Odontologia</h3>
+                            <p>Saúde da boca, dentes, gengiva e higienização geral.</p>
+                        </div>
+                        <div class="specialty-card" onclick="selectSpecialty('Otorrinolaringologia')">
+                            <div class="specialty-icon"><i class="fi fi-rr-ear"></i> </div>
+                            <h3>Otorrinolaringologia</h3>
+                            <p>Doenças e cuidados de ouvido, garganta, nariz e labirintite.</p>
                         </div>
                     </div>
                 </div>
@@ -367,9 +434,19 @@
                                         <label for="especialidade"><i class="fi fi-rr-briefcase-medical"></i>  Especialidade</label>
                                         <select id="especialidade" class="input-neon-focus">
                                             <option value="">Selecione...</option>
-                                            <option value="Clínico Geral">Clínica Geral</option>
+                                            <option value="Clinica Geral">Clínica Geral</option>
                                             <option value="Cardiologia">Cardiologia</option>
                                             <option value="Pediatria">Pediatria</option>
+                                            <option value="Ginecologia">Ginecologia</option>
+                                            <option value="Dermatologia">Dermatologia</option>
+                                            <option value="Oftalmologia">Oftalmologia</option>
+                                            <option value="Otorrinolaringologia">Otorrinolaringologia</option>
+                                            <option value="Ortopedia">Ortopedia</option>
+                                            <option value="Neurologia">Neurologia</option>
+                                            <option value="Psicologia">Psicologia</option>
+                                            <option value="Nutrição">Nutrição</option>
+                                            <option value="Fisioterapia">Fisioterapia</option>
+                                            <option value="Odontologia">Odontologia</option>
                                         </select>
                                     </div>
                                 </div>

@@ -84,6 +84,24 @@ async function carregarDadosPerfilAPI() {
 
     // Carregar Online
     let minhasVacinas = await API.minhasVacinas() || [];
+
+    // Se o banco online não tiver vacinas aplicadas para este paciente, popula com as simuladas (TCC)
+    if (!minhasVacinas || minhasVacinas.length === 0 || minhasVacinas.erro) {
+        minhasVacinas = [];
+        vacinasTomadasSimuladas.forEach(s => {
+            const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
+            minhasVacinas.push({
+                id: s.id,
+                vacina_id: s.id,
+                vacina: vSUS.nome,
+                data: s.data,
+                local: s.local,
+                dose: vSUS.dose,
+                lote: 'SIM-999',
+                status: 'oficial'
+            });
+        });
+    }
     
     // Carregar Offline (Locais pendentes)
     const dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
@@ -364,6 +382,31 @@ function renderizarMinhasConsultas(consultas) {
                 diaFmt = diaFmt.split('-').reverse().join('/');
             }
 
+            // Calendário e cancelamento para consultas ativas
+            const cStatus = (c.status || '').toLowerCase();
+            let syncAndCancelHtml = '';
+            if (cStatus === 'agendado' || cStatus === 'confirmado' || cStatus === 'confirmada' || cStatus === 'aguardando') {
+                const tituloConsulta = `Consulta: ${c.medico || 'Médico'}`;
+                const localConsulta = c.tipo === 'telemedicina' ? 'Telemedicina Virtual' : 'Consultório Médico - Portal Saúde Digital';
+                const googleLink = gerarLinkGoogleCalendar(tituloConsulta, c.data, c.hora, c.tipo, localConsulta);
+                
+                syncAndCancelHtml = `
+                    <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; border-top: 1px dashed #ddd; padding-top: 12px;">
+                        <div style="display: flex; gap: 6px;">
+                            <a href="${googleLink}" target="_blank" style="font-size:0.75rem; padding: 6px 10px; border: 1px solid #4285f4; color: #4285f4; display: flex; align-items: center; gap: 4px; text-decoration: none; font-weight: bold; border-radius: 4px; background: white;">
+                                <i class="fi fi-rr-calendar"></i> Google Calendar
+                            </a>
+                            <button onclick="window.baixarICS('${tituloConsulta.replace(/'/g, "\\'")}', '${c.data}', '${c.hora}', '${c.tipo}', '${localConsulta.replace(/'/g, "\\'")}')" style="font-size:0.75rem; padding: 6px 10px; border: 1px solid #888; color: #333; display: flex; align-items: center; gap: 4px; border-radius: 4px; background: white; cursor: pointer;">
+                                <i class="fi fi-rr-download"></i> .ICS
+                            </button>
+                        </div>
+                        <button onclick="window.cancelarConsultaPaciente(${c.id})" style="font-size:0.75rem; padding: 6px 10px; border: 1px solid #dc3545; color: #dc3545; background: #fff5f5; font-weight: bold; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 4px;">
+                            <i class="fi fi-rr-cross-small"></i> Desmarcar
+                        </button>
+                    </div>
+                `;
+            }
+
             const item = document.createElement('div');
             item.style.cssText = 'padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.02);';
             item.innerHTML = `
@@ -374,9 +417,10 @@ function renderizarMinhasConsultas(consultas) {
                 <div style="font-size:0.9rem; color:#666; margin-bottom: 8px;"><i class='fi fi-rr-clipboard-list'></i>  ${c.especialidade || 'Consulta Médica'} • ${c.tipo}</div>
                 <div style="display: flex; gap: 20px; margin-bottom: 10px; font-size: 0.95rem; background:#f4f7f6; padding:8px; border-radius:6px;">
                     <div><i class='fi fi-rr-calendar'></i>  <strong>${diaFmt}</strong></div>
-                    <div>⏰ <strong>${c.hora || ''}</strong></div>
+                    <div><i class='fi fi-rr-clock'></i> <strong>${c.hora || ''}</strong></div>
                 </div>
                 ${actionHtml}
+                ${syncAndCancelHtml}
             `;
             container.appendChild(item);
         });
@@ -385,6 +429,141 @@ function renderizarMinhasConsultas(consultas) {
         container.innerHTML = '';
     }
 }
+
+// Helper: Formata data local ou API para formato ISO YYYY-MM-DD
+function formatToISODate(dateStr) {
+    if (!dateStr) return '';
+    if (dateStr.includes('-')) {
+        return dateStr;
+    }
+    if (dateStr.includes('/')) {
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+    }
+    return dateStr;
+}
+
+function gerarLinkGoogleCalendar(titulo, dataStr, horaStr, tipo, local) {
+    const isoData = formatToISODate(dataStr);
+    const d = isoData.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const details = encodeURIComponent(`Consulta agendada pelo Portal Saúde Digital.\nModalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}\nLocal: ${local}`);
+    const title = encodeURIComponent(titulo);
+    
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${encodeURIComponent(local)}`;
+}
+
+function baixarICS(titulo, dataStr, horaStr, tipo, local) {
+    const isoData = formatToISODate(dataStr);
+    const d = isoData.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Portal Saude Digital//NONSGML v1.0//PT
+BEGIN:VEVENT
+UID:${Date.now()}@saudefacil.com
+DTSTAMP:${start}
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${titulo}
+DESCRIPTION:Consulta agendada pelo Portal Saúde Digital.\\nModalidade: ${tipo === 'telemedicina' ? 'Remota' : 'Presencial'}\\nLocal: ${local}
+LOCATION:${local}
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'consulta_agendada.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+window.gerarLinkGoogleCalendar = gerarLinkGoogleCalendar;
+window.baixarICS = baixarICS;
+
+window.cancelarConsultaPaciente = async function(id) {
+    if (typeof API === 'undefined') return;
+
+    const result = await Swal.fire({
+        title: 'Desmarcar Consulta?',
+        text: 'Você tem certeza que deseja cancelar esta consulta agendada?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, Desmarcar',
+        cancelButtonText: 'Não, manter agendamento'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const resp = await API.cancelarConsulta(id);
+        if (resp && resp.sucesso) {
+            // Atualiza cópia local do localStorage se existir
+            try {
+                const localS = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+                const updated = localS.map(a => {
+                    if (a.id == id || a.dataRaw === id) {
+                        a.status = 'cancelada';
+                    }
+                    return a;
+                });
+                localStorage.setItem('agendamentos', JSON.stringify(updated));
+            } catch (e) {
+                console.warn("Erro ao atualizar localStorage na desmarcação:", e);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cancelada!',
+                text: 'Sua consulta foi desmarcada com sucesso.',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao desmarcar consulta.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao desmarcar',
+            text: err.message || 'Ocorreu um erro ao tentar desmarcar a consulta.'
+        });
+    }
+};
 
 function carregarProximaTeleconsulta() {
     const todosAgendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
@@ -543,30 +722,37 @@ function carregarVacinas() {
     const dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
     const vacinasLocais = dbV.filter(v => (v.paciente_cpf && v.paciente_cpf.replace(/\D/g, '') === cpfLimpo) || (v.pacienteCpf && v.pacienteCpf.replace(/\D/g, '') === cpfLimpo));
 
-    // 3. Mesclar com as simuladas APENAS se estiver vazio (ou sempre mesclar para demonstração)
-    let todasMinhas = vacinasLocais.map(v => ({
-        id: v.vacinaId || 'local',
-        nome: v.vacina_nome || v.vacina,
-        data: v.data,
-        local: v.local_aplicacao || v.local,
-        dose: v.dose,
-        status: 'local'
-    }));
-
-    // Se estiver vazio, podemos usar as simuladas para o TCC não parecer vazio
-    if (todasMinhas.length === 0) {
-        vacinasTomadasSimuladas.forEach(s => {
-            const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
-            todasMinhas.push({
-                id: s.id,
-                nome: vSUS.nome,
-                data: s.data,
-                local: s.local,
-                dose: vSUS.dose,
-                status: 'simulada'
-            });
+    // 3. Sempre carregar as vacinas simuladas para demonstrar histórico no TCC
+    let todasMinhas = [];
+    
+    vacinasTomadasSimuladas.forEach(s => {
+        const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
+        todasMinhas.push({
+            id: s.id,
+            nome: vSUS.nome,
+            data: s.data,
+            local: s.local,
+            dose: vSUS.dose,
+            status: 'simulada'
         });
-    }
+    });
+
+    // 4. Adicionar vacinas registradas pelo enfermeiro no mesmo navegador (LocalStorage)
+    vacinasLocais.forEach(v => {
+        const nomeVacina = v.vacina_nome || v.vacina;
+        // Evitar duplicar se a vacina com o mesmo nome e dose já existir nas simuladas
+        const existe = todasMinhas.some(m => m.nome === nomeVacina && m.dose === v.dose);
+        if (!existe) {
+            todasMinhas.push({
+                id: v.vacinaId || 'local',
+                nome: nomeVacina,
+                data: v.data,
+                local: v.local_aplicacao || v.local,
+                dose: v.dose,
+                status: 'local'
+            });
+        }
+    });
 
     const idsTomados = new Set(todasMinhas.map(v => v.id).filter(id => id !== 'local'));
     const nomesTomados = new Set(todasMinhas.map(v => v.nome));

@@ -78,6 +78,135 @@ def agendar():
         """, (paciente_id, f'Consulta agendada com Dr(a). {medico_nome} em {data_consulta} às {hora}'))
         db.commit()
 
+        # Buscar dados extras do médico e paciente para o e-mail/agenda
+        cur.execute("SELECT nome, email FROM usuarios WHERE id = ?", (medico_id,))
+        med_row = cur.fetchone()
+        medico_email = med_row['email'] if med_row and med_row['email'] else f'medico_{medico_id}@saudefacil.gov.br'
+        medico_nome = med_row['nome'] if med_row else 'Médico'
+
+        cur.execute("SELECT nome, email FROM usuarios WHERE id = ?", (paciente_id,))
+        pac_row = cur.fetchone()
+        paciente_nome = pac_row['nome'] if pac_row else 'Paciente'
+        paciente_email = pac_row['email'] if pac_row and pac_row['email'] else ''
+
+        # Montar a data no formato ICS
+        ics_date = data_consulta.replace('-', '')
+        ics_time = hora.replace(':', '')
+        start_time = f"{ics_date}T{ics_time}00"
+        
+        # Calcular fim (30 minutos depois)
+        try:
+            h_p, m_p = map(int, hora.split(':'))
+            m_p += 30
+            if m_p >= 60:
+                m_p -= 60
+                h_p += 1
+            end_time = f"{ics_date}T{h_p:02d}{m_p:02d}00"
+        except Exception:
+            end_time = start_time
+
+        # Criar conteúdo ICS
+        ics_content = f"""BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Portal Saude Digital//NONSGML v1.0//PT
+BEGIN:VEVENT
+UID:consulta_{consulta_id}@saudefacil.com
+DTSTAMP:{start_time}
+DTSTART:{start_time}
+DTEND:{end_time}
+SUMMARY:Consulta: {paciente_nome}
+DESCRIPTION:Consulta agendada pelo Portal Saude Digital.\\nPaciente: {paciente_nome}\\nQueixa: {queixa}\\nModalidade: {tipo.upper()}
+LOCATION:{tipo.upper()} - Portal Saude Digital
+END:VEVENT
+END:VCALENDAR"""
+
+        # Escrever log de e-mail enviado simulado em backend/uploads/emails_enviados.txt
+        import os
+        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
+        os.makedirs(uploads_dir, exist_ok=True)
+        log_email_path = os.path.join(uploads_dir, 'emails_enviados.txt')
+        
+        try:
+            import datetime
+            hoje_agora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            hoje_agora = "2026-06-05 19:30:00"
+
+        email_simulado = f"""========================================================================
+[E-MAIL SIMULADO ENVIADO]
+Data/Hora de Envio: {hoje_agora}
+Remetente: notificacao@saudefacil.gov.br
+Destinatário: {medico_email} (Médico: {medico_nome})
+Destinatário Cópia: {paciente_email if paciente_email else 'Nenhum'} (Paciente: {paciente_nome})
+Assunto: 📅 CONFIRMAÇÃO DE AGENDA: Consulta com {paciente_nome} em {data_consulta} às {hora}
+
+Olá Dr(a). {medico_nome},
+Uma nova consulta foi agendada e adicionada automaticamente ao seu calendário.
+
+Detalhes da Consulta:
+- Paciente: {paciente_nome}
+- Data: {data_consulta}
+- Horário: {hora}
+- Tipo: {tipo.upper()}
+- Queixa Principal: {queixa if queixa else 'Não informada'}
+
+Anexo: invite.ics (Adicionado à sua agenda padrão)
+----------------------------------------
+[CONTEÚDO DO ARQUIVO ANEXO invite.ics]
+{ics_content}
+========================================================================
+\n"""
+        try:
+            with open(log_email_path, 'a', encoding='utf-8') as f_log:
+                f_log.write(email_simulado)
+            print(f"--> [Simulação Agenda] E-mail de agenda salvo em: {log_email_path}")
+        except Exception as err_log:
+            print(f"--> [Simulação Agenda] Erro ao salvar log de e-mail: {err_log}")
+
+        # Tentar enviar e-mail real por SMTP se configurado
+        smtp_server = os.environ.get('SMTP_SERVER')
+        smtp_port = os.environ.get('SMTP_PORT', '587')
+        smtp_user = os.environ.get('SMTP_USER')
+        smtp_pass = os.environ.get('SMTP_PASSWORD')
+
+        if smtp_server and smtp_user and smtp_pass:
+            try:
+                import smtplib
+                from email.mime.multipart import MIMEMultipart
+                from email.mime.text import MIMEText
+                from email.mime.base import MIMEBase
+                from email import encoders
+
+                msg = MIMEMultipart()
+                msg['From'] = smtp_user
+                msg['To'] = medico_email
+                msg['Subject'] = f"Nova Consulta: {paciente_nome} - {data_consulta} {hora}"
+
+                body = f"""Olá Dr. {medico_nome},
+Uma nova consulta foi agendada por {paciente_nome} para o dia {data_consulta} às {hora}.
+Especialidade: {especialidade}
+Tipo: {tipo}
+Queixa: {queixa}
+
+Este convite foi adicionado à sua agenda."""
+                msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+                # Anexar arquivo ICS
+                part = MIMEBase('text', 'calendar', method='REQUEST')
+                part.set_payload(ics_content.encode('utf-8'))
+                encoders.encode_base64(part)
+                part.add_header('Content-Disposition', 'attachment; filename="invite.ics"')
+                msg.attach(part)
+
+                server = smtplib.SMTP(smtp_server, int(smtp_port))
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.sendmail(smtp_user, [medico_email], msg.as_string())
+                server.quit()
+                print(f"--> [Real SMTP] E-mail enviado com sucesso para {medico_email}")
+            except Exception as smtp_err:
+                print(f"--> [Real SMTP] Falha ao enviar e-mail via SMTP real: {smtp_err}")
+
         db.close()
         return jsonify({
             'sucesso': True,

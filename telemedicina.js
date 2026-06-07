@@ -29,10 +29,6 @@ async function initTelemedicina() {
     // Use API response (logado) or fallback to localStorage
     if (!sessao || !sessao.logado || !localLogado) {
         document.getElementById('section-unauth').classList.add('active');
-        // Redirecionamento automático para o login exclusivo após 2 segundos
-        setTimeout(() => {
-            window.location.href = 'telemedicina_login.html';
-        }, 2000);
         return;
     }
 
@@ -132,28 +128,28 @@ async function carregarAgendaMedico() {
         
         let botaoHtml = '';
         if (c.status === 'finalizada') {
-            botaoHtml = '<button class="btn-neon-health" style="opacity:0.5; cursor:default; background:#333;">FINALIZADA</button>';
+            botaoHtml = '<button class="btn-neon-health" style="opacity:0.5; cursor:default; background:#333; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="fi fi-rr-check"></i> FINALIZADA</button>';
         } else if (diffMin > 15) {
-            botaoHtml = `<button class="btn-neon-health" style="opacity:0.6; cursor:not-allowed; background: #222;" disabled>AGUARDE (${c.hora})</button>`;
+            botaoHtml = `<button class="btn-neon-health" style="opacity:0.6; cursor:not-allowed; background: #222; display: flex; align-items: center; justify-content: center; gap: 6px;" disabled><i class="fi fi-rr-clock"></i> AGUARDE (${c.hora})</button>`;
         } else {
-            botaoHtml = `<button class="btn-neon-health pulse-neon" onclick="abrirSalaTelemedicina(${c.id})">ENTRAR NA SALA</button>`;
+            botaoHtml = `<button class="btn-neon-health pulse-neon" style="display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="abrirSalaTelemedicina(${c.id})"><i class="fi fi-rr-play"></i> ENTRAR NA SALA</button>`;
         }
 
         card.innerHTML = `
             <div class="card-header-tele">
-                <span class="status-badge status-${c.status}">${c.status.replace('_', ' ')}</span>
+                <span class="status-badge status-${(c.status || '').toLowerCase().replace('_', '-')}">${(c.status || '').toUpperCase().replace('_', ' ')}</span>
                 <span style="font-size: 0.8rem; opacity: 0.7;">#${c.id}</span>
             </div>
             <div style="display: flex; gap: 15px; align-items: center;">
-                <img src="${c.paciente_foto || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan);">
+                <img src="${c.paciente_foto || 'https://via.placeholder.com/50'}" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwYmZhNSI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNlMGYyZjEiLz48cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+';" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan); object-fit: cover;">
                 <div>
                     <h4 style="margin:0;">${c.paciente_nome}</h4>
                     <p style="margin:0; font-size:0.8rem; opacity:0.8;">CPF: ${c.paciente_cpf}</p>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-bottom: 10px;">
-                <span><i class='fi fi-rr-calendar'></i>  ${dataFmt}</span>
-                <span>⏰ ${c.hora}</span>
+                <span><i class='fi fi-rr-calendar'></i> ${dataFmt}</span>
+                <span><i class='fi fi-rr-clock'></i> ${c.hora}</span>
             </div>
             ${botaoHtml}
         `;
@@ -211,34 +207,102 @@ async function carregarConsultasPaciente() {
 
         const dataFmt = c.data ? new Date(c.data + 'T00:00:00').toLocaleDateString('pt-BR') : '--';
         
+        const statusBaixo = (c.status || '').toLowerCase();
+        const cancelable = statusBaixo === 'agendado' || statusBaixo === 'confirmado' || statusBaixo === 'confirmada' || statusBaixo === 'aguardando';
+        
+        let cancelBtnHtml = '';
+        if (cancelable) {
+            cancelBtnHtml = `<button class="btn-neon-health btn-cancelar-tele" style="background: rgba(214, 48, 49, 0.15); border: 1.5px solid #d63031; color: #ff7675; margin-top:8px; width:100%; font-weight:bold; cursor:pointer; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; padding: 12px; font-size: 0.9rem;" onclick="window.cancelarConsultaPacienteTelemedicina(${c.id})"><i class="fi fi-rr-cross-small"></i> DESMARCAR CONSULTA</button>`;
+        }
+
         let acaoBotao = '';
         if (isTele && c.status !== 'cancelada') {
-            acaoBotao = `<button class="btn-neon-health" onclick="abrirSalaTelemedicina(${c.id})">ENTRAR NA SALA</button>`;
+            acaoBotao = `
+                <button class="btn-neon-health" style="background: linear-gradient(135deg, #00bfa5 0%, #00796b 100%); border: none; padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: white; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0, 191, 165, 0.4);" onclick="abrirSalaTelemedicina(${c.id})"><i class="fi fi-rr-play"></i> ENTRAR NA SALA</button>
+                ${cancelBtnHtml}
+            `;
         } else {
-            acaoBotao = `<button class="btn-neon-health" style="background: rgba(255,255,255,0.1); cursor:default; border:1px solid #444;">VER DETALHES</button>`;
+            acaoBotao = `
+                <button class="btn-neon-health" style="background: rgba(255,255,255,0.1); cursor:default; border:1px solid #444; padding: 12px; border-radius: 8px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; color: white; font-size: 0.9rem;"><i class="fi fi-rr-search-alt"></i> VER DETALHES</button>
+                ${cancelBtnHtml}
+            `;
         }
 
         card.innerHTML = `
             <div class="card-header-tele">
-                <span class="status-badge status-${c.status}">${c.status.toUpperCase()}</span>
+                <span class="status-badge status-${(c.status || '').toLowerCase().replace('_', '-')}">${(c.status || '').toUpperCase().replace('_', ' ')}</span>
                 <span class="tipo-badge ${tipoClass}" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: rgba(0,255,255,0.1); color: var(--neon-cyan); border: 1px solid var(--neon-cyan);">${tipoIcon}</span>
             </div>
             <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-                <img src="${c.medico_foto || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan);">
+                <img src="${c.medico_foto || 'https://via.placeholder.com/50'}" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwYmZhNSI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNlMGYyZjEiLz48cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+';" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--neon-cyan); object-fit: cover;">
                 <div>
                     <h4 style="margin:0;">${c.medico || 'Médico'}</h4>
                     <p style="margin:0; font-size:0.8rem; opacity:0.8;">${c.especialidade || 'Clínico Geral'}</p>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-bottom: 10px;">
-                <span>📅 ${dataFmt}</span>
-                <span>⏰ ${c.hora}</span>
+                <span><i class="fi fi-rr-calendar"></i> ${dataFmt}</span>
+                <span><i class="fi fi-rr-clock"></i> ${c.hora}</span>
             </div>
             ${acaoBotao}
         `;
         container.appendChild(card);
     });
 }
+
+window.cancelarConsultaPacienteTelemedicina = async function(id) {
+    if (typeof API === 'undefined') return;
+
+    const result = await Swal.fire({
+        title: 'Desmarcar Consulta?',
+        text: 'Você tem certeza que deseja cancelar esta consulta?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, Desmarcar',
+        cancelButtonText: 'Não, manter agendamento'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const resp = await API.cancelarConsulta(id);
+        if (resp && resp.sucesso) {
+            // Sincroniza LocalStorage
+            try {
+                const localS = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+                const updated = localS.map(a => {
+                    if (a.id == id || a.dataRaw === id) {
+                        a.status = 'cancelada';
+                    }
+                    return a;
+                });
+                localStorage.setItem('agendamentos', JSON.stringify(updated));
+            } catch (e) {
+                console.warn("Erro ao atualizar localStorage na desmarcação:", e);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cancelada!',
+                text: 'Sua consulta foi desmarcada com sucesso.',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            throw new Error(resp.erro || 'Falha ao desmarcar consulta.');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao desmarcar',
+            text: err.message || 'Ocorreu um erro ao tentar desmarcar a consulta.'
+        });
+    }
+};
 
 // --- FUNÇÕES DE NAVEGAÇÃO DO WIZARD ---
 function nextStep() {
@@ -514,6 +578,13 @@ async function generateTicket() {
         }
     }
 
+    const finalMedicoNome = wizardState.doctor.name;
+    const finalEspecialidade = wizardState.specialty;
+    const finalData = wizardState.date;
+    const finalHora = wizardState.time;
+    const finalModalidade = 'telemedicina';
+    const finalUnidade = 'Telemedicina Virtual';
+
     container.innerHTML = `
         <div class="ticket-container">
             <h2><i class='fi fi-rr-party-horn'></i>  Agendado com Sucesso!</h2>
@@ -521,16 +592,31 @@ async function generateTicket() {
                 <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
                     <div style="background: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i class='fi fi-rr-stethoscope'></i> </div>
                     <div>
-                        <strong style="color: #004b82; font-size: 1.2rem;">${wizardState.doctor.name}</strong><br>
-                        <span style="color: #555; font-size: 0.95rem;">${wizardState.specialty}</span>
+                        <strong style="color: #004b82; font-size: 1.2rem;">${finalMedicoNome}</strong><br>
+                        <span style="color: #555; font-size: 0.95rem;">${finalEspecialidade}</span>
                     </div>
                 </div>
                 <div style="display: flex; gap: 30px; border-top: 1px solid rgba(0,75,130,0.1); padding-top: 15px;">
                     <div><small style="color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;"><i class='fi fi-rr-calendar'></i>  Data</small><br><strong style="font-size: 1.1rem; color: #333;">${dateFormatted}</strong></div>
-                    <div><small style="color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">⏰ Horário</small><br><strong style="font-size: 1.1rem; color: #333;">${wizardState.time}</strong></div>
+                    <div><small style="color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">⏰ Horário</small><br><strong style="font-size: 1.1rem; color: #333;">${finalHora}</strong></div>
                 </div>
             </div>
             ${buttonHtml}
+
+            <!-- Integração WhatsApp & Agenda -->
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; text-align: center;">
+                <button onclick="notificarWhatsApp('${finalMedicoNome.replace(/'/g, "\\'")}', '${finalEspecialidade.replace(/'/g, "\\'")}', '${finalData}', '${finalHora}', '${finalModalidade}')" style="background: #25d366; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); transition: all 0.2s; width: 100%;">
+                    💬 Enviar Confirmação p/ WhatsApp
+                </button>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <a href="${gerarLinkGoogleCalendar('Consulta: ' + finalMedicoNome, finalData, finalHora, finalModalidade, finalUnidade)}" target="_blank" style="flex: 1; background: #4285f4; color: white; border-radius: 8px; padding: 12px; font-weight: bold; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.2); text-align: center;">
+                        📅 Google Calendar
+                    </a>
+                    <button onclick="baixarICS('Consulta: ${finalMedicoNome.replace(/'/g, "\\'")}', '${finalData}', '${finalHora}', '${finalModalidade}', '${finalUnidade}')" style="flex: 1; background: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        📥 Baixar .ICS
+                    </button>
+                </div>
+            </div>
             
             <style>
                 @keyframes pulseWarning {
@@ -1096,4 +1182,84 @@ window.sairDaChamada = function () {
     document.getElementById('sala-telemedicina').style.display = 'none';
     alert("Você saiu da consulta de telemedicina.");
     window.location.href = 'perfil.html';
+}
+
+// ── UTILS PARA CALENDÁRIO E NOTIFICAÇÃO ───────────────────────
+function gerarLinkGoogleCalendar(titulo, dataStr, horaStr, tipo, local) {
+    const d = dataStr.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const details = encodeURIComponent(`Consulta agendada pelo Portal Saúde Digital.\nModalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}\nLocal: ${local}`);
+    const title = encodeURIComponent(titulo);
+    
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${encodeURIComponent(local)}`;
+}
+
+function baixarICS(titulo, dataStr, horaStr, tipo, local) {
+    const d = dataStr.replace(/-/g, '');
+    const h = horaStr.replace(/:/g, '');
+    const start = `${d}T${h}00`;
+    
+    const parts = horaStr.split(':');
+    let hour = parseInt(parts[0]);
+    let min = parseInt(parts[1]) + 30;
+    if (min >= 60) {
+        min -= 60;
+        hour += 1;
+    }
+    const endHour = String(hour).padStart(2, '0');
+    const endMin = String(min).padStart(2, '0');
+    const end = `${d}T${endHour}${endMin}00`;
+    
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Portal Saude Digital//NONSGML v1.0//PT
+BEGIN:VEVENT
+UID:${Date.now()}@saudefacil.com
+DTSTAMP:${start}
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${titulo}
+DESCRIPTION:Consulta agendada pelo Portal Saúde Digital.\\nModalidade: ${tipo === 'telemedicina' ? 'Remota' : 'Presencial'}\\nLocal: ${local}
+LOCATION:${local}
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'consulta_agendada.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function notificarWhatsApp(nomeMedico, especialidade, dataStr, horaStr, tipo) {
+    const tel = localStorage.getItem('usuarioTelefone') || '';
+    const cleanTel = tel.replace(/\D/g, '');
+    const dataFmt = dataStr.split('-').reverse().join('/');
+    
+    const msg = `Olá! Sua consulta no Portal Saúde Fácil está confirmada!
+🏥 Especialidade: ${especialidade}
+👨‍⚕️ Profissional: ${nomeMedico}
+📅 Data: ${dataFmt}
+⏰ Horário: ${horaStr}
+📍 Modalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}
+Obrigado por utilizar o Portal Saúde Digital!`;
+
+    const encoded = encodeURIComponent(msg);
+    const url = cleanTel ? `https://wa.me/55${cleanTel}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    window.open(url, '_blank');
 }

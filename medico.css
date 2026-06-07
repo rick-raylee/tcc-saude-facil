@@ -304,8 +304,10 @@ body {
 }
 
 .tab-btn.active {
-    background: var(--sus-blue-dark);
-    color: white;
+    background: var(--sus-blue-dark) !important;
+    color: white !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 75, 130, 0.25);
 }
 
 /* Conteúdo Tabs */

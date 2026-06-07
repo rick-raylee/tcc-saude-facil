@@ -29,8 +29,25 @@
             <a href="duvidas.html">Dúvidas</a>
         </nav>
         <div class="nav-auth">
-            <button class="btn-auth btn-login" onclick="abrirModalAuth()">LOGIN</button>
-            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">CADASTRE-SE</button>
+            <!-- Lupa de Busca Expansível -->
+            <div class="nav-search-container" id="navSearchContainer">
+                <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar no portal..." onkeydown="handleSearchKey(event)">
+                <button class="btn-search-toggle" id="navSearchToggle" onclick="toggleNavbarSearch(event)"><i class="fi fi-rr-search"></i></button>
+                <!-- Dropdown de resultados -->
+                <div class="search-results-dropdown" id="searchResultsDropdown">
+                    <div class="search-results-header">Resultados da Busca</div>
+                    <div class="search-results-list" id="searchResultsList"></div>
+                </div>
+            </div>
+            <!-- Botão de Login Modernizado Verde -->
+            <button class="btn-auth btn-login-modern" onclick="abrirModalAuth()">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>
+                <span style="margin-left: 2px;">Login</span>
+            </button>
+            <!-- Botão de Cadastro -->
+            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">
+                <i class="fi fi-rr-user-add" style="margin-right: 8px; font-size: 0.95rem; vertical-align: middle;"></i>CADASTRE-SE
+            </button>
         </div>
     </header>
 
@@ -104,7 +121,7 @@
 
                 <div class="form-group">
                     <label><i class="fi fi-rr-clipboard-list"></i>  Tipo de Atendimento</label>
-                    <select id="tipo-atendimento">
+                    <select id="tipo-atendimento" onchange="atualizarFiltroMedicos()">
                         <option value="">Selecione...</option>
                         <option value="consulta">Consulta Médica</option>
                         <option value="exame">Exames</option>
@@ -113,16 +130,38 @@
                     </select>
                 </div>
 
+                <div class="form-group" id="form-group-modalidade">
+                    <label><i class="fi fi-rr-laptop"></i>  Modalidade de Atendimento</label>
+                    <select id="modalidade-atendimento" onchange="atualizarFiltroMedicos()">
+                        <option value="presencial">Presencial (Na Unidade)</option>
+                        <option value="telemedicina">Remoto (Telemedicina)</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label><i class="fi fi-rr-hospital"></i>  Especialidade</label>
-                    <select id="especialidade">
+                    <select id="especialidade" onchange="atualizarFiltroMedicos()">
                         <option value="">Selecione...</option>
                         <option value="clinico">Clínico Geral</option>
+                        <option value="cardiologia">Cardiologia</option>
                         <option value="pediatria">Pediatria</option>
                         <option value="ginecologia">Ginecologia</option>
-                        <option value="cardiologia">Cardiologia</option>
-                        <option value="ortopedia">Ortopedia</option>
                         <option value="dermatologia">Dermatologia</option>
+                        <option value="ortopedia">Ortopedia</option>
+                        <option value="neurologia">Neurologia</option>
+                        <option value="oftalmologia">Oftalmologia</option>
+                        <option value="psicologia">Psicologia</option>
+                        <option value="nutricao">Nutrição</option>
+                        <option value="fisioterapia">Fisioterapia</option>
+                        <option value="odontologia">Odontologia</option>
+                        <option value="otorrinolaringologia">Otorrinolaringologia</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="form-group-medico" style="display: none;">
+                    <label><i class="fi fi-rr-stethoscope"></i>  Profissional</label>
+                    <select id="medico-select">
+                        <option value="">Selecione um profissional...</option>
                     </select>
                 </div>
 
@@ -354,6 +393,16 @@
                                             <option value="Clinica Geral">Clínica Geral</option>
                                             <option value="Cardiologia">Cardiologia</option>
                                             <option value="Pediatria">Pediatria</option>
+                                            <option value="Ginecologia">Ginecologia</option>
+                                            <option value="Dermatologia">Dermatologia</option>
+                                            <option value="Oftalmologia">Oftalmologia</option>
+                                            <option value="Otorrinolaringologia">Otorrinolaringologia</option>
+                                            <option value="Ortopedia">Ortopedia</option>
+                                            <option value="Neurologia">Neurologia</option>
+                                            <option value="Psicologia">Psicologia</option>
+                                            <option value="Nutrição">Nutrição</option>
+                                            <option value="Fisioterapia">Fisioterapia</option>
+                                            <option value="Odontologia">Odontologia</option>
                                         </select>
                                     </div>
                                 </div>
@@ -496,6 +545,21 @@
                     panelPlantao.style.display = 'block';
                     carregarPlantaoPresencial();
                 }
+
+                // Tratar parâmetro especialidade vindo da URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const espParam = urlParams.get('especialidade');
+                if (espParam) {
+                    const selectEsp = document.getElementById('especialidade');
+                    const selectTipo = document.getElementById('tipo-atendimento');
+                    if (selectEsp && selectTipo) {
+                        selectTipo.value = 'consulta';
+                        selectEsp.value = espParam;
+                        
+                        // Forçar evento onchange para atualizar médicos
+                        atualizarFiltroMedicos();
+                    }
+                }
             }
         });
 
@@ -623,13 +687,177 @@
             dataInput.setAttribute('min', hoje);
         }
 
-        function confirmarAgendamento() {
+        async function atualizarFiltroMedicos() {
+            const tipoSel = document.getElementById('tipo-atendimento').value;
+            const especialidadeSel = document.getElementById('especialidade').value;
+            const modalidadeSel = document.getElementById('modalidade-atendimento').value;
+            const medicoGroup = document.getElementById('form-group-medico');
+            const medicoSelect = document.getElementById('medico-select');
+            
+            let espFiltrar = especialidadeSel;
+            if ((tipoSel === 'exame' || tipoSel === 'vacina') && !especialidadeSel) {
+                espFiltrar = 'clinico'; // Filtra por Clínico Geral por padrão para exames/vacinas
+            }
+            
+            if (!espFiltrar) {
+                medicoGroup.style.display = 'none';
+                medicoSelect.innerHTML = '<option value="">Selecione um profissional...</option>';
+                return;
+            }
+            
+            let espDB = '';
+            // Obter especialidades dinâmicas do cachedSettings ou usar padrão
+            let especialidades = [];
+            try {
+                const cached = sessionStorage.getItem('cachedSettings');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (parsed && parsed.portal_especialidades) {
+                        especialidades = JSON.parse(parsed.portal_especialidades);
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao obter especialidades para filtro:", e);
+            }
+            
+            // Se não encontrou no cache, usa o fallback padrão
+            if (!especialidades || especialidades.length === 0) {
+                especialidades = [
+                    {"id": "clinico", "nome": "Clínica Geral"},
+                    {"id": "cardiologia", "nome": "Cardiologia"},
+                    {"id": "pediatria", "nome": "Pediatria"},
+                    {"id": "ginecologia", "nome": "Ginecologia"},
+                    {"id": "dermatologia", "nome": "Dermatologia"},
+                    {"id": "ortopedia", "nome": "Ortopedia"},
+                    {"id": "neurologia", "nome": "Neurologia"},
+                    {"id": "oftalmologia", "nome": "Oftalmologia"},
+                    {"id": "psicologia", "nome": "Psicologia"},
+                    {"id": "nutricao", "nome": "Nutrição"},
+                    {"id": "fisioterapia", "nome": "Fisioterapia"},
+                    {"id": "odontologia", "nome": "Odontologia"},
+                    {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia"}
+                ];
+            }
+
+            const matchEsp = especialidades.find(e => e.id === espFiltrar);
+            espDB = matchEsp ? matchEsp.nome : espFiltrar;
+            
+            try {
+                if (typeof API === 'undefined') return;
+                
+                const medicos = await API.listarMedicos(espDB);
+                const filtrados = medicos.filter(m => {
+                    if (modalidadeSel === 'telemedicina') {
+                        return m.telemedicina;
+                    }
+                    return true;
+                });
+                
+                medicoSelect.innerHTML = '<option value="">Selecione um profissional...</option>';
+                if (filtrados.length === 0) {
+                    medicoSelect.innerHTML = '<option value="">Nenhum médico disponível para esta modalidade/especialidade</option>';
+                } else {
+                    filtrados.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.id;
+                        option.textContent = `Dr(a). ${m.nome} (CRM: ${m.crm || 'N/A'})`;
+                        medicoSelect.appendChild(option);
+                    });
+                }
+                medicoGroup.style.display = 'block';
+            } catch (err) {
+                console.error("Erro ao carregar médicos:", err);
+            }
+        }
+
+        function gerarLinkGoogleCalendar(titulo, dataStr, horaStr, tipo, local) {
+            const d = dataStr.replace(/-/g, '');
+            const h = horaStr.replace(/:/g, '');
+            const start = `${d}T${h}00`;
+            
+            const parts = horaStr.split(':');
+            let hour = parseInt(parts[0]);
+            let min = parseInt(parts[1]) + 30;
+            if (min >= 60) {
+                min -= 60;
+                hour += 1;
+            }
+            const endHour = String(hour).padStart(2, '0');
+            const endMin = String(min).padStart(2, '0');
+            const end = `${d}T${endHour}${endMin}00`;
+            
+            const details = encodeURIComponent(`Consulta agendada pelo Portal Saúde Digital.\nModalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}\nLocal: ${local}`);
+            const title = encodeURIComponent(titulo);
+            
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${encodeURIComponent(local)}`;
+        }
+
+        function baixarICS(titulo, dataStr, horaStr, tipo, local) {
+            const d = dataStr.replace(/-/g, '');
+            const h = horaStr.replace(/:/g, '');
+            const start = `${d}T${h}00`;
+            
+            const parts = horaStr.split(':');
+            let hour = parseInt(parts[0]);
+            let min = parseInt(parts[1]) + 30;
+            if (min >= 60) {
+                min -= 60;
+                hour += 1;
+            }
+            const endHour = String(hour).padStart(2, '0');
+            const endMin = String(min).padStart(2, '0');
+            const end = `${d}T${endHour}${endMin}00`;
+            
+            const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Portal Saude Digital//NONSGML v1.0//PT
+BEGIN:VEVENT
+UID:${Date.now()}@saudefacil.com
+DTSTAMP:${start}
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${titulo}
+DESCRIPTION:Consulta agendada pelo Portal Saúde Digital.\\nModalidade: ${tipo === 'telemedicina' ? 'Remota' : 'Presencial'}\\nLocal: ${local}
+LOCATION:${local}
+END:VEVENT
+END:VCALENDAR`;
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', 'consulta_agendada.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function notificarWhatsApp(nomeMedico, especialidade, dataStr, horaStr, tipo) {
+            const tel = localStorage.getItem('usuarioTelefone') || '';
+            const cleanTel = tel.replace(/\D/g, '');
+            const dataFmt = dataStr.split('-').reverse().join('/');
+            
+            const msg = `Olá! Sua consulta no Portal Saúde Fácil está confirmada!
+🏥 Especialidade: ${especialidade}
+👨‍⚕️ Profissional: ${nomeMedico}
+📅 Data: ${dataFmt}
+⏰ Horário: ${horaStr}
+📍 Modalidade: ${tipo === 'telemedicina' ? 'Remota (Telemedicina)' : 'Presencial'}
+Obrigado por utilizar o Portal Saúde Digital!`;
+
+            const encoded = encodeURIComponent(msg);
+            const url = cleanTel ? `https://wa.me/55${cleanTel}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+            window.open(url, '_blank');
+        }
+
+        async function confirmarAgendamento() {
             const tipo = document.getElementById('tipo-atendimento').value;
+            const modalidade = document.getElementById('modalidade-atendimento').value;
             const especialidade = document.getElementById('especialidade').value;
             const data = document.getElementById('data-agendamento').value;
             const horario = document.getElementById('horario-agendamento').value;
             const unidade = document.getElementById('unidade').value;
             const observacoes = document.getElementById('observacoes').value;
+            const medicoId = document.getElementById('medico-select').value;
 
             if (!tipo || !especialidade || !data || !horario || !unidade) {
                 Swal.fire({ icon: 'warning', title: 'Campos Obrigatórios', text: 'Por favor, preencha todos os campos obrigatórios para prosseguir com o agendamento.' });
@@ -644,6 +872,15 @@
                 return;
             }
 
+            // Map specialties to match DB format text
+            const selectEspecialidade = document.getElementById('especialidade');
+            const especialidadeTexto = selectEspecialidade.options[selectEspecialidade.selectedIndex].text;
+
+            const selectMedico = document.getElementById('medico-select');
+            const medicoNome = selectMedico && selectMedico.selectedIndex >= 0 && selectMedico.value
+                ? selectMedico.options[selectMedico.selectedIndex].text.replace(/ \((CRM:.*?)\)/, '') 
+                : 'Profissional da Saúde';
+
             // Dados do Paciente (Recuperar da Sessão ou Mock)
             const pacienteNome = localStorage.getItem('usuarioNome') || 'Paciente Visitante';
             const pacienteCpf = localStorage.getItem('usuarioCpf') || '000.000.000-00';
@@ -652,39 +889,107 @@
             const novoAgendamento = {
                 id: Date.now(),
                 dataCriacao: new Date().toLocaleDateString(),
-                tipo: tipo,
-                especialidade: especialidade,
-                dataAgendamento: data.split('-').reverse().join('/'), // DD/MM/AAAA
-                dataRaw: data, // YYYY-MM-DD
+                tipo: modalidade,
+                especialidade: especialidadeTexto,
+                dataAgendamento: data.split('-').reverse().join('/'),
+                dataRaw: data,
                 horario: horario,
                 unidade: unidade,
                 observacoes: observacoes,
+                medico: medicoNome,
                 paciente: {
                     nome: pacienteNome,
                     cpf: pacienteCpf,
                     sus: pacienteSus
                 },
-                status: 'Agendado'
+                status: 'confirmada'
             };
 
-            // Salvar no LocalStorage
-            let agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
-            agendamentos.push(novoAgendamento);
-            localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
-
-            Swal.fire({ 
-                icon: 'success', 
-                title: 'Sucesso!', 
-                html: '<i class="fi fi-rr-check-circle"></i>  Agendamento solicitado com sucesso!<br><br>Verifique seu e-mail e SMS para a confirmação definitiva.' 
+            Swal.fire({
+                title: 'Processando Agendamento...',
+                text: 'Aguarde um momento enquanto registramos a consulta.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
 
-            // Limpar formulário
-            document.getElementById('tipo-atendimento').value = '';
-            document.getElementById('especialidade').value = '';
-            document.getElementById('data-agendamento').value = '';
-            document.getElementById('horario-agendamento').value = '';
-            document.getElementById('unidade').value = '';
-            document.getElementById('observacoes').value = '';
+            try {
+                let apiSucesso = false;
+                let finalId = novoAgendamento.id;
+
+                if (typeof API !== 'undefined' && medicoId) {
+                    const resp = await API.agendar({
+                        medico_id: parseInt(medicoId),
+                        especialidade: especialidadeTexto,
+                        data: data,
+                        hora: horario,
+                        tipo: modalidade,
+                        queixa: observacoes || 'Consulta de rotina'
+                    });
+
+                    if (resp && resp.sucesso) {
+                        apiSucesso = true;
+                        finalId = resp.id;
+                        novoAgendamento.id = resp.id;
+                        novoAgendamento.medico = resp.medico;
+                    } else if (resp && resp.erro) {
+                        throw new Error(resp.erro);
+                    }
+                }
+
+                let agendamentos = JSON.parse(localStorage.getItem('agendamentos') || '[]');
+                agendamentos.push(novoAgendamento);
+                localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+
+                const finalMedicoNome = apiSucesso ? novoAgendamento.medico : medicoNome;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Agendamento Confirmado!',
+                    html: `
+                        <p style="font-size: 0.95rem; color: #555; line-height: 1.4; margin-bottom: 18px;">
+                            Sua consulta foi agendada com sucesso com o(a) <strong>${finalMedicoNome}</strong>.<br>
+                            Selecione uma das opções abaixo para sincronizar ou notificar:
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                            <button onclick="notificarWhatsApp('${finalMedicoNome.replace(/'/g, "\\'")}', '${especialidadeTexto.replace(/'/g, "\\'")}', '${data}', '${horario}', '${modalidade}')" style="background: #25d366; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); transition: all 0.2s;">
+                                💬 Enviar Confirmação p/ WhatsApp
+                            </button>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="${gerarLinkGoogleCalendar('Consulta: ' + finalMedicoNome, data, horario, modalidade, unidade)}" target="_blank" style="flex: 1; background: #4285f4; color: white; border-radius: 8px; padding: 12px; font-weight: bold; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(66, 133, 244, 0.2);">
+                                    📅 Google Calendar
+                                </a>
+                                <button onclick="baixarICS('Consulta: ${finalMedicoNome.replace(/'/g, "\\'")}', '${data}', '${horario}', '${modalidade}', '${unidade}')" style="flex: 1; background: #f1f3f4; color: #3c4043; border: 1px solid #dadce0; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    📥 Baixar .ICS
+                                </button>
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonText: 'Concluir',
+                    confirmButtonColor: '#004b82'
+                }).then(() => {
+                    document.getElementById('tipo-atendimento').value = '';
+                    document.getElementById('especialidade').value = '';
+                    document.getElementById('data-agendamento').value = '';
+                    document.getElementById('horario-agendamento').value = '';
+                    document.getElementById('unidade').value = '';
+                    document.getElementById('observacoes').value = '';
+                    if (document.getElementById('medico-select')) {
+                        document.getElementById('medico-select').value = '';
+                        document.getElementById('form-group-medico').style.display = 'none';
+                    }
+                    window.location.href = 'perfil.html';
+                });
+
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao Salvar Agendamento',
+                    text: err.message || 'Não foi possível salvar a consulta no servidor. Verifique sua conexão e tente novamente.'
+                });
+            }
         }
     </script>
 

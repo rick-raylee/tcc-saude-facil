@@ -19,10 +19,15 @@ def buscar_paciente():
     try:
         db = get_db_connection()
         cur = db.cursor()
+        
+        # Normalizar CPF de busca
+        cpf_limpo = "".join(filter(str.isdigit, cpf))
+        
         cur.execute("""
             SELECT id, nome, cpf, sus, email, telefone, cidade, bairro, data_nascimento
-            FROM usuarios WHERE cpf = ?
-        """, (cpf,))
+            FROM usuarios 
+            WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?
+        """, (cpf_limpo,))
         u = cur.fetchone()
         db.close()
 
@@ -44,7 +49,7 @@ def salvar_triagem():
     from app import get_db_connection
     data = request.get_json()
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     paciente_cpf = data.get('paciente_cpf', '')
 
     try:
@@ -52,7 +57,8 @@ def salvar_triagem():
         cur = db.cursor()
 
         # Buscar paciente
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (paciente_cpf,))
+        paciente_cpf_limpo = "".join(filter(str.isdigit, paciente_cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (paciente_cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             # Tentar Cadastro Rápido se dados forem fornecidos
@@ -146,7 +152,7 @@ def registrar_vacina():
     from app import get_db_connection
     data = request.get_json()
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     paciente_cpf = data.get('paciente_cpf', '')
 
     try:
@@ -154,7 +160,8 @@ def registrar_vacina():
         cur = db.cursor()
 
         # Buscar paciente
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (paciente_cpf,))
+        paciente_cpf_limpo = "".join(filter(str.isdigit, paciente_cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (paciente_cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             db.close()
@@ -188,7 +195,7 @@ def dashboard_resumo():
     from app import get_db_connection
     from datetime import datetime
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
     
@@ -229,7 +236,7 @@ def dashboard_resumo():
 def prescricoes_pendentes():
     from app import get_db_connection
     
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -274,7 +281,7 @@ def prescricoes_pendentes():
 def aplicar_prescricao():
     from app import get_db_connection
     
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -320,7 +327,8 @@ def listar_triagens():
     try:
         db = get_db_connection()
         cur = db.cursor()
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (cpf,))
+        cpf_limpo = "".join(filter(str.isdigit, cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             db.close()
@@ -363,7 +371,8 @@ def vacinas_paciente():
     try:
         db = get_db_connection()
         cur = db.cursor()
-        cur.execute("SELECT id FROM usuarios WHERE cpf = ?", (cpf,))
+        cpf_limpo = "".join(filter(str.isdigit, cpf or ""))
+        cur.execute("SELECT id FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?", (cpf_limpo,))
         pac = cur.fetchone()
         if not pac:
             db.close()
@@ -399,7 +408,7 @@ def editar_vacina(id):
     from app import get_db_connection
     data = request.get_json()
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -438,7 +447,7 @@ def editar_vacina(id):
 def remover_vacina(id):
     from app import get_db_connection
 
-    enfermeiro_id = session.get('usuario_id')
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not enfermeiro_id:
         return jsonify({'erro': 'Não autenticado'}), 401
 
@@ -480,3 +489,118 @@ def medicos_disponiveis():
         return jsonify([{'id': r['id'], 'nome': r['nome'], 'especialidade': r['especialidade']} for r in rows])
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+
+# ── ATENDIMENTOS DO DIA (TRIAGEM, VACINA, MEDICAÇÃO) ──────────────
+@enfermeiro_bp.route('/api/enfermeiro/atendimentos-hoje', methods=['GET'])
+def atendimentos_hoje():
+    from app import get_db_connection
+    from datetime import datetime
+
+    enfermeiro_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not enfermeiro_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    hoje = datetime.now().strftime('%Y-%m-%d')
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+
+        # 1. Triagens realizadas hoje pelo enfermeiro
+        cur.execute("""
+            SELECT t.criado_em, u.nome AS paciente_nome, t.prioridade, t.medico_destino
+            FROM triagens t
+            JOIN usuarios u ON t.paciente_id = u.id
+            WHERE (date(t.criado_em) = ? OR date(t.criado_em, 'localtime') = ?) AND t.enfermeiro_id = ?
+        """, (hoje, hoje, enfermeiro_id))
+        triagens = cur.fetchall()
+
+        # 2. Vacinas aplicadas hoje pelo enfermeiro
+        cur.execute("""
+            SELECT va.criado_em, u.nome AS paciente_nome, va.vacina_nome, va.dose
+            FROM vacinas_aplicadas va
+            JOIN usuarios u ON va.paciente_id = u.id
+            WHERE (date(va.criado_em) = ? OR date(va.criado_em, 'localtime') = ?) AND va.enfermeiro_id = ?
+        """, (hoje, hoje, enfermeiro_id))
+        vacinas = cur.fetchall()
+
+        # 3. Medicamentos aplicados hoje pelo enfermeiro
+        cur.execute("""
+            SELECT ap.data_hora AS criado_em, u.nome AS paciente_nome, p.medicamento, p.dosagem
+            FROM aplicacoes ap
+            JOIN prescricoes p ON ap.prescricao_id = p.id
+            JOIN usuarios u ON p.paciente_id = u.id
+            WHERE (date(ap.data_hora) = ? OR date(ap.data_hora, 'localtime') = ?) AND ap.enfermeiro_id = ?
+        """, (hoje, hoje, enfermeiro_id))
+        aplicacoes = cur.fetchall()
+
+        db.close()
+
+        lista = []
+
+        # Formatar triagens
+        for r in triagens:
+            dt_str = str(r['criado_em'])
+            hora = ""
+            if dt_str and ' ' in dt_str:
+                time_part = dt_str.split(' ')[1]
+                hora = ':'.join(time_part.split(':')[:2])
+            else:
+                hora = dt_str
+
+            lista.append({
+                'tipo': 'Triagem',
+                'nome': r['paciente_nome'],
+                'hora': hora,
+                'criado_em': dt_str,
+                'prioridade': r['prioridade'],
+                'detalhe': f"Encaminhado: {r['medico_destino']}" if r['medico_destino'] else "Triagem realizada"
+            })
+
+        # Formatar vacinas
+        for r in vacinas:
+            dt_str = str(r['criado_em'])
+            hora = ""
+            if dt_str and ' ' in dt_str:
+                time_part = dt_str.split(' ')[1]
+                hora = ':'.join(time_part.split(':')[:2])
+            else:
+                hora = dt_str
+
+            lista.append({
+                'tipo': 'Vacina',
+                'nome': r['paciente_nome'],
+                'hora': hora,
+                'criado_em': dt_str,
+                'prioridade': None,
+                'detalhe': f"Vacina: {r['vacina_nome']} ({r['dose']})"
+            })
+
+        # Formatar medicações
+        for r in aplicacoes:
+            dt_str = str(r['criado_em'])
+            hora = ""
+            if dt_str and ' ' in dt_str:
+                time_part = dt_str.split(' ')[1]
+                hora = ':'.join(time_part.split(':')[:2])
+            else:
+                hora = dt_str
+
+            lista.append({
+                'tipo': 'Medicação',
+                'nome': r['paciente_nome'],
+                'hora': hora,
+                'criado_em': dt_str,
+                'prioridade': None,
+                'detalhe': f"Aplicado: {r['medicamento']} {r['dosagem']}"
+            })
+
+        # Ordenar decrescente pelo timestamp de criação
+        lista.sort(key=lambda x: x['criado_em'] or '', reverse=True)
+
+        return jsonify(lista), 200
+
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
