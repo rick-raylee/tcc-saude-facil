@@ -246,7 +246,7 @@ window.cancelarConsultaMedico = async function(id) {
     }
 };
 
-function verificarAcessoMedico() {
+async function verificarAcessoMedico() {
     const isLogado = localStorage.getItem('usuarioLogado') === 'true';
     const tipo = localStorage.getItem('tipoUsuario');
 
