@@ -8,51 +8,106 @@
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="medico.css"> <!-- Reutilizando estilos de cartão médico -->
     <style>
-        body { background: #0f172a; color: white; }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        body {
+            background: #0b0f19;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
         .navbar-tele {
-            background: linear-gradient(135deg, #0288d1, #01579b);
-            padding: 15px 30px;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 14px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
             color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            z-index: 10;
+            position: relative;
         }
         .container-tele {
             display: flex;
-            height: calc(100vh - 70px);
+            height: calc(100vh - 69px);
         }
         .sidebar-tele {
             width: 320px;
-            background: #1e293b;
-            border-right: 1px solid #334155;
-            padding: 20px;
+            background: #0f172a;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 24px 20px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         .main-tele {
             flex: 1;
-            padding: 20px;
-            background: #0f172a;
+            padding: 24px;
+            background: #0b0f19;
             position: relative;
+            overflow-y: auto;
         }
         .card-paciente-fila {
-            background: #334155;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #38bdf8;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background: rgba(30, 41, 59, 0.45);
+            padding: 18px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #00d2ff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-paciente-fila:hover {
+            transform: translateY(-2px);
+            background: rgba(30, 41, 59, 0.65);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
         }
         .btn-iniciar-chamada {
             width: 100%;
-            background: #22c55e;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 750;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-iniciar-chamada:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            filter: brightness(1.05);
+        }
+        .btn-iniciar-chamada:active {
+            transform: translateY(0);
         }
         #jitsi-container {
             width: 100%;
@@ -64,10 +119,220 @@
         }
         .empty-dash {
             text-align: center;
-            padding: 100px 20px;
+            padding: 120px 20px;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .empty-dash h2 {
+            color: white;
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .empty-dash p {
+            font-size: 0.95rem;
+            line-height: 1.6;
             color: #94a3b8;
         }
-        .btn-config { background: transparent; border: 1px solid #38bdf8; color: #38bdf8; padding: 5px 15px; border-radius: 15px; cursor: pointer; }
+        .btn-config {
+            background: transparent;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-config:hover {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: #38bdf8;
+            transform: translateY(-1px);
+        }
+        .btn-config:active {
+            transform: translateY(0);
+        }
+
+        /* OUTROS ESTILOS TELEMEDICINA */
+        .btn-logout-tele {
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 8px 20px !important;
+            border-radius: 8px !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            font-size: 0.85rem !important;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25) !important;
+            transition: all 0.25s ease !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+        }
+        .btn-logout-tele:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 16px rgba(244, 63, 94, 0.4) !important;
+            filter: brightness(1.05) !important;
+        }
+        .btn-logout-tele:active {
+            transform: translateY(0) !important;
+        }
+
+        .badge-exclusive {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .link-edit-perfil {
+            font-size: 0.75rem;
+            color: #38bdf8;
+            text-decoration: none;
+            margin-top: 4px;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .link-edit-perfil:hover {
+            color: #0ea5e9;
+            text-decoration: underline;
+        }
+
+        .stats-card-premium {
+            margin-top: 40px;
+            background: linear-gradient(135deg, #1e293b 0%, #111827 100%);
+            padding: 24px;
+            border-radius: 12px;
+            display: inline-block;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            min-width: 280px;
+        }
+        .stats-card-title {
+            color: #38bdf8;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 8px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+        .stats-label {
+            color: #94a3b8;
+        }
+        .stats-val-green {
+            color: #10b981;
+            font-weight: 700;
+        }
+        .stats-val-white {
+            color: white;
+            font-weight: 700;
+        }
+
+        .btn-encerrar-chamada {
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.25);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-encerrar-chamada:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
+            filter: brightness(1.05);
+        }
+        .btn-encerrar-chamada:active {
+            transform: translateY(0);
+        }
+
+        .btn-salvar-atendimento {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-salvar-atendimento:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            filter: brightness(1.05);
+        }
+        .btn-salvar-atendimento:active {
+            transform: translateY(0);
+        }
+
+        #tele-clinical-panel input[type="text"],
+        #tele-clinical-panel input[type="number"],
+        #tele-clinical-panel select,
+        #tele-clinical-panel textarea {
+            background: #0f172a !important;
+            color: white !important;
+            border: 1px solid #334155 !important;
+            padding: 10px 12px !important;
+            border-radius: 8px !important;
+            font-size: 0.9rem !important;
+            transition: all 0.25s ease !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        #tele-clinical-panel input[type="text"]:focus,
+        #tele-clinical-panel input[type="number"]:focus,
+        #tele-clinical-panel select:focus,
+        #tele-clinical-panel textarea:focus {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+            outline: none !important;
+        }
+
+        #tele-clinical-panel label {
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
     </style>
 
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
@@ -77,16 +342,16 @@
     <header class="navbar-tele">
         <div style="display:flex; align-items:center; gap: 15px;">
             <h1 style="margin:0; font-size: 1.4rem;"><i class="fi fi-rr-laptop"></i>  Portal Telemedicina</h1>
-            <span class="badge" style="background:#22c55e; padding:5px 10px; border-radius:15px; font-size:0.8rem;">Modo Exclusivo</span>
+            <span class="badge-exclusive">Modo Exclusivo</span>
         </div>
         <div style="display:flex; align-items:center; gap: 15px;">
             <div style="text-align: right; display: flex; flex-direction: column;">
                 <div id="nome-medico-tele" style="font-weight:bold;">Dr. Carregando...</div>
                 <small id="crm-medico-tele" style="color:#cbd5e1;">CRM: ...</small>
-                <a href="#" onclick="abrirModalEditarPerfil(event)" style="font-size: 0.65rem; color: inherit; opacity: 0.8; text-decoration: underline; margin-top: 2px;">Editar Dados Pessoais</a>
+                <a href="#" onclick="abrirModalEditarPerfil(event)" class="link-edit-perfil"><i class="fi fi-rr-edit"></i> Editar Dados Pessoais</a>
             </div>
             <button class="btn-config" onclick="editarSalaPadrao()"><i class="fi fi-rr-settings"></i>  Sala Padrão</button>
-            <button onclick="logoutTele()" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">Sair</button>
+            <button onclick="logoutTele()" class="btn-logout-tele"><i class="fi fi-rr-exit"></i> Sair</button>
         </div>
     </header>
 
@@ -105,14 +370,20 @@
         <main class="main-tele">
             <!-- TELA INICIAL ANTES DE ABRIR A SALA -->
             <div id="dash-vazio" class="empty-dash">
-                <div style="font-size: 4rem; margin-bottom:20px;">📹</div>
+                <div style="font-size: 4rem; margin-bottom:20px; filter: drop-shadow(0 10px 15px rgba(56, 189, 248, 0.25));">📹</div>
                 <h2>Nenhuma chamada ativa</h2>
                 <p>Selecione um paciente na fila ao lado e clique em "Iniciar" para abrir a sala virtual privada segura (E2EE).</p>
                 
-                <div style="margin-top:40px; background:#1e293b; padding:20px; border-radius:8px; display:inline-block; text-align:left; border:1px dashed #334155;">
-                    <h4 style="color:#38bdf8; margin-top:0;">Estatísticas do Mês</h4>
-                    <p style="margin:5px 0;">Atendimentos Virtuais: <strong id="stat-atendimentos" style="color:#22c55e;">Carregando...</strong></p>
-                    <p style="margin:5px 0;">Tempo Médio: <strong>14 min</strong></p>
+                <div class="stats-card-premium">
+                    <h4 class="stats-card-title"><i class="fi fi-rr-stats"></i> Estatísticas do Mês</h4>
+                    <div class="stats-row">
+                        <span class="stats-label">Atendimentos Virtuais:</span>
+                        <span id="stat-atendimentos" class="stats-val-green">Carregando...</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">Tempo Médio:</span>
+                        <span class="stats-val-white">14 min</span>
+                    </div>
                 </div>
             </div>
 
@@ -122,7 +393,7 @@
                 <div style="flex: 2; display: flex; flex-direction: column; position: relative; height: 100%;">
                     <div id="jitsi-container" style="flex: 1; min-height: 400px; background: #000; border-radius: 12px; overflow: hidden;"></div>
                     <div id="controles-fim" style="margin-top: 15px; display:flex; justify-content: center; gap: 15px;">
-                        <button onclick="encerrarJitsi()" style="background:#ef4444; color:white; border:none; padding:12px 25px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fi fi-rr-cross-circle"></i>  Encerrar Atendimento</button>
+                        <button onclick="encerrarJitsi()" class="btn-encerrar-chamada"><i class="fi fi-rr-cross-circle"></i>  Encerrar Atendimento</button>
                     </div>
                 </div>
                 
@@ -133,14 +404,14 @@
                     <form id="form-tele-clinico" onsubmit="salvarAtendimentoTele(event)" style="display:flex; flex-direction:column; gap:15px;">
                         <!-- DIAGNÓSTICO -->
                         <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label style="font-weight:600; color:#94a3b8; font-size:0.9rem;">Diagnóstico (CID-10 / Doença)</label>
-                            <input type="text" id="clin-diagnostico" placeholder="Ex: Hipertensão, Gripe..." required style="background:#0f172a; color:white; border:1px solid #334155; padding:10px; border-radius:6px; font-size:0.95rem;">
+                            <label>Diagnóstico (CID-10 / Doença)</label>
+                            <input type="text" id="clin-diagnostico" placeholder="Ex: Hipertensão, Gripe..." required>
                         </div>
                         
                         <!-- ENCAMINHAMENTO -->
                         <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label style="font-weight:600; color:#94a3b8; font-size:0.9rem;">Próxima Etapa / Encaminhamento</label>
-                            <select id="clin-proxima-etapa" onchange="toggleEncaminhamentoDropdown(this.value)" style="background:#0f172a; color:white; border:1px solid #334155; padding:10px; border-radius:6px; font-size:0.95rem;">
+                            <label>Próxima Etapa / Encaminhamento</label>
+                            <select id="clin-proxima-etapa" onchange="toggleEncaminhamentoDropdown(this.value)">
                                 <option value="alta">Alta Médica</option>
                                 <option value="retorno">Agendar Retorno</option>
                                 <option value="encaminhar">Encaminhar para outro Médico</option>
@@ -149,8 +420,8 @@
                         
                         <!-- SELEÇÃO DE OUTRO MÉDICO (ENCAMINHAMENTO) -->
                         <div id="clin-wrapper-encaminhamento" style="display:none; flex-direction:column; gap:5px;">
-                            <label style="font-weight:600; color:#38bdf8; font-size:0.9rem;"><i class="fi fi-rr-stethoscope"></i> Selecione o Médico para Encaminhar</label>
-                            <select id="clin-encaminhar-medico" style="background:#0f172a; color:white; border:1px solid #334155; padding:10px; border-radius:6px; font-size:0.95rem;">
+                            <label style="color:#38bdf8;"><i class="fi fi-rr-stethoscope"></i> Selecione o Médico para Encaminhar</label>
+                            <select id="clin-encaminhar-medico">
                                 <option value="">Carregando médicos...</option>
                             </select>
                         </div>
@@ -167,14 +438,14 @@
                             
                             <!-- FORMULÁRIO DE RECEITA -->
                             <div id="clin-receita-form" style="display:flex; flex-direction:column; gap:8px; background:#0f172a; padding:12px; border-radius:6px; border:1px solid #334155;">
-                                <input type="text" id="clin-med" placeholder="Medicamento (Ex: Paracetamol)" required style="background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
+                                <input type="text" id="clin-med" placeholder="Medicamento (Ex: Paracetamol)" required>
                                 <div style="display:flex; gap:8px;">
-                                    <input type="text" id="clin-dose" placeholder="Dosagem (Ex: 500mg)" required style="flex:1; background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
-                                    <input type="text" id="clin-freq" placeholder="Frequência (Ex: 8/8h)" required style="flex:1; background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
+                                    <input type="text" id="clin-dose" placeholder="Dosagem (Ex: 500mg)" required style="flex:1;">
+                                    <input type="text" id="clin-freq" placeholder="Frequência (Ex: 8/8h)" required style="flex:1;">
                                 </div>
                                 <div style="display:flex; gap:8px;">
-                                    <input type="text" id="clin-via" placeholder="Via (Ex: Oral)" value="Oral" style="flex:1; background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
-                                    <input type="text" id="clin-duracao" placeholder="Duração (Ex: 5 dias)" style="flex:1; background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
+                                    <input type="text" id="clin-via" placeholder="Via (Ex: Oral)" value="Oral" style="flex:1;">
+                                    <input type="text" id="clin-duracao" placeholder="Duração (Ex: 5 dias)" style="flex:1;">
                                 </div>
                             </div>
                             
@@ -187,15 +458,15 @@
                             <!-- FORMULÁRIO DE ATESTADO -->
                             <div id="clin-atestado-form" style="display:none; flex-direction:column; gap:8px; background:#0f172a; padding:12px; border-radius:6px; border:1px solid #334155;">
                                 <div style="display:flex; gap:8px;">
-                                    <input type="number" id="clin-dias" placeholder="Dias" min="1" value="1" style="width:70px; background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
-                                    <input type="text" id="clin-cid" placeholder="CID (Ex: M54.5)" style="flex:1; background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
+                                    <input type="number" id="clin-dias" placeholder="Dias" min="1" value="1" style="width:70px;">
+                                    <input type="text" id="clin-cid" placeholder="CID (Ex: M54.5)" style="flex:1;">
                                 </div>
-                                <input type="text" id="clin-motivo" placeholder="Motivo (Ex: Necessidade de repouso por lombalgia aguda)" style="background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:4px; font-size:0.85rem;">
+                                <input type="text" id="clin-motivo" placeholder="Motivo (Ex: Necessidade de repouso por lombalgia aguda)">
                             </div>
                         </div>
                         
                         <!-- BOTÃO SALVAR ATENDIMENTO -->
-                        <button type="submit" style="background:#22c55e; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:15px; box-shadow:0 4px 10px rgba(34, 197, 94, 0.2);"><i class="fi fi-rr-disk"></i> Salvar & Finalizar Atendimento</button>
+                        <button type="submit" class="btn-salvar-atendimento"><i class="fi fi-rr-disk"></i> Salvar & Finalizar Atendimento</button>
                     </form>
                 </div>
             </div>
