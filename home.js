@@ -376,7 +376,12 @@ async function carregarCarouselDinamico() {
     let todasNoticias = [...noticiasAPI];
     noticiasLocal.forEach(nl => { if(!todasNoticias.find(n => n.id === nl.id)) todasNoticias.push(nl); });
 
-    let destaquesNoticias = todasNoticias.filter(n => parseInt(n.destaque_carrossel) === 1).map(n => ({
+    let destaquesNoticias = todasNoticias.filter(n => 
+        parseInt(n.destaque_carrossel) === 1 || 
+        n.destaque_carrossel === true || 
+        String(n.destaque_carrossel) === '1' || 
+        String(n.destaque_carrossel) === 'true'
+    ).map(n => ({
         id: 'n' + n.id,
         imagem: n.imagem,
         titulo: n.titulo,
@@ -389,7 +394,7 @@ async function carregarCarouselDinamico() {
     let todosSlides = [...slidesAPI];
     slidesLocal.forEach(sl => { if(!todosSlides.find(s => s.id === sl.id)) todosSlides.push(sl); });
 
-    let slides = [...todosSlides];
+    let slides = [...todosSlides, ...destaquesNoticias];
 
 
     slides3D = slides.filter(s => parseInt(s.ativo) === 1 || parseInt(s.status) === 1 || String(s.status) === 'publicado' || s.ativo === undefined);

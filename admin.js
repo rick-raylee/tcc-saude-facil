@@ -391,23 +391,33 @@ async function carregarNoticias() {
     const lista = document.getElementById('lista-noticias');
     if (!lista) return;
 
-    let noticias = [];
+    let noticiasAPI = [];
     if (typeof API !== 'undefined') {
-        const resp = await API.noticias();
-        if (resp && !resp.erro) noticias = resp;
+        try {
+            const resp = await API.noticias();
+            if (resp && !resp.erro) noticiasAPI = resp;
+        } catch (e) {
+            console.error("Erro ao carregar notícias da API:", e);
+        }
     }
 
-    // Tratamento Fallback Local para evitar Tela em Branco Offline
-    if (!noticias || noticias.length === 0) {
-        noticias = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
-        if (noticias.length === 0) {
-            noticias = [
-                { id: 1, categoria: "Campanha Nacional", titulo: "Ministério amplia vacinação contra HPV para meninos de até 15 anos", conteudo: "Medida visa reduzir casos de câncer de colo de útero e outras doenças relacionadas ao vírus. O SUS agora disponibiliza...", data: "10 de Fevereiro, 2026", status: "publicado", destaque_carrossel: true, imagem: "https://www.gov.br/saude/pt-br/assuntos/noticias/2022/abril/campanha-de-vacinacao-contra-gripe-e-sarampo-comeca-nesta-segunda-4/vacinacao-gripe-sarampo.jpg/@@images/image.jpeg" },
-                { id: 2, categoria: "Tecnologia", titulo: "SUS lança novo aplicativo para agendamento de consultas", conteudo: "Disponível para todo o país, a ferramenta promete zerar as filas em postos de saúde da Atenção Básica.", data: "08 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://img.freepik.com/fotos-gratis/equipe-medica-de-sucesso_329181-4235.jpg" },
-                { id: 3, categoria: "Saúde Pública", titulo: "Casos de dengue diminuem 40% após campanhas de conscientização", conteudo: "Ações conjuntas entre agentes de saúde e população mostram resultados positivos contra o Aedes aegypti no verão.", data: "05 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://blog.ipog.edu.br/wp-content/uploads/2018/10/m%C3%A9dico-com-tablet.jpg" }
-            ];
-            localStorage.setItem('admin_noticias', JSON.stringify(noticias));
+    let noticiasLocal = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
+
+    // Mesclar dados do servidor e locais para total sincronia
+    let noticias = [...noticiasAPI];
+    noticiasLocal.forEach(nl => {
+        if (!noticias.find(n => String(n.id) === String(nl.id))) {
+            noticias.push(nl);
         }
+    });
+
+    if (noticias.length === 0) {
+        noticias = [
+            { id: 1, categoria: "Campanha Nacional", titulo: "Ministério amplia vacinação contra HPV para meninos de até 15 anos", conteudo: "Medida visa reduzir casos de câncer de colo de útero e outras doenças relacionadas ao vírus. O SUS agora disponibiliza...", data: "10 de Fevereiro, 2026", status: "publicado", destaque_carrossel: true, imagem: "https://www.gov.br/saude/pt-br/assuntos/noticias/2022/abril/campanha-de-vacinacao-contra-gripe-e-sarampo-comeca-nesta-segunda-4/vacinacao-gripe-sarampo.jpg/@@images/image.jpeg" },
+            { id: 2, categoria: "Tecnologia", titulo: "SUS lança novo aplicativo para agendamento de consultas", conteudo: "Disponível para todo o país, a ferramenta promete zerar as filas em postos de saúde da Atenção Básica.", data: "08 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://img.freepik.com/fotos-gratis/equipe-medica-de-sucesso_329181-4235.jpg" },
+            { id: 3, categoria: "Saúde Pública", titulo: "Casos de dengue diminuem 40% após campanhas de conscientização", conteudo: "Ações conjuntas entre agentes de saúde e população mostram resultados positivos contra o Aedes aegypti no verão.", data: "05 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://blog.ipog.edu.br/wp-content/uploads/2018/10/m%C3%A9dico-com-tablet.jpg" }
+        ];
+        localStorage.setItem('admin_noticias', JSON.stringify(noticias));
     }
 
     window._adminNoticiasCache = noticias;
@@ -899,33 +909,51 @@ async function carregarCarrosselEditor() {
     const lista = document.getElementById('lista-carrossel');
     if (!lista) return;
 
-    let slides = [];
-    let noticias = [];
+    let slidesAPI = [];
+    let noticiasAPI = [];
     
     if (typeof API !== 'undefined') {
         try {
             const respC = await API.carrossel();
-            if (respC && !respC.erro) slides = respC;
+            if (respC && !respC.erro) slidesAPI = respC;
             const respN = await API.noticias();
-            if (respN && !respN.erro) noticias = respN;
+            if (respN && !respN.erro) noticiasAPI = respN;
         } catch (e) {
-            console.error("Erro ao carregar dados:", e);
+            console.error("Erro ao carregar dados da API:", e);
         }
     }
 
-    if ((!slides || slides.length === 0) && (!noticias || noticias.length === 0)) {
-        slides = JSON.parse(localStorage.getItem('admin_carrossel') || '[]');
-        noticias = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
-    }
+    let slidesLocal = JSON.parse(localStorage.getItem('admin_carrossel') || '[]');
+    let noticiasLocal = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
+
+    // Mesclar dados do servidor e locais para total sincronia
+    let slides = [...slidesAPI];
+    slidesLocal.forEach(sl => {
+        if (!slides.find(s => String(s.id) === String(sl.id))) {
+            slides.push(sl);
+        }
+    });
+
+    let noticias = [...noticiasAPI];
+    noticiasLocal.forEach(nl => {
+        if (!noticias.find(n => String(n.id) === String(nl.id))) {
+            noticias.push(nl);
+        }
+    });
 
     // Salva no cache global
     window._adminCarouselCache.slides = slides;
     window._adminCarouselCache.noticias = noticias;
 
-    const noticiasNoCarrossel = noticias.filter(n => parseInt(n.destaque_carrossel) === 1 || n.destaque_carrossel === true);
+    const noticiasNoCarrossel = noticias.filter(n => 
+        parseInt(n.destaque_carrossel) === 1 || 
+        n.destaque_carrossel === true || 
+        String(n.destaque_carrossel) === '1' || 
+        String(n.destaque_carrossel) === 'true'
+    );
     lista.innerHTML = '';
 
-    // 1. Renderizar os Slides Fixos
+    // 1. Renderizar os Slides Fixos (Banners personalizados)
     slides.forEach((slide, idx) => {
         const item = document.createElement('div');
         item.className = 'admin-item';
@@ -946,7 +974,29 @@ async function carregarCarrosselEditor() {
         lista.appendChild(item);
     });
 
-    if (slides.length === 0) {
+    // 2. Renderizar Notícias Destaque no Carrossel
+    noticiasNoCarrossel.forEach((noticia) => {
+        const idxReal = noticias.findIndex(n => String(n.id) === String(noticia.id));
+        const item = document.createElement('div');
+        item.className = 'admin-item';
+        item.innerHTML = `
+            <div class="item-info" style="display: flex; align-items: center; gap: 15px;">
+                <img src="${noticia.imagem || 'https://via.placeholder.com/80x50'}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                <div>
+                    <h4 style="margin: 0;">${noticia.titulo || 'Notícia'}</h4>
+                    <p style="margin: 0; font-size: 0.8rem; color: #555;">${noticia.categoria || 'Notícia'}</p>
+                    <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: #e8f4fd; color: #0056ac; border: 1px solid currentColor; display: inline-flex; align-items: center; gap: 4px;"><i class="fi fi-rr-info"></i> Notícia Destaque</span>
+                </div>
+            </div>
+            <div class="item-actions">
+                <button class="btn-edit" onclick="window.irParaNoticia(${idxReal})"><i class="fi fi-rr-edit"></i> Editar Notícia</button>
+                <button class="btn-delete" onclick="window.removerNoticiaDoCarrossel('${noticia.id}')"><i class="fi fi-rr-ban"></i> Remover Destaque</button>
+            </div>
+        `;
+        lista.appendChild(item);
+    });
+
+    if (slides.length === 0 && noticiasNoCarrossel.length === 0) {
         lista.innerHTML = '<div style="text-align:center; padding: 20px; color: #666;">Nenhum item ativo no carrossel.</div>';
     }
 }
@@ -991,6 +1041,51 @@ async function deletarSlide(id) {
         hideHealthLoader();
     }
 }
+
+window.removerNoticiaDoCarrossel = async function(id) {
+    if (!confirm('Remover esta notícia do carrossel?')) return;
+
+    showHealthLoader('Removendo destaque da notícia...');
+
+    try {
+        // Encontrar a notícia no cache
+        const noticias = window._adminCarouselCache.noticias;
+        const noticia = noticias.find(n => String(n.id) === String(id));
+        if (noticia) {
+            const payload = {
+                titulo: noticia.titulo,
+                resumo: noticia.resumo,
+                conteudo: noticia.conteudo,
+                imagem: noticia.imagem,
+                categoria: noticia.categoria,
+                status: noticia.status,
+                destaque_carrossel: 0
+            };
+
+            if (typeof API !== 'undefined') {
+                const resp = await API.editarNoticia(id, payload);
+                if (resp && resp.sucesso) {
+                    console.log('Notícia atualizada no servidor');
+                }
+            }
+
+            // Atualizar fallback local
+            let listaN = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
+            const i = listaN.findIndex(n => String(n.id) === String(id));
+            if (i !== -1) {
+                listaN[i].destaque_carrossel = 0;
+                localStorage.setItem('admin_noticias', JSON.stringify(listaN));
+            }
+        }
+
+        await carregarCarrosselEditor();
+        Swal.fire({ icon: 'success', title: 'Removido', text: 'A notícia foi removida do carrossel com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao remover notícia do carrossel:', err);
+    } finally {
+        hideHealthLoader();
+    }
+};
 
 window.abrirModalCarrossel = function (slide = null) {
     const modal = document.getElementById('modal-admin');
