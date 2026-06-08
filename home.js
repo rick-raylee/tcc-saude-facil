@@ -1181,7 +1181,13 @@ async function carregarCampanhasPublicas() {
     }
 
     // AGGREGAÇÃO NO SININHO (BELL)
-    const outrasCampanhas = campanhas.filter(c => c.id !== welcomeCamp.id);
+    const campanhasLimpas = JSON.parse(localStorage.getItem('campanhas_limpas') || '[]');
+    const outrasCampanhas = campanhas.filter(c => c.id !== welcomeCamp.id && !campanhasLimpas.includes(c.id));
+    
+    // Salvar variáveis globais para a função limparNotificacoes
+    window.campanhasCarregadas = outrasCampanhas;
+    window.notificacoesCarregadas = notificacoesPessoais;
+
     const totalItens = outrasCampanhas.length + notificacoesPessoais.filter(n => !n.lida).length;
     
     if (listContainer) {
@@ -1268,11 +1274,34 @@ window.marcarNotifLida = async function(id, event) {
     }
 }
 
-window.limparNotificacoes = function() {
+window.limparNotificacoes = async function() {
     const list = document.getElementById('nav-notif-list');
     const badge = document.getElementById('nav-notif-count');
     if (list) list.innerHTML = '<p class="nav-notif-empty">Nenhuma notificação recente.</p>';
     if (badge) badge.style.display = 'none';
+
+    // 1. Persistir limpeza de campanhas públicas
+    if (window.campanhasCarregadas && window.campanhasCarregadas.length > 0) {
+        let campanhasLimpas = JSON.parse(localStorage.getItem('campanhas_limpas') || '[]');
+        window.campanhasCarregadas.forEach(c => {
+            if (!campanhasLimpas.includes(c.id)) {
+                campanhasLimpas.push(c.id);
+            }
+        });
+        localStorage.setItem('campanhas_limpas', JSON.stringify(campanhasLimpas));
+    }
+
+    // 2. Marcar notificações pessoais como lidas no banco
+    if (window.notificacoesCarregadas && window.notificacoesCarregadas.length > 0 && typeof API !== 'undefined') {
+        const unread = window.notificacoesCarregadas.filter(n => !n.lida);
+        for (const n of unread) {
+            try {
+                await API.lerNotificacao(n.id);
+            } catch (e) {
+                console.error('Erro ao ler notificação no limpar:', e);
+            }
+        }
+    }
 }
 
 // Fechar ao clicar fora
