@@ -187,17 +187,9 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
 }
 
 @media (max-width: 1024px) {
-    /* Full screen dark overlay (no blur) */
+    /* No backdrop overlay needed since it expands the header in flow */
     .menu-toggle-checkbox:checked ~ .hamburger-menu::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.55) !important;
-        z-index: 1998 !important;
-        cursor: pointer;
+        display: none !important;
     }
 
     /* Hamburger icon container */
@@ -211,7 +203,7 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         order: 2 !important;
         z-index: 2100 !important;
         position: relative !important;
-        margin-left: auto !important; /* Pushes the hamburger to the absolute right edge */
+        margin-left: auto !important; /* Pushes hamburger to the absolute right */
     }
     
     .hamburger-menu span {
@@ -221,11 +213,7 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         background-color: #ffffff !important;
         border-radius: 3px !important;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-        pointer-events: none !important; /* Fixes double-click / toggle-fail bug on mobile */
-    }
-
-    .menu-toggle-checkbox {
-        display: none !important;
+        pointer-events: none !important;
     }
 
     /* Premium X animation when checked */
@@ -246,37 +234,46 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         z-index: 2100 !important;
     }
 
-    /* Navigation Links Drawer - Full 100vh height */
+    /* Navigation Links - Full Width Dropdown in Flow */
     .nav-links {
-        display: flex !important;
-        position: fixed !important;
-        top: 0 !important;
-        right: -300px !important; /* Hidden off-screen right */
-        width: 300px !important;
-        height: 100vh !important;
-        background: #0f172a !important; /* Premium Slate Dark */
-        border-left: 2px solid rgba(0, 242, 255, 0.2) !important; /* Cyan border */
+        display: none !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        background: transparent !important;
         flex-direction: column !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        padding: 100px 20px 240px 20px !important; /* Top space for header, bottom padding for auth overlay */
+        align-items: stretch !important; /* Stretch links to full width */
+        padding: 20px 0 10px 0 !important;
         order: 3 !important;
-        gap: 15px !important;
+        gap: 0 !important;
         z-index: 1999 !important;
-        overflow-y: auto !important;
-        transition: right 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        border-left: none !important;
     }
 
-    /* Active link style in drawer */
+    /* Links style - matching accordion */
     .nav-links a {
+        display: block !important;
         width: 100% !important;
-        text-align: center !important;
-        padding: 12px !important;
-        border-radius: 8px !important;
-        transition: all 0.2s ease !important;
+        text-align: left !important;
+        padding: 16px 20px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         color: rgba(255, 255, 255, 0.85) !important;
         font-weight: 600 !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        font-size: 1.05rem !important;
+        transition: all 0.2s ease !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Add chevron on the right side of links */
+    .nav-links a::after {
+        content: '›' !important;
+        float: right !important;
+        font-size: 1.4rem !important;
+        line-height: 1 !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        margin-top: -2px !important;
     }
 
     .nav-links a:hover {
@@ -285,39 +282,65 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
     }
 
     .menu-toggle-checkbox:checked ~ .nav-links {
-        right: 0 !important; /* Slide in */
+        display: flex !important; /* Show links */
     }
 
-    /* Auth Actions & Search Drawer - Fixed bottom overlay */
-    .nav-auth {
+    /* Notification Bell inside links drawer */
+    .nav-bell-container {
         display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 15px 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Floating centered popup notifications on mobile */
+    .nav-notif-dropdown {
         position: fixed !important;
-        bottom: 0 !important;
-        top: auto !important;
-        right: -300px !important;
-        width: 300px !important;
-        height: 220px !important;
-        background: #0f172a !important; /* Solid matching background */
-        border-left: 2px solid rgba(0, 242, 255, 0.2) !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.05) !important; /* Nice visual separator */
+        top: 90px !important;
+        left: 5% !important;
+        right: 5% !important;
+        width: 90% !important;
+        max-width: none !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3) !important;
+        border-radius: 18px !important;
+        z-index: 3000 !important;
+        transform-origin: top center !important;
+    }
+
+    /* Auth Actions & Search dropdown below links */
+    .nav-auth {
+        display: none !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        background: transparent !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 15px 20px 25px 20px !important;
+        padding: 15px 0 25px 0 !important;
         order: 4 !important;
         gap: 12px !important;
         z-index: 1999 !important;
-        transition: right 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        border-left: none !important;
+        border-top: none !important;
     }
     
     .menu-toggle-checkbox:checked ~ .nav-auth {
-        right: 0 !important; /* Slide in */
+        display: flex !important; /* Show auth section */
     }
     
     /* Make search container full width on mobile inside nav-auth */
     .nav-search-container {
         width: 100% !important;
-        max-width: 260px !important;
+        max-width: 280px !important;
         justify-content: center !important;
         margin-bottom: 5px !important;
     }
@@ -340,7 +363,7 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
     /* Estilo dos botões de auth no mobile */
     .btn-auth {
         width: 100% !important;
-        max-width: 260px !important;
+        max-width: 280px !important;
         height: 44px !important;
         margin: 0 !important;
         border-radius: 22px !important;
@@ -349,6 +372,23 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         justify-content: center !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
+    }
+    
+    .btn-login-modern {
+        background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(0, 242, 255, 0.2) !important;
+    }
+
+    .btn-cadastro {
+        background: transparent !important;
+        border: 2px solid #00f2ff !important;
+        color: #00f2ff !important;
+    }
+
+    .btn-cadastro:hover {
+        background: rgba(0, 242, 255, 0.05) !important;
     }
 }
 
