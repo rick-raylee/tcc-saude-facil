@@ -203,7 +203,8 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         order: 2 !important;
         z-index: 2100 !important;
         position: relative !important;
-        margin-left: auto !important; /* Pushes hamburger to the absolute right */
+        margin-right: 5% !important; /* Pushes hamburger to the right */
+        margin-left: auto !important;
     }
     
     .hamburger-menu span {
@@ -232,6 +233,7 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
     .logo {
         order: 1 !important;
         z-index: 2100 !important;
+        padding: 15px 0 15px 5% !important;
     }
 
     /* Navigation Links - Full Width Dropdown in Flow */
@@ -240,28 +242,33 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         position: static !important;
         width: 100% !important;
         height: auto !important;
-        background: transparent !important;
+        background: #ffffff !important; /* Clean white background */
         flex-direction: column !important;
         align-items: stretch !important; /* Stretch links to full width */
-        padding: 20px 0 10px 0 !important;
+        padding: 0 !important;
         order: 3 !important;
         gap: 0 !important;
         z-index: 1999 !important;
         overflow: visible !important;
         box-shadow: none !important;
         border-left: none !important;
+        border-bottom: 1px solid #cbd5e1 !important;
     }
 
-    /* Links style - matching accordion */
+    /* Links style - matching accordion (Image 2) */
     .nav-links a {
-        display: block !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
         width: 100% !important;
         text-align: left !important;
-        padding: 16px 20px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-        color: rgba(255, 255, 255, 0.85) !important;
+        padding: 18px 24px !important;
+        border-bottom: 1px solid #e2e8f0 !important; /* Clean light border */
+        color: #334155 !important; /* Slate grey text */
         font-weight: 600 !important;
         font-size: 1.05rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
         transition: all 0.2s ease !important;
         box-sizing: border-box !important;
     }
@@ -269,32 +276,118 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
     /* Add chevron on the right side of links */
     .nav-links a::after {
         content: '›' !important;
-        float: right !important;
-        font-size: 1.4rem !important;
+        font-size: 1.6rem !important;
         line-height: 1 !important;
-        color: rgba(255, 255, 255, 0.4) !important;
+        color: #94a3b8 !important; /* Slate chevron */
         margin-top: -2px !important;
+        float: none !important;
+        transition: transform 0.2s ease !important;
     }
 
-    .nav-links a:hover {
-        background: rgba(0, 242, 255, 0.08) !important;
-        color: #00f2ff !important;
+    .nav-links a:hover,
+    .nav-links a:active {
+        background: #f8fafc !important; /* Subtle hover background */
+        color: #0056AC !important; /* SUS blue on hover */
+    }
+
+    .nav-links a:hover::after {
+        color: #0056AC !important;
+        transform: translateX(3px) !important;
     }
 
     .menu-toggle-checkbox:checked ~ .nav-links {
         display: flex !important; /* Show links */
     }
 
+    /* Active Link highlight on mobile (override ciano with blue for white background) */
+    body.page-home .nav-links a[href="index.html"],
+    body.page-agendamento .nav-links a[href="agendamento.html"],
+    body.page-telemedicina .nav-links a[href="telemedicina.html"],
+    body.page-campanhas .nav-links a[href="campanhas.html"],
+    body.page-mapas .nav-links a[href="mapas.html"],
+    body.page-duvidas .nav-links a[href="duvidas.html"] {
+        color: #0056AC !important; /* Readable SUS blue */
+        font-weight: 800 !important;
+        background: #f0f7ff !important; /* Light blue background for active item */
+        text-shadow: none !important;
+    }
+
+    body.page-home .nav-links a[href="index.html"]::after,
+    body.page-agendamento .nav-links a[href="agendamento.html"]::after,
+    body.page-telemedicina .nav-links a[href="telemedicina.html"]::after,
+    body.page-campanhas .nav-links a[href="campanhas.html"]::after,
+    body.page-mapas .nav-links a[href="mapas.html"]::after,
+    body.page-duvidas .nav-links a[href="duvidas.html"]::after {
+        color: #0056AC !important;
+    }
+
     /* Notification Bell inside links drawer */
     .nav-bell-container {
         display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
+        flex-direction: column !important;
         width: 100% !important;
         margin: 0 !important;
-        padding: 15px 0 !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 0 !important;
         box-sizing: border-box !important;
+        background: #ffffff !important;
+    }
+
+    .nav-bell-icon {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 18px 24px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        box-sizing: border-box !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .nav-bell-icon:hover {
+        background: #f8fafc !important;
+    }
+
+    .nav-bell-icon i {
+        order: 1 !important;
+        font-size: 1.2rem !important;
+        color: #0056AC !important; /* Highlight bell icon in blue */
+    }
+
+    .nav-bell-icon::before {
+        content: 'NOTIFICAÇÕES' !important;
+        order: 2 !important;
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        margin-left: 10px !important;
+        margin-right: auto !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .nav-bell-badge {
+        order: 3 !important;
+        position: static !important;
+        background: #ff4757 !important;
+        color: white !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        padding: 2px 8px !important;
+        border-radius: 10px !important;
+        margin-right: 10px !important;
+    }
+
+    .nav-bell-icon::after {
+        content: '›' !important;
+        order: 4 !important;
+        font-size: 1.6rem !important;
+        line-height: 1 !important;
+        color: #94a3b8 !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    .nav-bell-icon:hover::after {
+        color: #0056AC !important;
+        transform: translateX(3px) !important;
     }
 
     /* Floating centered popup notifications on mobile */
@@ -321,16 +414,17 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         position: static !important;
         width: 100% !important;
         height: auto !important;
-        background: transparent !important;
+        background: #ffffff !important; /* Matching white background */
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 15px 0 25px 0 !important;
+        padding: 20px 24px 30px 24px !important; /* Comfortable padding */
         order: 4 !important;
-        gap: 12px !important;
+        gap: 15px !important;
         z-index: 1999 !important;
         border-left: none !important;
         border-top: none !important;
+        box-sizing: border-box !important;
     }
     
     .menu-toggle-checkbox:checked ~ .nav-auth {
@@ -340,55 +434,112 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
     /* Make search container full width on mobile inside nav-auth */
     .nav-search-container {
         width: 100% !important;
-        max-width: 280px !important;
-        justify-content: center !important;
+        max-width: none !important;
+        display: flex !important;
+        position: relative !important;
         margin-bottom: 5px !important;
     }
 
     .nav-search-input {
         width: 100% !important;
-        background: rgba(0, 0, 0, 0.35) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        color: white !important;
-        border-radius: 20px !important;
-        padding: 10px 20px !important;
-        font-size: 0.95rem !important;
+        background: #f1f5f9 !important; /* Light background */
+        border: 1.5px solid #cbd5e1 !important; /* Slate border */
+        color: #0f172a !important; /* Dark text */
+        border-radius: 30px !important;
+        padding: 12px 20px 12px 45px !important;
+        font-size: 1rem !important;
+        transition: all 0.2s ease !important;
     }
 
     .nav-search-input:focus {
-        border-color: #00f2ff !important;
-        box-shadow: 0 0 10px rgba(0, 242, 255, 0.2) !important;
+        border-color: #0056AC !important;
+        background: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(0, 86, 172, 0.15) !important;
+        outline: none !important;
+    }
+
+    /* Reposition search icon/toggle to the left of input */
+    .btn-search-toggle {
+        position: absolute !important;
+        left: 15px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: transparent !important;
+        border: none !important;
+        color: #64748b !important;
+        font-size: 1.1rem !important;
+        pointer-events: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        height: auto !important;
+        display: block !important;
     }
 
     /* Estilo dos botões de auth no mobile */
     .btn-auth {
         width: 100% !important;
-        max-width: 280px !important;
-        height: 44px !important;
+        max-width: none !important;
+        height: 50px !important;
         margin: 0 !important;
-        border-radius: 22px !important;
+        border-radius: 30px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         font-weight: 700 !important;
-        font-size: 0.95rem !important;
+        font-size: 1rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        box-sizing: border-box !important;
     }
     
     .btn-login-modern {
-        background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%) !important;
+        background: linear-gradient(135deg, #0056AC 0%, #0072ff 100%) !important; /* SUS Blue gradient */
         color: white !important;
         border: none !important;
-        box-shadow: 0 4px 15px rgba(0, 242, 255, 0.2) !important;
+        box-shadow: 0 4px 15px rgba(0, 86, 172, 0.2) !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .btn-login-modern:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(0, 86, 172, 0.3) !important;
     }
 
     .btn-cadastro {
         background: transparent !important;
-        border: 2px solid #00f2ff !important;
-        color: #00f2ff !important;
+        border: 2px solid #0056AC !important; /* SUS Blue border */
+        color: #0056AC !important;
+        transition: all 0.2s ease !important;
     }
 
     .btn-cadastro:hover {
-        background: rgba(0, 242, 255, 0.05) !important;
+        background: rgba(0, 86, 172, 0.05) !important;
+        transform: translateY(-2px) !important;
+    }
+
+    /* User profile inside nav-auth on mobile */
+    .profile-dropdown-container {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    .user-profile.active {
+        display: flex !important;
+        background: #f1f5f9 !important; /* Light slate background */
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 16px !important;
+        padding: 12px 20px !important;
+        width: 100% !important;
+        justify-content: space-between !important;
+        box-sizing: border-box !important;
+    }
+
+    .user-welcome-modern {
+        color: #0f172a !important;
     }
 }
 
@@ -405,7 +556,7 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
 /* BREAKPOINT: 320px (MOBILE) */
 @media (max-width: 480px) {
     .navbar {
-        padding: 10px 3% !important;
+        padding: 0 !important;
     }
 
     .logo img {
