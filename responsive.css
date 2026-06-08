@@ -187,15 +187,32 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
 }
 
 @media (max-width: 1024px) {
+    /* Full screen dim overlay on checked */
+    .menu-toggle-checkbox:checked ~ .hamburger-menu::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(10, 15, 30, 0.7) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+        z-index: 1998 !important;
+        cursor: pointer;
+    }
+
+    /* Hamburger icon container */
     .hamburger-menu {
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
-        width: 30px !important;
+        width: 28px !important;
         height: 20px !important;
         cursor: pointer !important;
         order: 2 !important;
         z-index: 2100 !important;
+        position: relative !important;
     }
     
     .hamburger-menu span {
@@ -203,79 +220,124 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         width: 100% !important;
         height: 3px !important;
         background-color: #ffffff !important;
-        background: #ffffff !important;
         border-radius: 3px !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
     }
 
-    /* Animation for hamburger lines when checked */
+    /* Premium X animation when checked */
     .menu-toggle-checkbox:checked ~ .hamburger-menu span:nth-child(1) {
         transform: translateY(8px) rotate(45deg) !important;
+        background-color: #00f2ff !important;
     }
     .menu-toggle-checkbox:checked ~ .hamburger-menu span:nth-child(2) {
         opacity: 0 !important;
     }
     .menu-toggle-checkbox:checked ~ .hamburger-menu span:nth-child(3) {
         transform: translateY(-8px) rotate(-45deg) !important;
+        background-color: #00f2ff !important;
     }
 
     .logo {
         order: 1 !important;
+        z-index: 2100 !important;
     }
 
-    /* Transform menu links to expand inline within the navbar */
+    /* Navigation Links Drawer - Upper part */
     .nav-links {
-        display: none !important;
-        position: static !important;
-        width: 100% !important;
-        height: auto !important;
-        background: transparent !important;
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        right: -300px !important; /* Hidden off-screen right */
+        width: 300px !important;
+        height: 55vh !important;
+        background: #0f172a !important; /* Premium Slate Dark */
+        border-left: 2px solid rgba(0, 242, 255, 0.2) !important; /* Cyan border */
         flex-direction: column !important;
         align-items: center !important;
-        padding: 20px 0 10px 0 !important;
+        justify-content: flex-start !important;
+        padding: 90px 20px 10px 20px !important; /* Top space for navbar header */
         order: 3 !important;
-        gap: 15px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: none !important;
+        gap: 20px !important;
+        z-index: 1999 !important;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    /* Active link style in drawer */
+    .nav-links a {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 10px !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 600 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .nav-links a:hover {
+        background: rgba(0, 242, 255, 0.1) !important;
+        color: #00f2ff !important;
     }
 
     .menu-toggle-checkbox:checked ~ .nav-links {
-        display: flex !important;
+        right: 0 !important; /* Slide in */
     }
 
-    /* Transform auth buttons to expand inline within the navbar */
+    /* Auth Actions & Search Drawer - Lower part */
     .nav-auth {
-        display: none !important;
-        position: static !important;
-        width: 100% !important;
-        height: auto !important;
+        display: flex !important;
+        position: fixed !important;
+        top: 55vh !important;
+        right: -300px !important;
+        width: 300px !important;
+        height: 45vh !important;
+        background: #0f172a !important;
+        border-left: 2px solid rgba(0, 242, 255, 0.2) !important;
         flex-direction: column !important;
         align-items: center !important;
-        padding: 15px 0 20px 0 !important;
+        justify-content: flex-start !important;
+        padding: 10px 20px 40px 20px !important;
         order: 4 !important;
-        gap: 15px !important;
+        gap: 20px !important;
+        z-index: 1999 !important;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
     
     .menu-toggle-checkbox:checked ~ .nav-auth {
-        display: flex !important;
+        right: 0 !important; /* Slide in */
     }
     
     /* Make search container full width on mobile inside nav-auth */
     .nav-search-container {
         width: 100% !important;
-        max-width: 320px !important;
+        max-width: 260px !important;
         justify-content: center !important;
+        margin-bottom: 10px !important;
     }
 
     .nav-search-input {
         width: 100% !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 20px !important;
+        padding: 10px 20px !important;
+    }
+
+    .nav-search-input:focus {
+        border-color: #00f2ff !important;
     }
 
     /* Estilo dos botões de auth no mobile */
     .btn-auth {
         width: 100% !important;
-        max-width: 280px !important;
+        max-width: 260px !important;
+        height: 48px !important;
         margin: 5px 0 !important;
+        border-radius: 24px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 }
 
