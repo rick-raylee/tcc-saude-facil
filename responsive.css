@@ -211,6 +211,7 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         order: 2 !important;
         z-index: 2100 !important;
         position: relative !important;
+        margin-left: auto !important; /* Pushes the hamburger to the absolute right edge */
     }
     
     .hamburger-menu span {
@@ -220,6 +221,11 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         background-color: #ffffff !important;
         border-radius: 3px !important;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        pointer-events: none !important; /* Fixes double-click / toggle-fail bug on mobile */
+    }
+
+    .menu-toggle-checkbox {
+        display: none !important;
     }
 
     /* Premium X animation when checked */
