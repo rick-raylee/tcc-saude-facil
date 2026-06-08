@@ -24,15 +24,7 @@ img {
     object-fit: cover !important;
 }
 
-/* Override para imagens dentro dos cards do carrossel vertical */
-.vertical-card > img {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
-    flex-shrink: 0 !important;
-}
+/* Removed redundant vertical-card image override to preserve native absolute positioning and scale */
 
 
 h1, h2, h3, h4, h5, h6, p, span, .stat-numero, .stat-label {
@@ -197,31 +189,66 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
 @media (max-width: 1024px) {
     .hamburger-menu {
         display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        width: 30px !important;
+        height: 20px !important;
+        cursor: pointer !important;
         order: 2 !important;
+        z-index: 2100 !important;
     }
     
+    .hamburger-menu span {
+        display: block !important;
+        width: 100% !important;
+        height: 3px !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        border-radius: 3px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    /* Animation for hamburger lines when checked */
+    .menu-toggle-checkbox:checked ~ .hamburger-menu span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg) !important;
+    }
+    .menu-toggle-checkbox:checked ~ .hamburger-menu span:nth-child(2) {
+        opacity: 0 !important;
+    }
+    .menu-toggle-checkbox:checked ~ .hamburger-menu span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg) !important;
+    }
+
     .logo {
         order: 1 !important;
     }
 
+    /* Transform menu links to expand inline within the navbar */
     .nav-links {
         display: none !important;
+        position: static !important;
         width: 100% !important;
+        height: auto !important;
+        background: transparent !important;
         flex-direction: column !important;
         align-items: center !important;
         padding: 20px 0 10px 0 !important;
         order: 3 !important;
         gap: 15px !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: none !important;
     }
 
     .menu-toggle-checkbox:checked ~ .nav-links {
         display: flex !important;
     }
 
+    /* Transform auth buttons to expand inline within the navbar */
     .nav-auth {
         display: none !important;
+        position: static !important;
         width: 100% !important;
+        height: auto !important;
         flex-direction: column !important;
         align-items: center !important;
         padding: 15px 0 20px 0 !important;
@@ -382,7 +409,7 @@ body {
     }
 
     /* ESCALA DINÂMICA DE ANIMAÇÕES 3D (ETAPA 8) */
-    .animation-container, .carousel-3d-container {
+    .animation-container, .carousel-3d-container, .vertical-carousel-container {
         transform: scale(0.8) !important;
         transform-origin: center center !important;
     }
@@ -398,7 +425,7 @@ body {
 
 /* AJUSTES PARA TELAS MUITO PEQUENAS (360px - 375px) */
 @media (max-width: 375px) {
-    .animation-container, .carousel-3d-container {
+    .animation-container, .carousel-3d-container, .vertical-carousel-container {
         transform: scale(0.7) !important;
     }
 }
