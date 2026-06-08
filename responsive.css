@@ -182,9 +182,26 @@ p, a, span { font-size: clamp(0.9rem, 1.1vw, 1.1rem) !important; }
     height: clamp(40px, 6vw, 60px) !important;
 }
 
+/* Auto-highlight active links globally (Desktop & Mobile) */
+body.page-home .nav-links a[href="index.html"],
+body.page-agendamento .nav-links a[href="agendamento.html"],
+body.page-telemedicina .nav-links a[href="telemedicina.html"],
+body.page-campanhas .nav-links a[href="campanhas.html"],
+body.page-mapas .nav-links a[href="mapas.html"],
+body.page-duvidas .nav-links a[href="duvidas.html"] {
+    color: #00ffe6 !important;
+    font-weight: 800 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 230, 0.5) !important;
+}
+
 @media (max-width: 1024px) {
     .hamburger-menu {
         display: flex !important;
+        order: 2 !important;
+    }
+    
+    .logo {
+        order: 1 !important;
     }
 
     .nav-links {
@@ -192,8 +209,10 @@ p, a, span { font-size: clamp(0.9rem, 1.1vw, 1.1rem) !important; }
         width: 100% !important;
         flex-direction: column !important;
         align-items: center !important;
-        padding: 20px 0 !important;
-        order: 3; /* Garante que os links fiquem abaixo do logo/hambúrguer */
+        padding: 20px 0 10px 0 !important;
+        order: 3 !important;
+        gap: 15px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
     .menu-toggle-checkbox:checked ~ .nav-links {
@@ -202,6 +221,34 @@ p, a, span { font-size: clamp(0.9rem, 1.1vw, 1.1rem) !important; }
 
     .nav-auth {
         display: none !important;
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 15px 0 20px 0 !important;
+        order: 4 !important;
+        gap: 15px !important;
+    }
+    
+    .menu-toggle-checkbox:checked ~ .nav-auth {
+        display: flex !important;
+    }
+    
+    /* Make search container full width on mobile inside nav-auth */
+    .nav-search-container {
+        width: 100% !important;
+        max-width: 320px !important;
+        justify-content: center !important;
+    }
+
+    .nav-search-input {
+        width: 100% !important;
+    }
+
+    /* Estilo dos botões de auth no mobile */
+    .btn-auth {
+        width: 100% !important;
+        max-width: 280px !important;
+        margin: 5px 0 !important;
     }
 }
 
@@ -402,5 +449,238 @@ body {
         width: 100% !important;
         padding: 10px !important;
     }
+}
+
+/* ==========================================================================
+   DOENÇAS MAPA - CORREÇÃO DO LAYOUT EM COLUNA NO MOBILE & TABLET
+   ========================================================================== */
+@media (max-width: 900px) {
+    .vertical-main-container {
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: auto !important;
+        gap: 30px !important;
+        padding: 20px 0 !important;
+    }
+    .vertical-carousel-container {
+        width: 100% !important;
+        max-width: 340px !important;
+        height: 560px !important;
+        margin: 0 auto !important;
+    }
+    .vertical-controls-section {
+        width: 100% !important;
+        padding-left: 0 !important;
+        margin-top: 20px !important;
+    }
+    .vertical-card {
+        width: 310px !important;
+        height: 175px !important;
+    }
+}
+
+/* ==========================================================================
+   ESTATÍSTICAS & DASHBOARD - RESPONSIVIDADE E GRADE DINÂMICA
+   ========================================================================== */
+.estatisticas-layout {
+    display: grid !important;
+    grid-template-columns: 1.6fr 1.2fr !important;
+    gap: 40px !important;
+    width: 100% !important;
+}
+
+.mapa-container-3d {
+    width: 100% !important;
+    min-height: 400px !important;
+    overflow: hidden !important;
+}
+
+#chartdiv {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 15px !important;
+    width: 100% !important;
+}
+
+/* Breakpoint: Notebook / Tablet Horizontal (<= 1024px) */
+@media (max-width: 1024px) {
+    .estatisticas-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important;
+    }
+    .mapa-container-3d {
+        height: 450px !important;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* Breakpoint: Smartphone Grande (<= 480px) */
+@media (max-width: 480px) {
+    .mapa-container-3d {
+        height: 350px !important;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+}
+
+/* Breakpoint: Smartphone Pequeno (<= 360px) */
+@media (max-width: 360px) {
+    .mapa-container-3d {
+        height: 300px !important;
+    }
+}
+
+/* ==========================================================================
+   TELEMEDICINA - VÍDEO E CONTROLES RESPONSIVOS
+   ========================================================================== */
+@media (max-width: 768px) {
+    .video-pip {
+        width: 100px !important;
+        height: 140px !important; /* Retrato proporção no mobile */
+        bottom: 95px !important;
+        right: 15px !important;
+        border-radius: 8px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .tele-controls {
+        gap: 10px !important;
+        height: 70px !important;
+        padding: 0 10px !important;
+    }
+    
+    .tele-btn {
+        width: 45px !important;
+        height: 45px !important;
+        font-size: 0 !important; /* Oculta texto */
+        padding: 0 !important;
+        border-radius: 50% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .tele-btn i {
+        font-size: 1.1rem !important; /* Mostra ícone */
+    }
+
+    .tele-btn.end-call {
+        width: 45px !important;
+        height: 45px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important;
+    }
+
+    .tele-btn.end-call i {
+        font-size: 1.1rem !important;
+    }
+}
+
+/* Modo Paisagem em Aparelhos Móveis */
+@media (max-height: 480px) and (orientation: landscape) {
+    .tele-controls {
+        height: 55px !important;
+        gap: 12px !important;
+    }
+    
+    .tele-btn {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 0 !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+    }
+
+    .tele-btn i {
+        font-size: 0.95rem !important;
+    }
+
+    .tele-btn.end-call {
+        width: 38px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important;
+    }
+
+    .tele-btn.end-call i {
+        font-size: 0.95rem !important;
+    }
+    
+    .tele-header {
+        height: 45px !important;
+        padding: 0 15px !important;
+    }
+    
+    .video-pip {
+        width: 110px !important;
+        height: 70px !important;
+        bottom: 70px !important;
+        right: 15px !important;
+    }
+}
+
+/* ==========================================================================
+   ACESSIBILIDADE E TOUCH TARGETS (MÍNIMO 48PX)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Inputs, Selects, Buttons */
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    select,
+    button,
+    .btn-auth,
+    .btn-premium,
+    .btn-confirmar,
+    .news-slide-btn,
+    .acc-btn {
+        min-height: 48px !important;
+        line-height: 1.5 !important;
+    }
+
+    /* Aumentar padding interno de touch targets */
+    .form-group input,
+    .form-group select {
+        padding: 12px 18px !important;
+    }
+
+    /* Botões de fechar modais com áreas de clique ampliadas */
+    .btn-fechar,
+    .btn-fechar-modal,
+    .btn-fechar-simple {
+        width: 48px !important;
+        height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Indicador de foco de teclado aprimorado */
+input:focus,
+select:focus,
+textarea:focus,
+button:focus,
+a:focus {
+    outline: 3px solid #00f2ff !important;
+    outline-offset: 2px !important;
 }
 

@@ -13,20 +13,49 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
 </head>
 
-<body class="flex-body">
+<body class="page-duvidas">
 
     <!-- NAVBAR ANIMADA -->
     <header class="navbar" id="navbar">
-        <div class="logo"><a href="index.html"><img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
-                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'"></a>
+        <div class="logo">
+            <a href="index.html">
+                <img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'">
+            </a>
         </div>
+
+        <!-- MENU HAMBURGER MOBILE -->
+        <input type="checkbox" id="menu-toggle" class="menu-toggle-checkbox">
+        <label for="menu-toggle" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
         <nav class="nav-links">
             <a href="agendamento.html">Agendamento</a>
             <a href="telemedicina.html">Telemedicina</a>
             <a href="campanhas.html">Campanhas</a>
             <a href="mapas.html">Mapas</a>
             <a href="duvidas.html">Dúvidas</a>
+            <div class="nav-bell-container" id="navBellContainer">
+                <div class="nav-bell-icon" onclick="toggleNotificacoes(event)">
+                    <i class="fi fi-rr-bell"></i> 
+                    <span class="nav-bell-badge" id="nav-notif-count" style="display: none;">0</span>
+                </div>
+                <!-- Dropdown de Notificações -->
+                <div class="nav-notif-dropdown glass-card" id="navNotifDropdown">
+                    <div class="nav-notif-header">
+                        <span>Avisos e Campanhas</span>
+                        <button onclick="limparNotificacoes()">Limpar</button>
+                    </div>
+                    <div id="nav-notif-list" class="nav-notif-list">
+                        <p class="nav-notif-empty">Nenhuma nova campanha.</p>
+                    </div>
+                </div>
+            </div>
         </nav>
+
         <div class="nav-auth">
             <!-- Lupa de Busca Expansível -->
             <div class="nav-search-container" id="navSearchContainer">
@@ -39,12 +68,12 @@
                 </div>
             </div>
             <!-- Botão de Login Modernizado Verde -->
-            <button class="btn-auth btn-login-modern" onclick="abrirModalAuth()">
+            <button class="btn-auth btn-login-modern" onclick="abrirModalLogin()">
                 <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>
                 <span style="margin-left: 2px;">Login</span>
             </button>
             <!-- Botão de Cadastro -->
-            <button class="btn-auth btn-cadastro" onclick="abrirModalAuth(); flipParaCadastro();">
+            <button class="btn-auth btn-cadastro" onclick="abrirModalCadastro()">
                 <i class="fi fi-rr-user-add" style="margin-right: 8px; font-size: 0.95rem; vertical-align: middle;"></i>CADASTRE-SE
             </button>
         </div>
@@ -226,7 +255,59 @@
     <!-- =========================================================================
          MODAL DE AUTENTICAÇÃO INTEGRADO (3D FLIP & MEDICAL NEON)
          ========================================================================= -->
-    <div id="modalAuth" class="modal-auth">
+    
+    <script src="api.js?v=20260419-1"></script>
+    <script src="home.js?v=20260419-2"></script>
+    <script>
+        // Efeito de scroll na navbar
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Buscar dúvida
+        function buscarDuvida() {
+            const input = document.getElementById('search-faq').value.toLowerCase();
+            const items = document.querySelectorAll('.faq-item');
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(input)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Filtrar por categoria
+        function filtrarCategoria(categoria) {
+            const items = document.querySelectorAll('.faq-item');
+            const buttons = document.querySelectorAll('.cat-btn');
+
+            // Atualizar botões ativos
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Filtrar itens
+            items.forEach(item => {
+                if (categoria === 'todas' || item.dataset.categoria === categoria) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+    <script src="cookie-consent.js" defer></script>
+
+<!-- MODAIS DE AUTENTICACAO UNIFICADOS -->
+<div id="modalAuth" class="modal-auth">
         <div class="modal-auth-flipper" id="modalAuthFlipper">
 
             <!-- SEÇÃO FRONT: LOGIN -->
@@ -239,7 +320,7 @@
                         <p>Entre no seu painel inteligente</p>
                     </div>
 
-                    <form id="formLogin" class="form-auth" onsubmit="finalizarLogin(event); verificarSessao();">
+                    <form id="formLogin" class="form-auth" onsubmit="finalizarLogin(event)">
                         <div class="form-group-3d">
                             <label for="login-cpf"><i class="fi fi-rr-id-badge"></i>  CPF</label>
                             <input type="text" id="login-cpf" class="cpf-mask input-neon-focus" required
@@ -349,6 +430,14 @@
                                             <span>Admin</span>
                                         </div>
                                     </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="ti"
+                                            onchange="mudarTipoCadastro('ti')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-laptop"></i> </div>
+                                            <span>TI</span>
+                                        </div>
+                                    </label>
                                 </div>
                             </div>
 
@@ -365,34 +454,23 @@
                                             <option value="Clinica Geral">Clínica Geral</option>
                                             <option value="Cardiologia">Cardiologia</option>
                                             <option value="Pediatria">Pediatria</option>
+                                            <option value="Ginecologia">Ginecologia</option>
+                                            <option value="Dermatologia">Dermatologia</option>
+                                            <option value="Oftalmologia">Oftalmologia</option>
+                                            <option value="Otorrinolaringologia">Otorrinolaringologia</option>
+                                            <option value="Ortopedia">Ortopedia</option>
+                                            <option value="Neurologia">Neurologia</option>
+                                            <option value="Psicologia">Psicologia</option>
+                                            <option value="Nutrição">Nutrição</option>
+                                            <option value="Fisioterapia">Fisioterapia</option>
+                                            <option value="Odontologia">Odontologia</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            <div id="campos-enfermeiro" class="dynamic-fields-3d" style="display: none;">
-                                <div class="form-grid">
-                                    <div class="form-group-3d">
-                                        <label for="coren"><i class="fi fi-rr-stethoscope"></i>  COREN</label>
-                                        <input type="text" id="coren" class="input-neon-focus"
-                                            placeholder="Ex: 123456/PR">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="campos-admin" class="dynamic-fields-3d" style="display: none;">
-                                <div class="form-grid">
-                                    <div class="form-group-3d full-width">
-                                        <label for="admin-key"><i class="fi fi-rr-key"></i>  Chave Mestra</label>
-                                        <input type="password" id="admin-key" class="input-neon-focus"
-                                            placeholder="Digite a chave">
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="step-footer">
-                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(1)">⬅
-                                    VOLTAR</button>
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(1)">⬅ VOLTAR</button>
                                 <button type="button" class="btn-next-step btn-neon-health"
                                     onclick="proximoPassoCadastro(3)">PRÓXIMO ➜</button>
                             </div>
@@ -420,8 +498,7 @@
                                 </div>
                             </div>
                             <div class="step-footer">
-                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(2)">⬅
-                                    VOLTAR</button>
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(2)">⬅ VOLTAR</button>
                                 <button type="button" class="btn-next-step btn-neon-health"
                                     onclick="proximoPassoCadastro(4)">PRÓXIMO ➜</button>
                             </div>
@@ -447,8 +524,7 @@
                                 </div>
                             </div>
                             <div class="step-footer">
-                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(3)">⬅
-                                    VOLTAR</button>
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(3)">⬅ VOLTAR</button>
                                 <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONCLUIR <i class="fi fi-rr-party-horn"></i> </button>
                             </div>
                         </div>
@@ -461,55 +537,52 @@
             </div>
         </div>
     </div>
-    <script src="api.js?v=20260419-1"></script>
-    <script src="home.js?v=20260419-2"></script>
-    <script>
-        // Efeito de scroll na navbar
-        window.addEventListener('scroll', function () {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
 
-        // Buscar dúvida
-        function buscarDuvida() {
-            const input = document.getElementById('search-faq').value.toLowerCase();
-            const items = document.querySelectorAll('.faq-item');
+<div id="modal2FA" class="modal-auth">
+        <div class="neon-border-3d">
+            <div class="modal-auth-card glass-auth-deep">
+                <button class="btn-fechar-modal" onclick="fecharModal2FA()">✕</button>
+                <div class="auth-header-neon">
+                    <div class="header-icon-pulsing"><i class="fi fi-rr-shield"></i> </div>
+                    <h2>Verificação</h2>
+                    <p>Insira o código de 6 dígitos enviado ao seu dispositivo.</p>
+                </div>
+                <form id="form2FA" class="form-auth" onsubmit="finalizar2FA(event)">
+                    <div class="form-group-3d">
+                        <input type="text" id="codigo-2fa" maxlength="6" required
+                            style="text-align: center; font-size: 2rem; letter-spacing: 10px; width: 100%; margin: 10px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--health-cyan); color: white; border-radius: 15px;"
+                            placeholder="000000">
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn-enviar-auth-3d btn-neon-health">VALIDAR ACESSO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                if (text.includes(input)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
+<div id="modalRecuperar" class="modal-auth">
+        <div class="neon-border-3d">
+            <div class="modal-auth-card glass-auth-deep">
+                <button class="btn-fechar-modal" onclick="fecharModalRecuperar()">✕</button>
+                <div class="auth-header-neon">
+                    <div class="header-icon-pulsing"><i class="fi fi-rr-key"></i> </div>
+                    <h2>Recuperar Acesso</h2>
+                    <p>Insira seu E-mail ou Telefone para receber uma senha temporária.</p>
+                </div>
+                <form id="formRecuperar" class="form-auth" onsubmit="finalizarRecuperacao(event)">
+                    <div class="form-group-3d">
+                        <label for="recuperar-contato">E-mail ou Celular</label>
+                        <input type="text" id="recuperar-contato" class="input-neon-focus" required placeholder="seuemail@exemplo.com">
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONTINUAR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-        // Filtrar por categoria
-        function filtrarCategoria(categoria) {
-            const items = document.querySelectorAll('.faq-item');
-            const buttons = document.querySelectorAll('.cat-btn');
-
-            // Atualizar botões ativos
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            // Filtrar itens
-            items.forEach(item => {
-                if (categoria === 'todas' || item.dataset.categoria === categoria) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-    </script>
-
-    <script src="cookie-consent.js" defer></script>
 </body>
 
 </html>

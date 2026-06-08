@@ -22,7 +22,7 @@
 
 </head>
 
-<body>
+<body class="page-home">
 
     <!-- NAVBAR ANIMADA -->
     <header class="navbar" id="navbar">
@@ -445,7 +445,67 @@
     <!-- =========================================================================
          MODAL DE AUTENTICAÇÃO INTEGRADO (3D FLIP & MEDICAL NEON)
          ========================================================================= -->
-    <div id="modalAuth" class="modal-auth">
+    
+
+    <!-- MODAL 2FA -->
+    
+
+    <!-- MODAL RECUPERAÇÃO -->
+    
+
+    <footer class="modern-footer">
+        <div class="container">
+            <div class="footer-brand">
+                <h3>Portal Saúde Fácil</h3>
+                <p>O portal de saúde mais completo da região. Agendamentos, telemedicina e informações reais para você.</p>
+            </div>
+            <div class="footer-links-col">
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="index.html">Página Inicial</a></li>
+                    <li><a href="agendamento.html">Agendamentos</a></li>
+                    <li><a href="telemedicina.html">Telemedicina</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-col">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacidade.html">Política de Privacidade</a></li>
+                    <li><a href="termos.html">Termos de Uso</a></li>
+                    <li><a href="duvidas.html">Dúvidas Frequentes</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Portal Saúde Fácil. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet substituindo amCharts (dependências Leaflet foram inseridas no <head>) -->
+
+
+    <!-- API Helper e Lógica de Autenticação -->
+    <script src="api.js?v=20260529-5005" defer></script>
+    <script src="home.js?v=20260529-5005" defer></script>
+
+
+    <script>
+        // Efeito de scroll na navbar
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
+    </script>
+    <script src="cookie-consent.js" defer></script>
+
+<!-- MODAIS DE AUTENTICACAO UNIFICADOS -->
+<div id="modalAuth" class="modal-auth">
         <div class="modal-auth-flipper" id="modalAuthFlipper">
 
             <!-- SEÇÃO FRONT: LOGIN -->
@@ -676,8 +736,7 @@
         </div>
     </div>
 
-    <!-- MODAL 2FA -->
-    <div id="modal2FA" class="modal-auth">
+<div id="modal2FA" class="modal-auth">
         <div class="neon-border-3d">
             <div class="modal-auth-card glass-auth-deep">
                 <button class="btn-fechar-modal" onclick="fecharModal2FA()">✕</button>
@@ -700,8 +759,7 @@
         </div>
     </div>
 
-    <!-- MODAL RECUPERAÇÃO -->
-    <div id="modalRecuperar" class="modal-auth">
+<div id="modalRecuperar" class="modal-auth">
         <div class="neon-border-3d">
             <div class="modal-auth-card glass-auth-deep">
                 <button class="btn-fechar-modal" onclick="fecharModalRecuperar()">✕</button>
@@ -723,55 +781,5 @@
         </div>
     </div>
 
-    <footer class="modern-footer">
-        <div class="container">
-            <div class="footer-brand">
-                <h3>Portal Saúde Fácil</h3>
-                <p>O portal de saúde mais completo da região. Agendamentos, telemedicina e informações reais para você.</p>
-            </div>
-            <div class="footer-links-col">
-                <h4>Navegação</h4>
-                <ul>
-                    <li><a href="index.html">Página Inicial</a></li>
-                    <li><a href="agendamento.html">Agendamentos</a></li>
-                    <li><a href="telemedicina.html">Telemedicina</a></li>
-                </ul>
-            </div>
-            <div class="footer-links-col">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="privacidade.html">Política de Privacidade</a></li>
-                    <li><a href="termos.html">Termos de Uso</a></li>
-                    <li><a href="duvidas.html">Dúvidas Frequentes</a></li>
-                </ul>
-            </div>
-            <div class="footer-bottom">
-                &copy; 2026 Portal Saúde Fácil. Todos os direitos reservados.
-            </div>
-        </div>
-    </footer>
-
-    <!-- Leaflet substituindo amCharts (dependências Leaflet foram inseridas no <head>) -->
-
-
-    <!-- API Helper e Lógica de Autenticação -->
-    <script src="api.js?v=20260529-5005" defer></script>
-    <script src="home.js?v=20260529-5005" defer></script>
-
-
-    <script>
-        // Efeito de scroll na navbar
-        window.addEventListener('scroll', function () {
-            const navbar = document.getElementById('navbar');
-            if (navbar) {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            }
-        });
-    </script>
-    <script src="cookie-consent.js" defer></script>
 </body>
 </html>

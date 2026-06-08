@@ -19,22 +19,69 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
-<body>
+<body class="page-perfil">
 
     <!-- NAVBAR ANIMADA -->
     <header class="navbar" id="navbar">
-        <div class="logo"><a href="index.html"><img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
-                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'"></a>
+        <div class="logo">
+            <a href="index.html">
+                <img src="logo-saude-facil.png" alt="Logo Saúde Fácil"
+                    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'">
+            </a>
         </div>
+
+        <!-- MENU HAMBURGER MOBILE -->
+        <input type="checkbox" id="menu-toggle" class="menu-toggle-checkbox">
+        <label for="menu-toggle" class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
         <nav class="nav-links">
             <a href="agendamento.html">Agendamento</a>
             <a href="telemedicina.html">Telemedicina</a>
             <a href="campanhas.html">Campanhas</a>
             <a href="mapas.html">Mapas</a>
             <a href="duvidas.html">Dúvidas</a>
+            <div class="nav-bell-container" id="navBellContainer">
+                <div class="nav-bell-icon" onclick="toggleNotificacoes(event)">
+                    <i class="fi fi-rr-bell"></i> 
+                    <span class="nav-bell-badge" id="nav-notif-count" style="display: none;">0</span>
+                </div>
+                <!-- Dropdown de Notificações -->
+                <div class="nav-notif-dropdown glass-card" id="navNotifDropdown">
+                    <div class="nav-notif-header">
+                        <span>Avisos e Campanhas</span>
+                        <button onclick="limparNotificacoes()">Limpar</button>
+                    </div>
+                    <div id="nav-notif-list" class="nav-notif-list">
+                        <p class="nav-notif-empty">Nenhuma nova campanha.</p>
+                    </div>
+                </div>
+            </div>
         </nav>
+
         <div class="nav-auth">
-            <!-- Será preenchido via JS -->
+            <!-- Lupa de Busca Expansível -->
+            <div class="nav-search-container" id="navSearchContainer">
+                <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar no portal..." onkeydown="handleSearchKey(event)">
+                <button class="btn-search-toggle" id="navSearchToggle" onclick="toggleNavbarSearch(event)"><i class="fi fi-rr-search"></i></button>
+                <!-- Dropdown de resultados -->
+                <div class="search-results-dropdown" id="searchResultsDropdown">
+                    <div class="search-results-header">Resultados da Busca</div>
+                    <div class="search-results-list" id="searchResultsList"></div>
+                </div>
+            </div>
+            <!-- Botão de Login Modernizado Verde -->
+            <button class="btn-auth btn-login-modern" onclick="abrirModalLogin()">
+                <span class="login-user-icon"><i class="fi fi-rr-user"></i></span>
+                <span style="margin-left: 2px;">Login</span>
+            </button>
+            <!-- Botão de Cadastro -->
+            <button class="btn-auth btn-cadastro" onclick="abrirModalCadastro()">
+                <i class="fi fi-rr-user-add" style="margin-right: 8px; font-size: 0.95rem; vertical-align: middle;"></i>CADASTRE-SE
+            </button>
         </div>
     </header>
 
@@ -299,6 +346,284 @@
     <script src="api.js?v=20260419-1"></script>
     <script src="home.js?v=20260419-2"></script>
     <script src="perfil.js"></script>
+
+<!-- MODAIS DE AUTENTICACAO UNIFICADOS -->
+<div id="modalAuth" class="modal-auth">
+        <div class="modal-auth-flipper" id="modalAuthFlipper">
+
+            <!-- SEÇÃO FRONT: LOGIN -->
+            <div class="login-side-neon" id="loginNeonWrapper">
+                <div class="card-padrao modal-auth-card" id="loginCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+                    <div class="auth-header-neon">
+                        <div class="header-icon-pulsing"><i class="fi fi-rr-hospital"></i> </div>
+                        <h2>Acesso Saúde</h2>
+                        <p>Entre no seu painel inteligente</p>
+                    </div>
+
+                    <form id="formLogin" class="form-auth" onsubmit="finalizarLogin(event)">
+                        <div class="form-group-3d">
+                            <label for="login-cpf"><i class="fi fi-rr-id-badge"></i>  CPF</label>
+                            <input type="text" id="login-cpf" class="cpf-mask input-neon-focus" required
+                                placeholder="000.000.000-00">
+                        </div>
+                        <div class="form-group-3d">
+                            <label for="login-senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                            <input type="password" id="login-senha" class="input-neon-focus" required
+                                placeholder="Sua senha secreta">
+                        </div>
+                        <div class="form-aux">
+                            <a href="#" class="link-fale-conosco" onclick="abrirModalRecuperar()">Esqueci a senha</a>
+                        </div>
+                        <div class="form-footer">
+                            <button type="submit" class="btn-enviar-auth-3d btn-neon-health">ENTRAR NO PORTAL
+                                 </button>
+                        </div>
+                        <div class="auth-switch">
+                            Não tem conta? <a href="#" onclick="flipParaCadastro()">Cadastre-se agora</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SEÇÃO BACK: CADASTRO -->
+            <div class="cadastro-side-neon" id="cadastroNeonWrapper">
+                <div class="card-padrao modal-auth-card cadastro-wide" id="cadastroCard">
+                    <button class="btn-fechar-modal" onclick="fecharModalAuth()">✕</button>
+
+                    <!-- Barra de Progresso 3D -->
+                    <div class="auth-progress-container">
+                        <div class="auth-progress-bar" id="authProgressBar"></div>
+                        <div class="auth-progress-steps">
+                            <div class="step active" data-step="1">1</div>
+                            <div class="step" data-step="2">2</div>
+                            <div class="step" data-step="3">3</div>
+                            <div class="step" data-step="4">4</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-header-neon">
+                        <h2 id="cadastroTitle">Novo Cadastro</h2>
+                        <p id="cadastroSub">Identificação básica no portal</p>
+                    </div>
+
+                    <form id="formCadastro" class="form-auth" onsubmit="finalizarCadastro(event)">
+
+                        <!-- PASSO 1: IDENTIFICAÇÃO -->
+                        <div class="auth-step-content active" id="authStep1">
+                            <div class="form-grid">
+                                <div class="form-group-3d full-width">
+                                    <label for="nome"><i class="fi fi-rr-user"></i>  Nome Completo</label>
+                                    <input type="text" id="nome" class="input-neon-focus" required
+                                        placeholder="Digite seu nome completo">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="cpf"><i class="fi fi-rr-id-badge"></i>  CPF / CNPJ</label>
+                                    <input type="text" id="cpf" class="cpf-mask input-neon-focus" required
+                                        placeholder="000.000.000-00">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="nascimento"><i class="fi fi-rr-calendar"></i>  Nascimento</label>
+                                    <input type="text" id="nascimento" class="date-mask input-neon-focus" required
+                                        placeholder="DD/MM/AAAA">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(2)">PRÓXIMO PASSO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 2: PERFIL E PROFISSÃO -->
+                        <div class="auth-step-content" id="authStep2">
+                            <div class="role-selector-3d">
+                                <p class="role-label">Quero me cadastrar como:</p>
+                                <div class="role-cards-grid">
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="paciente" checked
+                                            onchange="mudarTipoCadastro('paciente')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-user"></i> </div>
+                                            <span>Paciente</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="medico"
+                                            onchange="mudarTipoCadastro('medico')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-stethoscope"></i> </div>
+                                            <span>Médico</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="enfermeiro"
+                                            onchange="mudarTipoCadastro('enfermeiro')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-hospital"></i> </div>
+                                            <span>Enfermeiro</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="admin"
+                                            onchange="mudarTipoCadastro('admin')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-shield"></i> </div>
+                                            <span>Admin</span>
+                                        </div>
+                                    </label>
+                                    <label class="role-card-3d">
+                                        <input type="radio" name="tipoCadastro" value="ti"
+                                            onchange="mudarTipoCadastro('ti')">
+                                        <div class="role-card-inner">
+                                            <div class="role-icon"><i class="fi fi-rr-laptop"></i> </div>
+                                            <span>TI</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="campos-medico" class="dynamic-fields-3d" style="display: none;">
+                                <div class="form-grid">
+                                    <div class="form-group-3d">
+                                        <label for="crm"><i class="fi fi-rr-stethoscope"></i>  CRM / Registro</label>
+                                        <input type="text" id="crm" class="input-neon-focus" placeholder="Ex: 12345/PR">
+                                    </div>
+                                    <div class="form-group-3d">
+                                        <label for="especialidade"><i class="fi fi-rr-briefcase-medical"></i>  Especialidade</label>
+                                        <select id="especialidade" class="input-neon-focus">
+                                            <option value="">Selecione...</option>
+                                            <option value="Clinica Geral">Clínica Geral</option>
+                                            <option value="Cardiologia">Cardiologia</option>
+                                            <option value="Pediatria">Pediatria</option>
+                                            <option value="Ginecologia">Ginecologia</option>
+                                            <option value="Dermatologia">Dermatologia</option>
+                                            <option value="Oftalmologia">Oftalmologia</option>
+                                            <option value="Otorrinolaringologia">Otorrinolaringologia</option>
+                                            <option value="Ortopedia">Ortopedia</option>
+                                            <option value="Neurologia">Neurologia</option>
+                                            <option value="Psicologia">Psicologia</option>
+                                            <option value="Nutrição">Nutrição</option>
+                                            <option value="Fisioterapia">Fisioterapia</option>
+                                            <option value="Odontologia">Odontologia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(1)">⬅ VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(3)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 3: LOCALIZAÇÃO -->
+                        <div class="auth-step-content" id="authStep3">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="cidade"><i class="fi fi-rr-city"></i>  Cidade</label>
+                                    <select id="cidade" class="input-neon-focus" required>
+                                        <option value="Cascavel">Cascavel</option>
+                                        <option value="Toledo">Toledo</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="bairro"><i class="fi fi-rr-house-chimney"></i>  Bairro</label>
+                                    <input type="text" id="bairro" class="input-neon-focus" required
+                                        placeholder="Ex: Centro">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="sus"><i class="fi fi-rr-credit-card"></i>  Cartão SUS</label>
+                                    <input type="text" id="sus" class="sus-mask input-neon-focus" required
+                                        placeholder="000 0000 0000 0000">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(2)">⬅ VOLTAR</button>
+                                <button type="button" class="btn-next-step btn-neon-health"
+                                    onclick="proximoPassoCadastro(4)">PRÓXIMO ➜</button>
+                            </div>
+                        </div>
+
+                        <!-- PASSO 4: CONTATO E SENHA -->
+                        <div class="auth-step-content" id="authStep4">
+                            <div class="form-grid">
+                                <div class="form-group-3d">
+                                    <label for="telefone"><i class="fi fi-rr-smartphone"></i>  Celular</label>
+                                    <input type="tel" id="telefone" class="tel-mask input-neon-focus" required
+                                        placeholder="(45) 99999-0000">
+                                </div>
+                                <div class="form-group-3d">
+                                    <label for="email"><i class="fi fi-rr-envelope"></i>  E-mail</label>
+                                    <input type="email" id="email" class="input-neon-focus" required
+                                        placeholder="seu@email.com">
+                                </div>
+                                <div class="form-group-3d full-width">
+                                    <label for="senha"><i class="fi fi-rr-lock"></i>  Senha</label>
+                                    <input type="password" id="senha" class="input-neon-focus" required
+                                        placeholder="Mínimo 6 caracteres">
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <button type="button" class="btn-prev-step" onclick="proximoPassoCadastro(3)">⬅ VOLTAR</button>
+                                <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONCLUIR <i class="fi fi-rr-party-horn"></i> </button>
+                            </div>
+                        </div>
+
+                        <div class="auth-switch">
+                            Já tem conta? <a href="#" onclick="flipParaLogin()">Faça login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div id="modal2FA" class="modal-auth">
+        <div class="neon-border-3d">
+            <div class="modal-auth-card glass-auth-deep">
+                <button class="btn-fechar-modal" onclick="fecharModal2FA()">✕</button>
+                <div class="auth-header-neon">
+                    <div class="header-icon-pulsing"><i class="fi fi-rr-shield"></i> </div>
+                    <h2>Verificação</h2>
+                    <p>Insira o código de 6 dígitos enviado ao seu dispositivo.</p>
+                </div>
+                <form id="form2FA" class="form-auth" onsubmit="finalizar2FA(event)">
+                    <div class="form-group-3d">
+                        <input type="text" id="codigo-2fa" maxlength="6" required
+                            style="text-align: center; font-size: 2rem; letter-spacing: 10px; width: 100%; margin: 10px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--health-cyan); color: white; border-radius: 15px;"
+                            placeholder="000000">
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn-enviar-auth-3d btn-neon-health">VALIDAR ACESSO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<div id="modalRecuperar" class="modal-auth">
+        <div class="neon-border-3d">
+            <div class="modal-auth-card glass-auth-deep">
+                <button class="btn-fechar-modal" onclick="fecharModalRecuperar()">✕</button>
+                <div class="auth-header-neon">
+                    <div class="header-icon-pulsing"><i class="fi fi-rr-key"></i> </div>
+                    <h2>Recuperar Acesso</h2>
+                    <p>Insira seu E-mail ou Telefone para receber uma senha temporária.</p>
+                </div>
+                <form id="formRecuperar" class="form-auth" onsubmit="finalizarRecuperacao(event)">
+                    <div class="form-group-3d">
+                        <label for="recuperar-contato">E-mail ou Celular</label>
+                        <input type="text" id="recuperar-contato" class="input-neon-focus" required placeholder="seuemail@exemplo.com">
+                    </div>
+                    <div class="form-footer">
+                        <button type="submit" class="btn-enviar-auth-3d btn-neon-health">CONTINUAR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
