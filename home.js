@@ -1157,6 +1157,18 @@ async function carregarCampanhasPublicas() {
         }
     }
 
+    // Evitar que cliques dentro do conteúdo do dropdown fechem o modal (permitindo fechar no backdrop)
+    const dropdownEl = document.getElementById('navNotifDropdown');
+    if (dropdownEl) {
+        const contentHeader = dropdownEl.querySelector('.nav-notif-header');
+        if (contentHeader) {
+            contentHeader.onclick = (e) => e.stopPropagation();
+        }
+        if (listContainer) {
+            listContainer.onclick = (e) => e.stopPropagation();
+        }
+    }
+
     let campanhasAPI = [];
     let notificacoesPessoais = [];
     
