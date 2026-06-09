@@ -133,6 +133,130 @@ def vacinas():
         return jsonify({'erro': str(e)}), 500
 
 
+@paciente_bp.route('/api/paciente/vacina', methods=['POST'])
+def adicionar_vacina():
+    from app import get_db_connection
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not usuario_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    data = request.get_json()
+    vacina_nome = data.get('vacina_nome', '').strip()
+    dose = data.get('dose', '').strip()
+    lote = data.get('lote', '').strip() or 'N/A'
+    local_aplicacao = data.get('local_aplicacao', '').strip() or 'Não informado'
+    data_vacina = data.get('data', '').strip() # expected format: YYYY-MM-DD
+
+    if not vacina_nome or not dose:
+        return jsonify({'erro': 'Nome da vacina e dose são obrigatórios'}), 400
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        if data_vacina:
+            cur.execute("""
+                INSERT INTO vacinas_aplicadas (paciente_id, enfermeiro_id, vacina_nome, dose, lote, local_aplicacao, criado_em)
+                VALUES (?, NULL, ?, ?, ?, ?, ?)
+            """, (usuario_id, vacina_nome, dose, lote, local_aplicacao, data_vacina))
+        else:
+            cur.execute("""
+                INSERT INTO vacinas_aplicadas (paciente_id, enfermeiro_id, vacina_nome, dose, lote, local_aplicacao)
+                VALUES (?, NULL, ?, ?, ?, ?)
+            """, (usuario_id, vacina_nome, dose, lote, local_aplicacao))
+        db.commit()
+        vacina_id = cur.lastrowid
+        db.close()
+        return jsonify({'sucesso': True, 'id': vacina_id}), 201
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+@paciente_bp.route('/api/paciente/vacina/<int:id>', methods=['PUT'])
+def editar_vacina_paciente(id):
+    from app import get_db_connection
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not usuario_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    data = request.get_json()
+    vacina_nome = data.get('vacina_nome', '').strip()
+    dose = data.get('dose', '').strip()
+    lote = data.get('lote', '').strip() or 'N/A'
+    local_aplicacao = data.get('local_aplicacao', '').strip() or 'Não informado'
+    data_vacina = data.get('data', '').strip() # expected format: YYYY-MM-DD
+
+    if not vacina_nome or not dose:
+        return jsonify({'erro': 'Nome da vacina e dose são obrigatórios'}), 400
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        
+        # Verify the record exists, belongs to the patient, and is self-reported (enfermeiro_id IS NULL)
+        cur.execute("SELECT paciente_id, enfermeiro_id FROM vacinas_aplicadas WHERE id = ?", (id,))
+        vac = cur.fetchone()
+        if not vac:
+            db.close()
+            return jsonify({'erro': 'Registro de vacina não encontrado'}), 404
+        if int(vac['paciente_id']) != int(usuario_id):
+            db.close()
+            return jsonify({'erro': 'Permissão negada'}), 403
+        if vac['enfermeiro_id'] is not None:
+            db.close()
+            return jsonify({'erro': 'Não é permitido editar vacinas registradas por profissionais de saúde'}), 403
+
+        if data_vacina:
+            cur.execute("""
+                UPDATE vacinas_aplicadas
+                SET vacina_nome = ?, dose = ?, lote = ?, local_aplicacao = ?, criado_em = ?
+                WHERE id = ?
+            """, (vacina_nome, dose, lote, local_aplicacao, data_vacina, id))
+        else:
+            cur.execute("""
+                UPDATE vacinas_aplicadas
+                SET vacina_nome = ?, dose = ?, lote = ?, local_aplicacao = ?
+                WHERE id = ?
+            """, (vacina_nome, dose, lote, local_aplicacao, id))
+        db.commit()
+        db.close()
+        return jsonify({'sucesso': True}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+@paciente_bp.route('/api/paciente/vacina/<int:id>', methods=['DELETE'])
+def remover_vacina_paciente(id):
+    from app import get_db_connection
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not usuario_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        
+        # Verify the record exists, belongs to the patient, and is self-reported (enfermeiro_id IS NULL)
+        cur.execute("SELECT paciente_id, enfermeiro_id FROM vacinas_aplicadas WHERE id = ?", (id,))
+        vac = cur.fetchone()
+        if not vac:
+            db.close()
+            return jsonify({'erro': 'Registro de vacina não encontrado'}), 404
+        if int(vac['paciente_id']) != int(usuario_id):
+            db.close()
+            return jsonify({'erro': 'Permissão negada'}), 403
+        if vac['enfermeiro_id'] is not None:
+            db.close()
+            return jsonify({'erro': 'Não é permitido excluir vacinas registradas por profissionais de saúde'}), 403
+
+        cur.execute("DELETE FROM vacinas_aplicadas WHERE id = ?", (id,))
+        db.commit()
+        db.close()
+        return jsonify({'sucesso': True}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+
 # ── DOENÇAS / CONDIÇÕES DO PACIENTE ──────────────────────────────
 @paciente_bp.route('/api/paciente/doencas', methods=['GET'])
 def listar_doencas():

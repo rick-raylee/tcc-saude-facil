@@ -84,13 +84,19 @@ async function carregarDadosPerfilAPI() {
 
     // Carregar Online
     let minhasVacinas = await API.minhasVacinas() || [];
+    if (minhasVacinas.erro) minhasVacinas = [];
 
-    // Se o banco online não tiver vacinas aplicadas para este paciente, popula com as simuladas (TCC)
-    if (!minhasVacinas || minhasVacinas.length === 0 || minhasVacinas.erro) {
-        minhasVacinas = [];
-        vacinasTomadasSimuladas.forEach(s => {
-            const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
-            minhasVacinas.push({
+    // Sempre carregar as vacinas simuladas (para demonstrar histórico no TCC), a menos que já estejam no banco
+    const vacinasDoBanco = [...minhasVacinas];
+    const nomesNoBanco = new Set(vacinasDoBanco.map(v => `${v.vacina || v.vacina_nome}-${v.dose}`));
+
+    let todasMinhasOnline = [...vacinasDoBanco];
+    
+    vacinasTomadasSimuladas.forEach(s => {
+        const vSUS = vacinasSUS.find(v => v.id === s.id) || { nome: 'Vacina', dose: 'Dose' };
+        const chave = `${vSUS.nome}-${vSUS.dose}`;
+        if (!nomesNoBanco.has(chave)) {
+            todasMinhasOnline.push({
                 id: s.id,
                 vacina_id: s.id,
                 vacina: vSUS.nome,
@@ -98,22 +104,29 @@ async function carregarDadosPerfilAPI() {
                 local: s.local,
                 dose: vSUS.dose,
                 lote: 'SIM-999',
-                status: 'oficial'
+                status: 'oficial', // As simulated vaccines are "official" mock records
+                enfermeiro: 'Sistema (Simulação)'
             });
-        });
-    }
+        }
+    });
     
     // Carregar Offline (Locais pendentes)
     const dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
     const vacinasLocais = dbV.filter(v => (v.paciente_cpf && v.paciente_cpf.replace(/\D/g, '') === cpfLimpo) || (v.pacienteCpf && v.pacienteCpf.replace(/\D/g, '') === cpfLimpo));
 
     // Deduplicar para não mostrar a mesma vacina duas vezes se ela já subiu
-    const nomesJaNaAPI = new Set(minhasVacinas.map(v => `${v.vacina || v.vacina_nome}-${v.dose}`));
+    const nomesJaNaAPI = new Set(todasMinhasOnline.map(v => `${v.vacina || v.vacina_nome}-${v.dose}`));
     const pendentesSync = vacinasLocais.filter(v => !nomesJaNaAPI.has(`${v.vacina_nome || v.vacina}-${v.dose}`));
 
     // Mesclar as listas
     const todasRealizadas = [
-        ...minhasVacinas.map(v => ({...v, status: 'oficial'})),
+        ...todasMinhasOnline.map(v => {
+            let currentStatus = v.status;
+            if (!currentStatus) {
+                currentStatus = (v.enfermeiro === null || v.enfermeiro === undefined || v.enfermeiro === '') ? 'self' : 'oficial';
+            }
+            return { ...v, status: currentStatus };
+        }),
         ...pendentesSync.map(v => ({
             vacina: v.vacina_nome || v.vacina,
             data: v.data,
@@ -132,14 +145,37 @@ async function carregarDadosPerfilAPI() {
         const row = document.createElement('div');
         row.className = 'booklet-row taken';
         if (v.status === 'local') row.style.borderLeft = '4px solid #f39c12';
+        if (v.status === 'self') row.style.borderLeft = '4px solid #28a745'; // green border for self-declared
         
+        let actionsHtml = '';
+        if (v.status === 'self') {
+            const vJson = JSON.stringify({
+                id: v.id,
+                vacina: v.vacina,
+                dose: v.dose,
+                lote: v.lote,
+                local: v.local,
+                data: v.data
+            }).replace(/"/g, '&quot;');
+            
+            actionsHtml = `
+                <div class="row-actions" style="margin-left: 10px; display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-action-self" onclick="abrirFormEditarVacina(${vJson}, event)" style="background: #e3f2fd; color: #1565c0; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; gap: 3px;" title="Editar">✏️</button>
+                    <button class="btn-action-self" onclick="removerVacinaPacienteConfirm(${v.id}, event)" style="background: #ffebee; color: #c62828; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; gap: 3px;" title="Excluir">❌</button>
+                </div>
+            `;
+        }
+
         row.innerHTML = `
-            <div class="row-date">${v.data || '--/--/----'}</div>
-            <div class="row-info">
-                <strong>${v.vacina} ${v.status === 'local' ? '<small style="color:#e67e22;">(Sincronização pendente)</small>' : ''}</strong>
+            <div class="row-date">${formatarDataBR(v.data)}</div>
+            <div class="row-info" style="flex: 1;">
+                <strong>${v.vacina} ${v.status === 'local' ? '<small style="color:#e67e22;">(Sincronização pendente)</small>' : ''} ${v.status === 'self' ? '<small style="color:#28a745;">(Autodeclarada)</small>' : ''}</strong>
                 <small>${v.local || 'Não informado'} • ${v.dose} • Lote: ${v.lote || 'N/A'}</small>
             </div>
-            <div class="row-stamp"><i class='fi fi-rr-${v.status === 'local' ? 'time-past' : 'syringe'}'></i> </div>
+            <div style="display: flex; align-items: center;">
+                <div class="row-stamp"><i class='fi fi-rr-${v.status === 'local' ? 'time-past' : 'syringe'}'></i> </div>
+                ${actionsHtml}
+            </div>
         `;
         listRealizadas.appendChild(row);
     });
@@ -761,13 +797,35 @@ function carregarVacinas() {
         const row = document.createElement('div'); row.className = 'booklet-row taken';
         if (v.status === 'local') row.style.borderLeft = '4px solid #f39c12';
         
+        let actionsHtml = '';
+        if (v.status === 'local') {
+            const vObj = {
+                id: 'local',
+                vacina: v.nome,
+                data: v.data,
+                local: v.local,
+                dose: v.dose,
+                lote: v.lote || 'N/A',
+                status: 'local'
+            };
+            actionsHtml = `
+                <div class="row-actions" style="margin-left: 10px; display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-action-self" onclick="abrirFormEditarVacina(${JSON.stringify(vObj).replace(/"/g, '&quot;')}, event)" style="background: #e3f2fd; color: #1565c0; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; gap: 3px;" title="Editar">✏️</button>
+                    <button class="btn-action-self" onclick="removerVacinaLocalConfirm('${v.nome}', '${v.dose}', event)" style="background: #ffebee; color: #c62828; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; gap: 3px;" title="Excluir">❌</button>
+                </div>
+            `;
+        }
+
         row.innerHTML = `
-            <div class="row-date">${v.data}</div>
-            <div class="row-info">
-                <strong>${v.nome}</strong>
-                <small>${v.local} • ${v.dose}</small>
+            <div class="row-date">${formatarDataBR(v.data)}</div>
+            <div class="row-info" style="flex: 1;">
+                <strong>${v.nome} ${v.status === 'local' ? '<small style="color:#e67e22;">(Sincronização pendente)</small>' : ''}</strong>
+                <small>${v.local || 'Não informado'} • ${v.dose} ${v.lote ? `• Lote: ${v.lote}` : ''}</small>
             </div>
-            <div class="row-stamp"><i class='fi fi-rr-${v.status === 'local' ? 'time-past' : 'check-circle'}'></i> </div>
+            <div style="display: flex; align-items: center;">
+                <div class="row-stamp"><i class='fi fi-rr-${v.status === 'local' ? 'time-past' : 'check-circle'}'></i> </div>
+                ${actionsHtml}
+            </div>
         `;
         listRealizadas.appendChild(row);
     });
@@ -1322,4 +1380,430 @@ async function carregarAtestadosPacienteAPI() {
         listaExames.innerHTML = '<li class="empty-msg" style="text-align:center; padding:20px; color:#888;">Erro ao carregar documentos da telemedicina.</li>';
     }
 }
+
+function formatarDataBR(dataStr) {
+    if (!dataStr) return '--/--/----';
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return dataStr;
+    const match = dataStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return `${match[3]}/${match[2]}/${match[1]}`;
+    }
+    return dataStr;
+}
+window.formatarDataBR = formatarDataBR;
+
+window.abrirFormAdicionarVacina = function(event) {
+    if (event) event.stopPropagation();
+
+    // Criar opções da vacina do SUS para o dropdown
+    let optionsHtml = '<option value="">-- Selecione uma vacina --</option>';
+    vacinasSUS.forEach(v => {
+        optionsHtml += `<option value="${v.id}" data-dose="${v.dose}">${v.nome} (${v.dose})</option>`;
+    });
+    optionsHtml += '<option value="custom">Outra / Não listada...</option>';
+
+    const formHtml = `
+      <div class="swal-vacina-form" style="text-align: left; font-family: 'Inter', sans-serif;">
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Selecione a Vacina <span style="color:red;">*</span></label>
+          <select id="swal-vacina-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+            ${optionsHtml}
+          </select>
+        </div>
+        <div id="swal-custom-vacina-container" style="margin-bottom: 15px; display: none;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Nome da Vacina (Manual) <span style="color:red;">*</span></label>
+          <input type="text" id="swal-custom-vacina" placeholder="Digite o nome da vacina" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Dose <span style="color:red;">*</span></label>
+          <input type="text" id="swal-dose" placeholder="Ex: 1ª Dose, Dose Única, Reforço" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Lote</label>
+          <input type="text" id="swal-lote" placeholder="Ex: AB1234" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Local de Aplicação</label>
+          <input type="text" id="swal-local" placeholder="Ex: UBS Centro, Hospital Saúde Fácil" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Data da Aplicação <span style="color:red;">*</span></label>
+          <input type="date" id="swal-data" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+      </div>
+    `;
+
+    Swal.fire({
+        title: 'Adicionar Registro de Vacina',
+        html: formHtml,
+        showCancelButton: true,
+        confirmButtonText: 'Salvar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        focusConfirm: false,
+        didOpen: () => {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('swal-data').value = today;
+
+            const selectEl = document.getElementById('swal-vacina-select');
+            const customContainer = document.getElementById('swal-custom-vacina-container');
+            const doseEl = document.getElementById('swal-dose');
+
+            selectEl.addEventListener('change', () => {
+                const val = selectEl.value;
+                if (val === 'custom') {
+                    customContainer.style.display = 'block';
+                    doseEl.value = '';
+                } else if (val) {
+                    customContainer.style.display = 'none';
+                    const selectedOpt = selectEl.options[selectEl.selectedIndex];
+                    doseEl.value = selectedOpt.getAttribute('data-dose') || '';
+                } else {
+                    customContainer.style.display = 'none';
+                    doseEl.value = '';
+                }
+            });
+        },
+        preConfirm: () => {
+            const selectEl = document.getElementById('swal-vacina-select');
+            const customVal = document.getElementById('swal-custom-vacina').value.trim();
+            const doseVal = document.getElementById('swal-dose').value.trim();
+            const loteVal = document.getElementById('swal-lote').value.trim();
+            const localVal = document.getElementById('swal-local').value.trim();
+            const dataVal = document.getElementById('swal-data').value.trim();
+
+            let vacinaNome = '';
+            if (selectEl.value === 'custom') {
+                vacinaNome = customVal;
+            } else if (selectEl.value) {
+                const selectedOpt = selectEl.options[selectEl.selectedIndex];
+                const found = vacinasSUS.find(v => v.id === selectEl.value);
+                vacinaNome = found ? found.nome : selectedOpt.text;
+            }
+
+            if (!vacinaNome) {
+                Swal.showValidationMessage('Selecione uma vacina ou digite o nome manualmente');
+                return false;
+            }
+            if (!doseVal) {
+                Swal.showValidationMessage('Informe a dose');
+                return false;
+            }
+            if (!dataVal) {
+                Swal.showValidationMessage('Informe a data de aplicação');
+                return false;
+            }
+
+            return {
+                vacina_nome: vacinaNome,
+                dose: doseVal,
+                lote: loteVal,
+                local_aplicacao: localVal,
+                data: dataVal
+            };
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                if (typeof API === 'undefined') {
+                    // Fallback para LocalStorage
+                    let dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
+                    const meuCpf = localStorage.getItem('usuarioCpf') || '';
+                    const meuNome = localStorage.getItem('usuarioNome') || '';
+                    dbV.push({
+                        paciente_cpf: meuCpf,
+                        pacienteNome: meuNome,
+                        vacina_nome: result.value.vacina_nome,
+                        dose: result.value.dose,
+                        lote: result.value.lote,
+                        local_aplicacao: result.value.local_aplicacao,
+                        data: formatarDataBR(result.value.data),
+                        criado_em: result.value.data
+                    });
+                    localStorage.setItem('db_vacinas_paciente', JSON.stringify(dbV));
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Modo Offline',
+                        text: 'Vacina salva localmente no dispositivo.'
+                    });
+                    carregarVacinas();
+                } else {
+                    // Via API
+                    const resp = await API.adicionarVacinaPaciente(result.value);
+                    if (resp && resp.sucesso) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Vacina Adicionada',
+                            text: 'Seu registro de vacina foi adicionado com sucesso!'
+                        });
+                        await carregarDadosPerfilAPI();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: (resp && resp.erro) ? resp.erro : 'Não foi possível adicionar o registro.'
+                        });
+                    }
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro de Conexão',
+                    text: 'Não foi possível comunicar com o servidor.'
+                });
+            }
+        }
+    });
+};
+
+window.abrirFormEditarVacina = function(v, event) {
+    if (event) event.stopPropagation();
+
+    // Descobrir se o nome da vacina pertence a alguma vacina SUS
+    const matchSUS = vacinasSUS.find(sus => sus.nome === v.vacina);
+    let selectVal = '';
+    let isCustom = false;
+    if (matchSUS) {
+        selectVal = matchSUS.id;
+    } else {
+        selectVal = 'custom';
+        isCustom = true;
+    }
+
+    // Criar opções do SUS
+    let optionsHtml = '<option value="">-- Selecione uma vacina --</option>';
+    vacinasSUS.forEach(sus => {
+        optionsHtml += `<option value="${sus.id}" data-dose="${sus.dose}" ${sus.id === selectVal ? 'selected' : ''}>${sus.nome} (${sus.dose})</option>`;
+    });
+    optionsHtml += `<option value="custom" ${selectVal === 'custom' ? 'selected' : ''}>Outra / Não listada...</option>`;
+
+    // Formatar data para YYYY-MM-DD
+    let dateVal = '';
+    if (v.data) {
+        if (/^\d{4}-\d{2}-\d{2}/.test(v.data)) {
+            dateVal = v.data.substring(0, 10);
+        } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(v.data)) {
+            const parts = v.data.split('/');
+            dateVal = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+    }
+
+    const formHtml = `
+      <div class="swal-vacina-form" style="text-align: left; font-family: 'Inter', sans-serif;">
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Selecione a Vacina <span style="color:red;">*</span></label>
+          <select id="swal-vacina-select" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+            ${optionsHtml}
+          </select>
+        </div>
+        <div id="swal-custom-vacina-container" style="margin-bottom: 15px; display: ${isCustom ? 'block' : 'none'};">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Nome da Vacina (Manual) <span style="color:red;">*</span></label>
+          <input type="text" id="swal-custom-vacina" placeholder="Digite o nome da vacina" value="${isCustom ? v.vacina : ''}" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Dose <span style="color:red;">*</span></label>
+          <input type="text" id="swal-dose" placeholder="Ex: 1ª Dose, Dose Única, Reforço" value="${v.dose || ''}" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Lote</label>
+          <input type="text" id="swal-lote" placeholder="Ex: AB1234" value="${v.lote || ''}" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Local de Aplicação</label>
+          <input type="text" id="swal-local" placeholder="Ex: UBS Centro, Hospital Saúde Fácil" value="${v.local || ''}" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Data da Aplicação <span style="color:red;">*</span></label>
+          <input type="date" id="swal-data" value="${dateVal}" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+      </div>
+    `;
+
+    Swal.fire({
+        title: 'Editar Registro de Vacina',
+        html: formHtml,
+        showCancelButton: true,
+        confirmButtonText: 'Atualizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#007bff',
+        focusConfirm: false,
+        didOpen: () => {
+            const selectEl = document.getElementById('swal-vacina-select');
+            const customContainer = document.getElementById('swal-custom-vacina-container');
+            const doseEl = document.getElementById('swal-dose');
+
+            selectEl.addEventListener('change', () => {
+                const val = selectEl.value;
+                if (val === 'custom') {
+                    customContainer.style.display = 'block';
+                    doseEl.value = '';
+                } else if (val) {
+                    customContainer.style.display = 'none';
+                    const selectedOpt = selectEl.options[selectEl.selectedIndex];
+                    doseEl.value = selectedOpt.getAttribute('data-dose') || '';
+                } else {
+                    customContainer.style.display = 'none';
+                    doseEl.value = '';
+                }
+            });
+        },
+        preConfirm: () => {
+            const selectEl = document.getElementById('swal-vacina-select');
+            const customVal = document.getElementById('swal-custom-vacina').value.trim();
+            const doseVal = document.getElementById('swal-dose').value.trim();
+            const loteVal = document.getElementById('swal-lote').value.trim();
+            const localVal = document.getElementById('swal-local').value.trim();
+            const dataVal = document.getElementById('swal-data').value.trim();
+
+            let vacinaNome = '';
+            if (selectEl.value === 'custom') {
+                vacinaNome = customVal;
+            } else if (selectEl.value) {
+                const selectedOpt = selectEl.options[selectEl.selectedIndex];
+                const found = vacinasSUS.find(sus => sus.id === selectEl.value);
+                vacinaNome = found ? found.nome : selectedOpt.text;
+            }
+
+            if (!vacinaNome) {
+                Swal.showValidationMessage('Selecione uma vacina ou digite o nome manualmente');
+                return false;
+            }
+            if (!doseVal) {
+                Swal.showValidationMessage('Informe a dose');
+                return false;
+            }
+            if (!dataVal) {
+                Swal.showValidationMessage('Informe a data de aplicação');
+                return false;
+            }
+
+            return {
+                vacina_nome: vacinaNome,
+                dose: doseVal,
+                lote: loteVal,
+                local_aplicacao: localVal,
+                data: dataVal
+            };
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                if (typeof API === 'undefined' || v.id === 'local') {
+                    // Update in LocalStorage
+                    let dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
+                    const index = dbV.findIndex(item => (item.vacina_nome === v.vacina || item.vacina === v.vacina) && item.dose === v.dose);
+                    if (index !== -1) {
+                        dbV[index].vacina_nome = result.value.vacina_nome;
+                        dbV[index].dose = result.value.dose;
+                        dbV[index].lote = result.value.lote;
+                        dbV[index].local_aplicacao = result.value.local_aplicacao;
+                        dbV[index].data = formatarDataBR(result.value.data);
+                        dbV[index].criado_em = result.value.data;
+                        localStorage.setItem('db_vacinas_paciente', JSON.stringify(dbV));
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Atualizado',
+                            text: 'Registro de vacina updated localmente!'
+                        });
+                        carregarVacinas();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: 'Registro não encontrado localmente.'
+                        });
+                    }
+                } else {
+                    // API Call
+                    const resp = await API.editarVacinaPaciente(v.id, result.value);
+                    if (resp && resp.sucesso) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Atualizado',
+                            text: 'Registro de vacina atualizado com sucesso!'
+                        });
+                        await carregarDadosPerfilAPI();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: (resp && resp.erro) ? resp.erro : 'Não foi possível atualizar o registro.'
+                        });
+                    }
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro de Conexão',
+                    text: 'Não foi possível comunicar com o servidor.'
+                });
+            }
+        }
+    });
+};
+
+window.removerVacinaPacienteConfirm = function(vacinaId, event) {
+    if (event) event.stopPropagation();
+
+    Swal.fire({
+        title: 'Excluir Registro?',
+        text: 'Você tem certeza que deseja remover este registro de vacina autodeclarada?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const resp = await API.removerVacinaPaciente(vacinaId);
+                if (resp && resp.sucesso) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Removido',
+                        text: 'O registro foi removido com sucesso!'
+                    });
+                    await carregarDadosPerfilAPI();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: (resp && resp.erro) ? resp.erro : 'Não foi possível remover o registro.'
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro de Conexão',
+                    text: 'Não foi possível comunicar com o servidor.'
+                });
+            }
+        }
+    });
+};
+
+window.removerVacinaLocalConfirm = function(nome, dose, event) {
+    if (event) event.stopPropagation();
+
+    Swal.fire({
+        title: 'Excluir Registro?',
+        text: 'Deseja remover esta vacina do seu dispositivo?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let dbV = JSON.parse(localStorage.getItem('db_vacinas_paciente') || '[]');
+            dbV = dbV.filter(item => !( (item.vacina_nome === nome || item.vacina === nome) && item.dose === dose ));
+            localStorage.setItem('db_vacinas_paciente', JSON.stringify(dbV));
+            Swal.fire('Removido', 'Registro removido do dispositivo.', 'success');
+            carregarVacinas();
+        }
+    });
+};
 
