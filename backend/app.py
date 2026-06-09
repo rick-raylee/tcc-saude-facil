@@ -257,6 +257,8 @@ def migrar_schema_admin():
     colunas_medico = {row[1] for row in cur.fetchall()}
     if 'presencial_ativo' not in colunas_medico:
         cur.execute("ALTER TABLE medico_info ADD COLUMN presencial_ativo INTEGER DEFAULT 0")
+    if 'atende_amanha' not in colunas_medico:
+        cur.execute("ALTER TABLE medico_info ADD COLUMN atende_amanha INTEGER DEFAULT 1")
 
     # Migração para a tabela consultas
     cur.execute("PRAGMA table_info(consultas)")
@@ -334,9 +336,22 @@ def migrar_schema_admin():
         {"id": "nutricao", "nome": "Nutrição", "icon": "fi fi-rr-apple-whole", "desc": "Planos alimentares, emagrecimento e reeducação alimentar."},
         {"id": "fisioterapia", "nome": "Fisioterapia", "icon": "fi fi-rr-running", "desc": "Reabilitação física, pilates e alívio de dores."},
         {"id": "odontologia", "nome": "Odontologia", "icon": "fi fi-rr-tooth", "desc": "Saúde bucal, limpeza, tratamento de canal e cáries."},
-        {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia", "icon": "fi fi-rr-ear", "desc": "Tratamento de ouvido, nariz, garganta e labirintite."}
+        {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia", "icon": "fi fi-rr-ear", "desc": "Tratamento de ouvido, nariz, garganta e labirintite."},
+        {"id": "otorrino_teste", "nome": "Otorrino Teste", "icon": "fi fi-rr-ear", "desc": "Especialidade de teste de otorrinolaringologia."}
     ]
     cur.execute("INSERT OR IGNORE INTO settings (chave, valor) VALUES ('portal_especialidades', ?)", (json.dumps(especialidades_padrao),))
+
+    # Garantir que a especialidade de teste exista caso já estivesse no settings
+    cur.execute("SELECT valor FROM settings WHERE chave = 'portal_especialidades'")
+    row = cur.fetchone()
+    if row:
+        try:
+            val = json.loads(row[0])
+            if not any(item['id'] == 'otorrino_teste' for item in val):
+                val.append({"id": "otorrino_teste", "nome": "Otorrino Teste", "icon": "fi fi-rr-ear", "desc": "Especialidade de teste de otorrinolaringologia."})
+                cur.execute("UPDATE settings SET valor = ? WHERE chave = 'portal_especialidades'", (json.dumps(val),))
+        except Exception as e:
+            print("Erro ao atualizar portal_especialidades:", e)
 
 
     # Seed de campanhas reais se a tabela estiver vazia

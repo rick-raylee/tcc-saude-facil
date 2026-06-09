@@ -199,16 +199,30 @@
                     <h2 style="margin:0;"><i class="fi fi-rr-chart-histogram"></i>  Painel de Controle - <span id="dash-tipo-atendimento"
                             style="color: var(--sus-blue-light); font-weight: normal;">Carregando...</span></h2>
                     
-                    <!-- Toggle Presença Presencial (Elite UI) -->
-                    <div id="presenca-presencial-container" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.9); padding: 8px 18px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
-                        <span style="font-weight: bold; font-size: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-                            <i class="fi fi-rr-hospital" style="color: #004b82; font-size: 1.1rem;"></i> Meu Status Presencial:
-                        </span>
-                        <label class="switch-premium">
-                            <input type="checkbox" id="check-presenca-presencial" onchange="togglePresencaPresencial(this)">
-                            <span class="slider-premium"></span>
-                        </label>
-                        <span id="label-presenca-status" style="font-size: 0.85rem; font-weight: 800; color: #dc3545; min-width: 60px;">AUSENTE</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                        <!-- Toggle Presença Presencial (Elite UI) -->
+                        <div id="presenca-presencial-container" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.9); padding: 8px 18px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
+                            <span style="font-weight: bold; font-size: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                                <i class="fi fi-rr-hospital" style="color: #004b82; font-size: 1.1rem;"></i> Meu Status Presencial:
+                            </span>
+                            <label class="switch-premium">
+                                <input type="checkbox" id="check-presenca-presencial" onchange="togglePresencaPresencial(this)">
+                                <span class="slider-premium"></span>
+                            </label>
+                            <span id="label-presenca-status" style="font-size: 0.85rem; font-weight: 800; color: #dc3545; min-width: 60px;">AUSENTE</span>
+                        </div>
+
+                        <!-- Toggle Atendimento Amanhã (New Feature) -->
+                        <div id="atendimento-amanha-container" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.9); padding: 8px 18px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
+                            <span style="font-weight: bold; font-size: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                                <i class="fi fi-rr-calendar" style="color: #004b82; font-size: 1.1rem;"></i> Atendimento Amanhã:
+                            </span>
+                            <label class="switch-premium">
+                                <input type="checkbox" id="check-atendimento-amanha" onchange="toggleAtendimentoAmanha(this)">
+                                <span class="slider-premium"></span>
+                            </label>
+                            <span id="label-atendimento-amanha-status" style="font-size: 0.85rem; font-weight: 800; color: #dc3545; min-width: 60px;">NÃO</span>
+                        </div>
                     </div>
                 </div>
 

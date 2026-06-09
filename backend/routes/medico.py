@@ -63,13 +63,18 @@ def resumo():
         hoje = datetime.now().strftime('%Y-%m-%d')
 
         # Tipo de Atendimento do Médico
-        cur.execute("SELECT tipo_atendimento, presencial_ativo FROM medico_info WHERE usuario_id = ?", (medico_id,))
+        cur.execute("SELECT tipo_atendimento, presencial_ativo, atende_amanha FROM medico_info WHERE usuario_id = ?", (medico_id,))
         medInfo = cur.fetchone()
         tipo_atendimento = medInfo['tipo_atendimento'] if medInfo else 'presencial'
         presencial_ativo = False
+        atende_amanha = True
         if medInfo:
             try:
                 presencial_ativo = bool(medInfo['presencial_ativo'])
+            except Exception:
+                pass
+            try:
+                atende_amanha = bool(medInfo['atende_amanha']) if medInfo['atende_amanha'] is not None else True
             except Exception:
                 pass
 
@@ -116,6 +121,7 @@ def resumo():
         return jsonify({
             'tipo_atendimento': tipo_atendimento,
             'presencial_ativo': presencial_ativo,
+            'atende_amanha': atende_amanha,
             'consultasHoje': hoje_count,
             'confirmadas': total_confirmadas,
             'aguardando': aguardando,
@@ -498,28 +504,28 @@ def listar_medicos():
             esp_lower = especialidade.lower()
             if esp_lower in ['cardiologia', 'cardiologista']:
                 cur.execute("""
-                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
+                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo, m.atende_amanha
                     FROM usuarios u
                     JOIN medico_info m ON m.usuario_id = u.id
                     WHERE u.tipo = 'medico' AND (m.especialidade = 'Cardiologia' OR m.especialidade = 'Cardiologista')
                 """)
             elif esp_lower in ['clínica geral', 'clinico geral', 'clínico geral', 'clinica geral']:
                 cur.execute("""
-                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
+                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo, m.atende_amanha
                     FROM usuarios u
                     JOIN medico_info m ON m.usuario_id = u.id
                     WHERE u.tipo = 'medico' AND (m.especialidade = 'Clínica Geral' OR m.especialidade = 'Clínico Geral' OR m.especialidade = 'Clinica Geral')
                 """)
             else:
                 cur.execute("""
-                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
+                    SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo, m.atende_amanha
                     FROM usuarios u
                     JOIN medico_info m ON m.usuario_id = u.id
                     WHERE u.tipo = 'medico' AND m.especialidade = ?
                 """, (especialidade,))
         else:
             cur.execute("""
-                SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo
+                SELECT u.id, u.nome, m.crm, m.especialidade, m.atende_telemedicina, m.presencial_ativo, m.atende_amanha
                 FROM usuarios u
                 JOIN medico_info m ON m.usuario_id = u.id
                 WHERE u.tipo = 'medico'
@@ -533,10 +539,14 @@ def listar_medicos():
             pres_ativo = False
             if 'presencial_ativo' in r.keys():
                 pres_ativo = bool(r['presencial_ativo'])
+            atende_amanha = True
+            if 'atende_amanha' in r.keys() and r['atende_amanha'] is not None:
+                atende_amanha = bool(r['atende_amanha'])
             lista_medicos.append({
                 'id': r['id'], 'nome': r['nome'], 'crm': r['crm'],
                 'especialidade': r['especialidade'], 'telemedicina': bool(r['atende_telemedicina']),
-                'presencial_ativo': pres_ativo
+                'presencial_ativo': pres_ativo,
+                'atende_amanha': atende_amanha
             })
         return jsonify(lista_medicos)
     except Exception as e:
@@ -596,6 +606,48 @@ def alterar_presenca():
         db.commit()
         db.close()
         return jsonify({'sucesso': True, 'presencial_ativo': bool(presencial_ativo)})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+# ── ALTERAR SE ATENDE AMANHÃ ───────────────────────────────────
+@medico_bp.route('/api/medico/presenca-amanha', methods=['POST'])
+def alterar_presenca_amanha():
+    from app import get_db_connection
+    medico_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not medico_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    data = request.get_json() or {}
+    atende_amanha = data.get('atende_amanha')
+
+    if atende_amanha is None:
+        return jsonify({'erro': 'Status de atendimento para amanhã não informado'}), 400
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+
+        # Garantir que a linha de medico_info existe
+        cur.execute("SELECT id FROM medico_info WHERE usuario_id = ?", (medico_id,))
+        row = cur.fetchone()
+        
+        status_num = 1 if atende_amanha else 0
+        if not row:
+            cur.execute("""
+                INSERT INTO medico_info (usuario_id, atende_amanha, tipo_atendimento) 
+                VALUES (?, ?, 'presencial')
+            """, (medico_id, status_num))
+        else:
+            cur.execute("""
+                UPDATE medico_info 
+                SET atende_amanha = ? 
+                WHERE usuario_id = ?
+            """, (status_num, medico_id))
+
+        db.commit()
+        db.close()
+        return jsonify({'sucesso': True, 'atende_amanha': bool(atende_amanha)})
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 

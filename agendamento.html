@@ -195,14 +195,30 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>📆 Data</label>
-                        <input type="date" id="data-agendamento">
+                    <div class="form-group calendar-field-group" style="flex: 2;">
+                        <label><i class="fi fi-rr-calendar"></i> Data da Consulta</label>
+                        <input type="hidden" id="data-agendamento">
+                        <div id="calendar-container" class="calendar-wrapper">
+                            <div class="calendar-header">
+                                <button type="button" class="btn-cal-nav" onclick="navegarMes(-1)">‹</button>
+                                <span id="calendar-month-year" class="calendar-title">Carregando...</span>
+                                <button type="button" class="btn-cal-nav" onclick="navegarMes(1)">›</button>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                            </div>
+                            <div id="calendar-days" class="calendar-days-grid"></div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>🕐 Horário</label>
+                    <div class="form-group" style="flex: 1;">
+                        <label><i class="fi fi-rr-clock"></i> Horário</label>
                         <input type="time" id="horario-agendamento">
+                        
+                        <!-- Status de Disponibilidade Médico -->
+                        <div id="status-medico-container" style="margin-top: 15px; padding: 12px; border-radius: 12px; font-size: 0.85rem; display: none; border: 1px solid transparent;">
+                            <span id="status-medico-texto" style="font-weight: bold; display: flex; align-items: center; gap: 6px;"></span>
+                        </div>
                     </div>
                 </div>
 
@@ -346,6 +362,7 @@
                     }
                 }
             }
+            inicializarCalendario();
         });
 
         async function carregarPlantaoPresencial() {
@@ -520,7 +537,8 @@
                     {"id": "nutricao", "nome": "Nutrição"},
                     {"id": "fisioterapia", "nome": "Fisioterapia"},
                     {"id": "odontologia", "nome": "Odontologia"},
-                    {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia"}
+                    {"id": "otorrinolaringologia", "nome": "Otorrinolaringologia"},
+                    {"id": "otorrino_teste", "nome": "Otorrino Teste"}
                 ];
             }
 
@@ -546,10 +564,18 @@
                         const option = document.createElement('option');
                         option.value = m.id;
                         option.textContent = `Dr(a). ${m.nome} (CRM: ${m.crm || 'N/A'})`;
+                        option.dataset.atendeAmanha = m.hasOwnProperty('atende_amanha') ? m.atende_amanha : true;
                         medicoSelect.appendChild(option);
                     });
                 }
                 medicoGroup.style.display = 'block';
+
+                if (typeof renderizarCalendario === 'function') {
+                    renderizarCalendario();
+                }
+                if (typeof atualizarStatusInfoMedico === 'function') {
+                    atualizarStatusInfoMedico();
+                }
             } catch (err) {
                 console.error("Erro ao carregar médicos:", err);
             }
@@ -774,6 +800,213 @@ Obrigado por utilizar o Portal Saúde Digital!`;
                     title: 'Erro ao Salvar Agendamento',
                     text: err.message || 'Não foi possível salvar a consulta no servidor. Verifique sua conexão e tente novamente.'
                 });
+            }
+        }
+
+        // Lógica do Calendário Interativo Premium
+        let dataAtualCalendario = new Date();
+        let dataSelecionadaCalendario = null;
+
+        function inicializarCalendario() {
+            renderizarCalendario();
+            
+            // Ouvir mudança no médico selecionado para atualizar o calendário
+            const medicoSelect = document.getElementById('medico-select');
+            if (medicoSelect) {
+                medicoSelect.addEventListener('change', () => {
+                    renderizarCalendario();
+                    validarDisponibilidadeDataMedico();
+                    atualizarStatusInfoMedico();
+                });
+            }
+            
+            // Ouvir mudança no tipo/modalidade/especialidade para atualizar o status do médico
+            const especialidadeSelect = document.getElementById('especialidade');
+            if (especialidadeSelect) {
+                especialidadeSelect.addEventListener('change', () => {
+                    setTimeout(() => {
+                        atualizarStatusInfoMedico();
+                    }, 500); // Dar tempo para popular os médicos
+                });
+            }
+        }
+
+        function renderizarCalendario() {
+            const containerDias = document.getElementById('calendar-days');
+            const tituloMesAno = document.getElementById('calendar-month-year');
+            if (!containerDias || !tituloMesAno) return;
+
+            const ano = dataAtualCalendario.getFullYear();
+            const mes = dataAtualCalendario.getMonth(); // 0-indexed
+
+            const nomesMeses = [
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            ];
+            tituloMesAno.textContent = `${nomesMeses[mes]} ${ano}`;
+
+            containerDias.innerHTML = '';
+
+            // Primeiro dia do mês
+            const primeiroDiaMes = new Date(ano, mes, 1);
+            const diaSemanaInicial = primeiroDiaMes.getDay(); // 0 (Dom) a 6 (Sáb)
+
+            // Quantidade de dias no mês
+            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+
+            // Slots vazios para dias da semana anteriores ao início do mês
+            for (let i = 0; i < diaSemanaInicial; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'calendar-day-empty';
+                containerDias.appendChild(emptyDiv);
+            }
+
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+
+            const amanha = new Date(hoje);
+            amanha.setDate(hoje.getDate() + 1);
+            const amanhaStr = `${amanha.getFullYear()}-${String(amanha.getMonth() + 1).padStart(2, '0')}-${String(amanha.getDate()).padStart(2, '0')}`;
+
+            // Obter médico selecionado e status de atende amanhã
+            const medicoSelect = document.getElementById('medico-select');
+            let atendeAmanha = true;
+            let medicoNome = '';
+            if (medicoSelect && medicoSelect.selectedIndex >= 0 && medicoSelect.value) {
+                const opt = medicoSelect.options[medicoSelect.selectedIndex];
+                atendeAmanha = opt.dataset.atendeAmanha !== 'false' && opt.dataset.atendeAmanha !== '0';
+                medicoNome = opt.text.replace(/ \((CRM:.*?)\)/, '');
+            }
+
+            // Gerar botões para cada dia do mês
+            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
+                const dataDia = new Date(ano, mes, dia);
+                const dataDiaStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'calendar-day-btn';
+                btn.textContent = dia;
+
+                // Desabilitar dias retroativos (anteriores a hoje)
+                if (dataDia < hoje) {
+                    btn.disabled = true;
+                    btn.classList.add('disabled');
+                } else {
+                    // Tratar dia de amanhã
+                    if (dataDiaStr === amanhaStr) {
+                        btn.classList.add('tomorrow-day');
+                        if (medicoSelect && medicoSelect.value) {
+                            if (atendeAmanha) {
+                                btn.classList.add('available-tomorrow');
+                                btn.title = `${medicoNome} atende amanhã!`;
+                            } else {
+                                btn.classList.add('unavailable-tomorrow');
+                                btn.title = `${medicoNome} NÃO atende amanhã.`;
+                            }
+                        }
+                    }
+
+                    // Destacar dia selecionado
+                    const valInput = document.getElementById('data-agendamento').value;
+                    if (valInput === dataDiaStr) {
+                        btn.classList.add('active');
+                        dataSelecionadaCalendario = dataDiaStr;
+                    }
+
+                    btn.addEventListener('click', () => {
+                        selecionarDia(dataDiaStr, btn);
+                    });
+                }
+
+                containerDias.appendChild(btn);
+            }
+        }
+
+        function navegarMes(direcao) {
+            dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() + direcao);
+            renderizarCalendario();
+        }
+
+        function selecionarDia(dataStr, btnElement) {
+            // Remover classe ativa de outros dias
+            const diasAtivos = document.querySelectorAll('.calendar-day-btn.active');
+            diasAtivos.forEach(d => d.classList.remove('active'));
+
+            // Definir valor no input hidden
+            document.getElementById('data-agendamento').value = dataStr;
+            btnElement.classList.add('active');
+            dataSelecionadaCalendario = dataStr;
+
+            // Validar disponibilidade do médico para amanhã
+            validarDisponibilidadeDataMedico();
+            atualizarStatusInfoMedico();
+        }
+
+        function validarDisponibilidadeDataMedico() {
+            const dataVal = document.getElementById('data-agendamento').value;
+            const medicoSelect = document.getElementById('medico-select');
+            const medicoId = medicoSelect ? medicoSelect.value : '';
+            
+            if (!dataVal || !medicoId) return true;
+            
+            // Obter data de amanhã no fuso local (Formato YYYY-MM-DD)
+            const hoje = new Date();
+            const amanha = new Date(hoje);
+            amanha.setDate(hoje.getDate() + 1);
+            const amanhaStr = `${amanha.getFullYear()}-${String(amanha.getMonth() + 1).padStart(2, '0')}-${String(amanha.getDate()).padStart(2, '0')}`;
+            
+            if (dataVal === amanhaStr) {
+                const selectedOption = medicoSelect.options[medicoSelect.selectedIndex];
+                const atendeAmanha = selectedOption ? selectedOption.dataset.atendeAmanha : 'true';
+                
+                if (atendeAmanha === 'false' || atendeAmanha === '0') {
+                    const medicoNome = selectedOption ? selectedOption.text.replace(/ \((CRM:.*?)\)/, '') : 'O médico';
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Profissional Indisponível Amanhã',
+                        html: `O(a) <strong>${medicoNome}</strong> informou que não estará atendendo amanhã.<br><br>Por favor, selecione outra data no calendário ou selecione outro profissional.`,
+                        confirmButtonColor: '#004b82'
+                    });
+                    
+                    // Limpar data selecionada
+                    document.getElementById('data-agendamento').value = '';
+                    const activeDay = document.querySelector('.calendar-day-btn.active');
+                    if (activeDay) activeDay.classList.remove('active');
+                    dataSelecionadaCalendario = null;
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function atualizarStatusInfoMedico() {
+            const container = document.getElementById('status-medico-container');
+            const texto = document.getElementById('status-medico-texto');
+            const medicoSelect = document.getElementById('medico-select');
+            
+            if (!container || !texto) return;
+
+            if (!medicoSelect || !medicoSelect.value) {
+                container.style.display = 'none';
+                return;
+            }
+
+            const selectedOption = medicoSelect.options[medicoSelect.selectedIndex];
+            const atendeAmanha = selectedOption ? selectedOption.dataset.atendeAmanha !== 'false' && selectedOption.dataset.atendeAmanha !== '0' : true;
+            const medicoNome = selectedOption ? selectedOption.text.replace(/ \((CRM:.*?)\)/, '') : 'Médico';
+
+            container.style.display = 'block';
+            if (atendeAmanha) {
+                container.style.background = '#e8f5e9';
+                container.style.borderColor = '#c8e6c9';
+                texto.style.color = '#2e7d32';
+                texto.innerHTML = `<i class="fi fi-rr-check-circle" style="font-size: 1.1rem;"></i> ${medicoNome} atenderá normalmente amanhã.`;
+            } else {
+                container.style.background = '#ffebee';
+                container.style.borderColor = '#ffcdd2';
+                texto.style.color = '#c62828';
+                texto.innerHTML = `<i class="fi fi-rr-cross-circle" style="font-size: 1.1rem;"></i> ${medicoNome} NÃO atenderá amanhã.`;
             }
         }
     </script>

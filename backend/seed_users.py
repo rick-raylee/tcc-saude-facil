@@ -23,7 +23,10 @@ users = [
     {"nome": "Mariana (Paciente Virtual)", "cpf": "00000000022", "tipo": "paciente", "senha": "123", "sus": "700000000000001"},
     
     # Perfil de TI
-    {"nome": "Suporte TI", "cpf": "55555555555", "tipo": "ti", "senha": "123"}
+    {"nome": "Suporte TI", "cpf": "55555555555", "tipo": "ti", "senha": "123"},
+    
+    # Médico Otorrino Teste
+    {"nome": "MÉDICO OTORRINO TESTE", "cpf": "77777777777", "tipo": "medico", "senha": "123", "crm": "CRM/PR-77777", "especialidade": "Otorrino Teste", "tipo_atendimento": "presencial", "atende_telemedicina": 0}
 ]
 
 def seed():

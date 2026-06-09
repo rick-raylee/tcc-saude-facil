@@ -695,6 +695,22 @@ async function carregarDashboard() {
         }
     }
 
+    // Atualizar Switch de Atendimento Amanhã
+    const checkAmanha = document.getElementById('check-atendimento-amanha');
+    const labelAmanha = document.getElementById('label-atendimento-amanha-status');
+    if (checkAmanha) {
+        checkAmanha.checked = !!dados.atende_amanha;
+        if (labelAmanha) {
+            if (dados.atende_amanha) {
+                labelAmanha.textContent = 'SIM';
+                labelAmanha.style.color = '#28a745';
+            } else {
+                labelAmanha.textContent = 'NÃO';
+                labelAmanha.style.color = '#dc3545';
+            }
+        }
+    }
+
     // Atualizar Doenças
     const listaDoencas = document.getElementById('dash-doencas-lista');
     if (listaDoencas && dados.doencas_frequentes) {
@@ -1849,6 +1865,66 @@ window.togglePresencaPresencial = async function(checkbox) {
                 icon: 'error',
                 title: 'Erro de Conexão',
                 text: 'Não foi possível atualizar seu status de presença no servidor.'
+            });
+        }
+    }
+};
+
+// ── CONTROLE DE ATENDIMENTO DE AMANHÃ REAL-TIME ──────────────────
+window.toggleAtendimentoAmanha = async function(checkbox) {
+    const label = document.getElementById('label-atendimento-amanha-status');
+    const isChecked = checkbox.checked;
+    
+    if (label) {
+        if (isChecked) {
+            label.textContent = 'SIM';
+            label.style.color = '#28a745';
+        } else {
+            label.textContent = 'NÃO';
+            label.style.color = '#dc3545';
+        }
+    }
+    
+    if (typeof API !== 'undefined') {
+        try {
+            const resp = await API.atualizarAtendimentoAmanha(isChecked);
+            if (resp && resp.sucesso) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    background: '#0f172a',
+                    color: '#f8fafc',
+                    customClass: {
+                        popup: 'swal-premium-toast'
+                    },
+                    title: isChecked 
+                        ? `<div style="display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;">
+                             <i class="fi fi-rr-check-circle" style="color: #00ff88; font-size: 1.15rem; display: flex; align-items: center;"></i>
+                             <span>Disponibilidade para amanhã ativada!</span>
+                           </div>`
+                        : `<div style="display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;">
+                             <i class="fi fi-rr-cross-circle" style="color: #ff7675; font-size: 1.15rem; display: flex; align-items: center;"></i>
+                             <span>Disponibilidade para amanhã desativada!</span>
+                           </div>`
+                });
+            } else {
+                throw new Error(resp.erro || 'Falha ao atualizar.');
+            }
+        } catch (err) {
+            console.error(err);
+            // Reverter em caso de falha
+            checkbox.checked = !isChecked;
+            if (label) {
+                label.textContent = !isChecked ? 'SIM' : 'NÃO';
+                label.style.color = !isChecked ? '#28a745' : '#dc3545';
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro de Conexão',
+                text: 'Não foi possível atualizar seu status de atendimento para amanhã.'
             });
         }
     }
