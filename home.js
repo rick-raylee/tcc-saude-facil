@@ -1175,6 +1175,89 @@ async function carregarCampanhasPublicas() {
             if (respNotif && !respNotif.erro) {
                 // Filtra apenas as não lidas para o badge, mas mostra todas no dropdown
                 notificacoesPessoais = respNotif;
+
+                // Interceptar lembretes de consultas de amanhã para confirmação ativa do paciente
+                const lembrete = notificacoesPessoais.find(n => !n.lida && n.mensagem.includes("Lembrete: Você tem uma consulta amanhã"));
+                if (lembrete) {
+                    const match = lembrete.mensagem.match(/\[ID Agendamento:\s*(\d+)\]/);
+                    if (match) {
+                        const consultaId = parseInt(match[1]);
+                        const textoExibicao = lembrete.mensagem.replace(/\[ID Agendamento:\s*\d+\]\s*/, '');
+                        
+                        // Solicitar permissão e exibir notificação no navegador (Web/Mobile)
+                        if (typeof Notification !== 'undefined') {
+                            if (Notification.permission === 'default') {
+                                Notification.requestPermission();
+                            }
+                            if (Notification.permission === 'granted') {
+                                new Notification("Lembrete de Consulta", {
+                                    body: "Por favor, confirme sua presença para a consulta de amanhã no Portal Saúde Fácil!",
+                                    icon: "logo-icon.png"
+                                });
+                            }
+                        }
+                        
+                        // Exibir SweetAlert customizado
+                        if (!sessionStorage.getItem('lembrete_ignorado_' + consultaId)) {
+                            setTimeout(() => {
+                                Swal.fire({
+                                    title: '⚠️ Confirmação de Presença',
+                                    html: `<p style="font-size: 0.95rem; line-height: 1.5; color: #334155;">${textoExibicao}</p><br><small style="color: #64748b;">Atenção: Caso você não confirme sua presença ou cancele, sua vaga na fila poderá ser liberada para outros pacientes.</small>`,
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    showDenyButton: true,
+                                    confirmButtonText: '✅ Confirmar Presença',
+                                    denyButtonText: '❌ Cancelar Agendamento',
+                                    cancelButtonText: '⏳ Lembrar Mais Tarde',
+                                    confirmButtonColor: '#28a745',
+                                    denyButtonColor: '#dc3545',
+                                    cancelButtonColor: '#6c757d',
+                                    allowOutsideClick: false
+                                }).then(async (result) => {
+                                    if (result.isConfirmed) {
+                                        try {
+                                            const r = await API.confirmarPresencaAmanha(consultaId, true);
+                                            if (r && r.sucesso) {
+                                                Swal.fire('Confirmado!', 'Sua presença foi confirmada com sucesso.', 'success');
+                                                await API.lerNotificacao(lembrete.id);
+                                                carregarCampanhasENotificacoes();
+                                            }
+                                        } catch (err) {
+                                            console.error(err);
+                                        }
+                                    } else if (result.isDenied) {
+                                        const confirmCancel = await Swal.fire({
+                                            title: 'Cancelar Agendamento?',
+                                            text: 'Você tem certeza que deseja cancelar esta consulta? A vaga será liberada de imediato para a fila.',
+                                            icon: 'question',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Sim, cancelar',
+                                            cancelButtonText: 'Não, manter',
+                                            confirmButtonColor: '#dc3545'
+                                        });
+                                        if (confirmCancel.isConfirmed) {
+                                            try {
+                                                const r = await API.confirmarPresencaAmanha(consultaId, false);
+                                                if (r && r.sucesso) {
+                                                    Swal.fire('Cancelado!', 'Seu agendamento foi cancelado e a vaga liberada.', 'success');
+                                                    await API.lerNotificacao(lembrete.id);
+                                                    carregarCampanhasENotificacoes();
+                                                }
+                                            } catch (err) {
+                                                console.error(err);
+                                            }
+                                        } else {
+                                            sessionStorage.removeItem('lembrete_ignorado_' + consultaId);
+                                            carregarCampanhasENotificacoes();
+                                        }
+                                    } else {
+                                        sessionStorage.setItem('lembrete_ignorado_' + consultaId, 'true');
+                                    }
+                                });
+                            }, 1000);
+                        }
+                    }
+                }
             }
         } catch (e) { console.warn('API (Notificações) indisponível.'); }
     }

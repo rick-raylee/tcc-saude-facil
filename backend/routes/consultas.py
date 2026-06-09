@@ -343,12 +343,55 @@ def listar_msgs(consulta_id):
 #  NOTIFICAÇÕES
 # ══════════════════════════════════════════════════════════════════
 
+def check_and_create_tomorrow_reminders(usuario_id):
+    from app import get_db_connection
+    from datetime import datetime, timedelta
+    
+    # Obter data de amanhã no fuso do servidor (formato YYYY-MM-DD)
+    amanha = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    db = get_db_connection()
+    cur = db.cursor()
+    
+    # Buscar consultas do paciente para amanhã que não foram confirmadas (confirmado_presenca = 0)
+    cur.execute("""
+        SELECT c.id, c.data, c.hora, u.nome AS medico_nome
+        FROM consultas c
+        JOIN usuarios u ON c.medico_id = u.id
+        WHERE c.paciente_id = ? AND c.data = ? AND c.status IN ('confirmada', 'agendada') AND c.confirmado_presenca = 0
+    """, (usuario_id, amanha))
+    
+    consultas_amanha = cur.fetchall()
+    
+    for c in consultas_amanha:
+        consulta_id = c['id']
+        medico_nome = c['medico_nome']
+        data_fmt = datetime.strptime(c['data'], '%Y-%m-%d').strftime('%d/%m/%Y')
+        hora = c['hora']
+        
+        # Formato contendo o ID de referência para o front resgatar e usar
+        msg = f"[ID Agendamento: {consulta_id}] Lembrete: Você tem uma consulta amanhã ({data_fmt} às {hora}) com Dr(a). {medico_nome}. Confirme sua presença para manter a sua vaga na fila!"
+        
+        # Verificar se já existe essa notificação para evitar duplicações
+        cur.execute("SELECT id FROM notificacoes WHERE usuario_id = ? AND mensagem = ?", (usuario_id, msg))
+        if not cur.fetchone():
+            cur.execute("INSERT INTO notificacoes (usuario_id, mensagem) VALUES (?, ?)", (usuario_id, msg))
+            
+    db.commit()
+    db.close()
+
 @consultas_bp.route('/api/notificacoes', methods=['GET'])
 def listar_notificacoes():
     from app import get_db_connection
-    usuario_id = session.get('usuario_id')
+    usuario_id = session.get('usuario_id') or request.headers.get('X-User-Id')
     if not usuario_id:
         return jsonify([])
+
+    # Auto check reminders for tomorrow
+    try:
+        check_and_create_tomorrow_reminders(usuario_id)
+    except Exception as e:
+        print("Erro ao verificar lembretes de amanhã:", e)
 
     try:
         db = get_db_connection()
@@ -512,6 +555,46 @@ def confirmar_paciente(consulta_id):
         db.commit()
         db.close()
         return jsonify({'sucesso': True})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+# ── CONFIRMAR OU DECLINAR PRESENÇA DO DIA SEGUINTE ──────────────────
+@consultas_bp.route('/api/consultas/<int:consulta_id>/confirmar-presenca', methods=['POST'])
+def confirmar_presenca_amanha(consulta_id):
+    from app import get_db_connection
+    paciente_id = session.get('usuario_id') or request.headers.get('X-User-Id')
+    if not paciente_id:
+        return jsonify({'erro': 'Não autenticado'}), 401
+
+    data = request.get_json() or {}
+    confirmado = data.get('confirmado', True)
+
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+
+        # Buscar consulta
+        cur.execute("SELECT paciente_id, status FROM consultas WHERE id = ?", (consulta_id,))
+        c = cur.fetchone()
+        if not c:
+            db.close()
+            return jsonify({'erro': 'Consulta não encontrada'}), 404
+
+        if str(c['paciente_id']) != str(paciente_id):
+            db.close()
+            return jsonify({'erro': 'Acesso negado'}), 403
+
+        if confirmado:
+            cur.execute("UPDATE consultas SET confirmado_presenca = 1 WHERE id = ?", (consulta_id,))
+            msg_ret = "Presença confirmada com sucesso!"
+        else:
+            cur.execute("UPDATE consultas SET status = 'cancelada' WHERE id = ?", (consulta_id,))
+            msg_ret = "Consulta cancelada. A vaga foi liberada para outros pacientes."
+
+        db.commit()
+        db.close()
+        return jsonify({'sucesso': True, 'msg': msg_ret})
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 

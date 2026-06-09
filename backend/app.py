@@ -263,7 +263,7 @@ def migrar_schema_admin():
     # Migração para a tabela consultas
     cur.execute("PRAGMA table_info(consultas)")
     colunas_consultas = {row[1] for row in cur.fetchall()}
-    for col_nome, col_tipo in [('confirmacao_paciente', 'INTEGER DEFAULT 0'), ('confirmacao_medico', 'INTEGER DEFAULT 0'), ('encaminhado_para_medico_id', 'INTEGER')]:
+    for col_nome, col_tipo in [('confirmacao_paciente', 'INTEGER DEFAULT 0'), ('confirmacao_medico', 'INTEGER DEFAULT 0'), ('encaminhado_para_medico_id', 'INTEGER'), ('confirmado_presenca', 'INTEGER DEFAULT 0')]:
         if col_nome not in colunas_consultas:
             cur.execute(f"ALTER TABLE consultas ADD COLUMN {col_nome} {col_tipo}")
 

@@ -135,6 +135,7 @@ const API = {
     atualizarAtendimentoAmanha: (status) => apiCall('/api/medico/presenca-amanha', 'POST', { atende_amanha: status }),
     checkinPresencialConsulta: (id) => apiCall(`/api/consultas/${id}/checkin-presencial`, 'POST'),
     confirmarConsultaPaciente: (id) => apiCall(`/api/consultas/${id}/confirmar-paciente`, 'POST'),
+    confirmarPresencaAmanha: (id, confirmado) => apiCall(`/api/consultas/${id}/confirmar-presenca`, 'POST', { confirmado: confirmado }),
 
     // Enfermeiro
     buscarPacienteEnf: (cpf) => apiCall(`/api/enfermeiro/buscar-paciente?cpf=${cpf}`),
