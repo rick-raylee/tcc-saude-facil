@@ -390,22 +390,21 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         transform: translateX(3px) !important;
     }
 
-    /* Floating centered popup notifications on mobile */
+    /* Accordion Dropdown style for notifications on mobile */
     .nav-notif-dropdown {
-        position: fixed !important;
-        top: 90px !important;
-        left: 5% !important;
-        right: 5% !important;
-        width: 90% !important;
+        position: static !important;
+        width: 100% !important;
         max-width: none !important;
-        background: rgba(255, 255, 255, 0.98) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3) !important;
-        border-radius: 18px !important;
-        z-index: 3000 !important;
-        transform-origin: top center !important;
+        background: #f8fafc !important; /* Slightly darker background to distinguish as sub-menu */
+        border: none !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important; /* Inner shadow for depth */
+        border-radius: 0 !important;
+        padding: 20px 24px !important;
+        z-index: 1999 !important;
+        box-sizing: border-box !important;
+        max-height: 380px !important;
+        overflow-y: auto !important;
     }
 
     /* Auth Actions & Search dropdown below links */
