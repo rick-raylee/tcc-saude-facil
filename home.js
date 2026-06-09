@@ -1131,33 +1131,62 @@ async function carregarCampanhasPublicas() {
     const welcomeContainer = document.getElementById('welcome-card-container');
     const homeAlertContainer = document.getElementById('home-campanhas-alert');
 
-    // Injetar botão Fechar dinamicamente no cabeçalho do dropdown
+    // Injetar botões dinamicamente no cabeçalho do dropdown
     const header = document.querySelector('.nav-notif-header');
-    if (header && !header.querySelector('.btn-close-notif')) {
-        const limparBtn = header.querySelector('button');
-        if (limparBtn) {
-            const actionsContainer = document.createElement('div');
-            actionsContainer.style.cssText = 'display: flex; gap: 12px; align-items: center;';
-            
-            limparBtn.parentNode.insertBefore(actionsContainer, limparBtn);
-            actionsContainer.appendChild(limparBtn);
-            
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'btn-close-notif';
-            closeBtn.innerHTML = '<i class="fi fi-rr-cross-small" style="font-size: 0.8rem; font-weight: bold; display: flex;"></i>';
-            closeBtn.style.cssText = 'background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; padding: 0;';
-            closeBtn.title = 'Fechar';
-            closeBtn.onclick = (e) => {
-                e.stopPropagation();
-                const dropdown = document.getElementById('navNotifDropdown');
-                if (dropdown) dropdown.classList.remove('show');
-            };
-            
-            actionsContainer.appendChild(closeBtn);
-        }
+    if (header && !header.querySelector('.btn-mark-read')) {
+        header.innerHTML = '';
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = 'Avisos';
+        titleSpan.style.cssText = 'font-weight: 800; color: #004b82; font-size: 0.95rem;';
+        header.appendChild(titleSpan);
+        
+        const actionsContainer = document.createElement('div');
+        actionsContainer.style.cssText = 'display: flex; gap: 6px; align-items: center;';
+        
+        // Botão: Marcar todas como lidas
+        const markReadBtn = document.createElement('button');
+        markReadBtn.className = 'btn-mark-read';
+        markReadBtn.innerHTML = '<i class="fi fi-rr-check-double" style="margin-right: 3px; font-size: 0.75rem; vertical-align: middle;"></i>Lidas';
+        markReadBtn.style.cssText = 'background: rgba(0, 86, 172, 0.08); border: none; color: #0056ac; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center;';
+        markReadBtn.title = 'Marcar todas como lidas';
+        markReadBtn.onclick = async (e) => {
+            e.stopPropagation();
+            if (typeof window.marcarTodasLidas === 'function') {
+                await window.marcarTodasLidas();
+            }
+        };
+        actionsContainer.appendChild(markReadBtn);
+        
+        // Botão: Limpar Notificações
+        const limparBtn = document.createElement('button');
+        limparBtn.className = 'btn-clear-notif-header';
+        limparBtn.innerHTML = '<i class="fi fi-rr-trash" style="margin-right: 3px; font-size: 0.7rem; vertical-align: middle;"></i>Limpar';
+        limparBtn.style.cssText = 'background: rgba(108, 117, 125, 0.08); border: none; color: #6c757d; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center;';
+        limparBtn.title = 'Limpar Notificações';
+        limparBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await window.limparNotificacoes();
+        };
+        actionsContainer.appendChild(limparBtn);
+        
+        // Botão: Fechar
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'btn-close-notif';
+        closeBtn.innerHTML = '<i class="fi fi-rr-cross-small" style="font-size: 0.8rem; font-weight: bold; display: flex;"></i>';
+        closeBtn.style.cssText = 'background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; padding: 0;';
+        closeBtn.title = 'Fechar';
+        closeBtn.onclick = (e) => {
+            e.stopPropagation();
+            const dropdown = document.getElementById('navNotifDropdown');
+            if (dropdown) dropdown.classList.remove('show');
+        };
+        actionsContainer.appendChild(closeBtn);
+        
+        header.appendChild(actionsContainer);
     }
 
-    // Evitar que cliques dentro do conteúdo do dropdown fechem o modal (permitindo fechar no backdrop)
+    // Evitar que cliques dentro do conteúdo do dropdown fechem o modal
     const dropdownEl = document.getElementById('navNotifDropdown');
     if (dropdownEl) {
         const contentHeader = dropdownEl.querySelector('.nav-notif-header');
@@ -1422,6 +1451,23 @@ window.limparNotificacoes = async function() {
                 console.error('Erro ao ler notificação no limpar:', e);
             }
         }
+    }
+}
+
+window.marcarTodasLidas = async function() {
+    if (window.notificacoesCarregadas && window.notificacoesCarregadas.length > 0 && typeof API !== 'undefined') {
+        const unread = window.notificacoesCarregadas.filter(n => !n.lida);
+        for (const n of unread) {
+            try {
+                await API.lerNotificacao(n.id);
+            } catch (e) {
+                console.error('Erro ao ler notificação no marcar lidas:', e);
+            }
+        }
+    }
+    // Refresh to show updated read status
+    if (typeof carregarCampanhasPublicas === 'function') {
+        await carregarCampanhasPublicas();
     }
 }
 

@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="agendamento.css">
-    <link rel="stylesheet" href="responsive.css?v=20260609-1920">
+    <link rel="stylesheet" href="responsive.css?v=20260609-1935">
 
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -167,7 +167,7 @@
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="form-group-especialidade">
                     <label><i class="fi fi-rr-hospital"></i>  Especialidade</label>
                     <select id="especialidade" onchange="atualizarFiltroMedicos()">
                         <option value="">Selecione...</option>
@@ -230,6 +230,8 @@
                         <option value="ubs-coqueiral">UBS Coqueiral</option>
                         <option value="ubs-brasmadeira">UBS Brasmadeira</option>
                         <option value="ubs-periolo">UBS Periolo</option>
+                        <option value="clinica-saude-facil">Clínica Saúde Fácil</option>
+                        <option value="hospital-saude-facil">Hospital Geral Saúde Fácil</option>
                     </select>
                 </div>
 
@@ -300,8 +302,8 @@
          MODAL DE AUTENTICAÇÃO INTEGRADO (3D FLIP & MEDICAL NEON)
          ========================================================================= -->
     
-    <script src="api.js?v=20260419-1"></script>
-    <script src="home.js?v=20260609-1920"></script>
+    <script src="api.js?v=20260609-1935"></script>
+    <script src="home.js?v=20260609-1935"></script>
     <script>
         // Efeito de scroll na navbar
         window.addEventListener('scroll', function () {
@@ -495,10 +497,48 @@
             const modalidadeSel = document.getElementById('modalidade-atendimento').value;
             const medicoGroup = document.getElementById('form-group-medico');
             const medicoSelect = document.getElementById('medico-select');
+            const especialidadeGroup = document.getElementById('form-group-especialidade');
+            
+            if (tipoSel === 'vacina') {
+                // Ocultar campo de especialidade e exibir campo de profissional
+                if (especialidadeGroup) especialidadeGroup.style.display = 'none';
+                
+                try {
+                    if (typeof API === 'undefined') return;
+                    
+                    const enfermeiros = await API.listarEnfermeiros();
+                    medicoSelect.innerHTML = '<option value="">Selecione um(a) enfermeiro(a)...</option>';
+                    if (enfermeiros.length === 0) {
+                        medicoSelect.innerHTML = '<option value="">Nenhum(a) enfermeiro(a) disponível</option>';
+                    } else {
+                        enfermeiros.forEach(e => {
+                            const option = document.createElement('option');
+                            option.value = e.id;
+                            option.textContent = `Enf. ${e.nome} (COREN: ${e.coren || 'N/A'})`;
+                            option.dataset.atendeAmanha = true;
+                            medicoSelect.appendChild(option);
+                        });
+                    }
+                    medicoGroup.style.display = 'block';
+                    
+                    if (typeof renderizarCalendario === 'function') {
+                        renderizarCalendario();
+                    }
+                    if (typeof atualizarStatusInfoMedico === 'function') {
+                        atualizarStatusInfoMedico();
+                    }
+                } catch (err) {
+                    console.error("Erro ao carregar enfermeiros:", err);
+                }
+                return;
+            }
+            
+            // Para outros atendimentos, mostrar campo de especialidade
+            if (especialidadeGroup) especialidadeGroup.style.display = 'block';
             
             let espFiltrar = especialidadeSel;
-            if ((tipoSel === 'exame' || tipoSel === 'vacina') && !especialidadeSel) {
-                espFiltrar = 'clinico'; // Filtra por Clínico Geral por padrão para exames/vacinas
+            if (tipoSel === 'exame' && !especialidadeSel) {
+                espFiltrar = 'clinico'; // Filtra por Clínico Geral por padrão para exames
             }
             
             if (!espFiltrar) {
@@ -670,7 +710,13 @@ Obrigado por utilizar o Portal Saúde Digital!`;
             const observacoes = document.getElementById('observacoes').value;
             const medicoId = document.getElementById('medico-select').value;
 
-            if (!tipo || !especialidade || !data || !horario || !unidade) {
+            // Validar especialidade apenas se não for vacinação
+            let especialidadeValida = especialidade;
+            if (tipo === 'vacina') {
+                especialidadeValida = 'vacina';
+            }
+
+            if (!tipo || !especialidadeValida || !data || !horario || !unidade) {
                 Swal.fire({ icon: 'warning', title: 'Campos Obrigatórios', text: 'Por favor, preencha todos os campos obrigatórios para prosseguir com o agendamento.' });
                 return;
             }
@@ -685,11 +731,13 @@ Obrigado por utilizar o Portal Saúde Digital!`;
 
             // Map specialties to match DB format text
             const selectEspecialidade = document.getElementById('especialidade');
-            const especialidadeTexto = selectEspecialidade.options[selectEspecialidade.selectedIndex].text;
+            const especialidadeTexto = tipo === 'vacina' 
+                ? 'Vacinação' 
+                : selectEspecialidade.options[selectEspecialidade.selectedIndex].text;
 
             const selectMedico = document.getElementById('medico-select');
             const medicoNome = selectMedico && selectMedico.selectedIndex >= 0 && selectMedico.value
-                ? selectMedico.options[selectMedico.selectedIndex].text.replace(/ \((CRM:.*?)\)/, '') 
+                ? selectMedico.options[selectMedico.selectedIndex].text.replace(/ \((CRM|COREN):.*?\)/, '') 
                 : 'Profissional da Saúde';
 
             // Dados do Paciente (Recuperar da Sessão ou Mock)

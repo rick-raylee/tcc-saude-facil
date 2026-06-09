@@ -604,3 +604,33 @@ def atendimentos_hoje():
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
+
+# ── LISTAR ENFERMEIROS (para agendamento) ───────────────────────────
+@enfermeiro_bp.route('/api/enfermeiros', methods=['GET'])
+def listar_enfermeiros():
+    from app import get_db_connection
+    try:
+        db = get_db_connection()
+        cur = db.cursor()
+        cur.execute("""
+            SELECT u.id, u.nome, e.coren, e.funcao
+            FROM usuarios u
+            JOIN enfermeiro_info e ON e.usuario_id = u.id
+            WHERE u.tipo = 'enfermeiro'
+        """)
+        rows = cur.fetchall()
+        db.close()
+        
+        lista_enfermeiros = []
+        for r in rows:
+            lista_enfermeiros.append({
+                'id': r['id'],
+                'nome': r['nome'],
+                'coren': r['coren'],
+                'funcao': r['funcao']
+            })
+        return jsonify(lista_enfermeiros)
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+

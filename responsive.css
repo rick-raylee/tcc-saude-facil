@@ -390,44 +390,51 @@ body.page-duvidas .nav-links a[href="duvidas.html"] {
         transform: translateX(3px) !important;
     }
 
-    /* Centered Modal popup style for notifications on mobile */
+    /* Accordion dropdown style for notifications on mobile */
     .nav-notif-dropdown {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        width: 90% !important;
-        max-width: 420px !important;
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
         height: auto !important;
-        max-height: 75vh !important;
-        background: #ffffff !important;
-        border: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
-        border-radius: 24px !important;
-        padding: 24px !important;
-        z-index: 3000 !important;
+        max-height: 300px !important;
+        background: #f8fafc !important; /* Soft light background */
+        border: none !important;
+        border-top: 1px solid #e2e8f0 !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 15px 20px !important;
+        z-index: 100 !important;
         box-sizing: border-box !important;
         display: none !important; /* Controlled by .show class */
         flex-direction: column !important;
+        overflow-y: auto !important;
     }
 
     .nav-notif-dropdown.show {
         display: flex !important;
+        animation: slideDownMobile 0.3s ease-out !important;
     }
 
-    /* Full-screen dark backdrop overlay behind the modal */
+    /* Disable dark backdrop on mobile */
     .nav-notif-dropdown::before {
-        content: '' !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(15, 23, 42, 0.6) !important; /* Dark slate semi-transparent backdrop */
-        backdrop-filter: blur(4px) !important; /* Premium blur behind the modal */
-        -webkit-backdrop-filter: blur(4px) !important;
-        z-index: -1 !important;
-        pointer-events: auto !important;
+        display: none !important;
+    }
+
+    @keyframes slideDownMobile {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+            max-height: 0;
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 300px;
+        }
     }
 
     /* Auth Actions & Search dropdown below links */

@@ -2698,7 +2698,7 @@ footer {
 }
 
 .nav-notif-list {
-    max-height: 400px;
+    max-height: 250px;
     overflow-y: auto;
 }
 
@@ -2730,6 +2730,11 @@ footer {
     font-size: 0.85rem;
     color: #555;
     line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-notif-item small {
