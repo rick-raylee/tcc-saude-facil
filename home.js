@@ -1131,6 +1131,32 @@ async function carregarCampanhasPublicas() {
     const welcomeContainer = document.getElementById('welcome-card-container');
     const homeAlertContainer = document.getElementById('home-campanhas-alert');
 
+    // Injetar botão Fechar dinamicamente no cabeçalho do dropdown
+    const header = document.querySelector('.nav-notif-header');
+    if (header && !header.querySelector('.btn-close-notif')) {
+        const limparBtn = header.querySelector('button');
+        if (limparBtn) {
+            const actionsContainer = document.createElement('div');
+            actionsContainer.style.cssText = 'display: flex; gap: 12px; align-items: center;';
+            
+            limparBtn.parentNode.insertBefore(actionsContainer, limparBtn);
+            actionsContainer.appendChild(limparBtn);
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'btn-close-notif';
+            closeBtn.innerHTML = '<i class="fi fi-rr-cross-small" style="font-size: 0.8rem; font-weight: bold; display: flex;"></i>';
+            closeBtn.style.cssText = 'background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; padding: 0;';
+            closeBtn.title = 'Fechar';
+            closeBtn.onclick = (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('navNotifDropdown');
+                if (dropdown) dropdown.classList.remove('show');
+            };
+            
+            actionsContainer.appendChild(closeBtn);
+        }
+    }
+
     let campanhasAPI = [];
     let notificacoesPessoais = [];
     
@@ -1304,11 +1330,30 @@ window.limparNotificacoes = async function() {
     }
 }
 
-// Fechar ao clicar fora
-document.addEventListener('click', () => {
+// Fechar ao clicar ou tocar fora (suporta click e touchstart para mobile/responsivo)
+const fecharNotifDropdownOutside = (event) => {
     const dropdown = document.getElementById('navNotifDropdown');
-    if (dropdown) dropdown.classList.remove('show');
-});
+    const bellIcon = document.querySelector('.nav-bell-icon');
+    
+    if (dropdown && dropdown.classList.contains('show')) {
+        // Se o clique/toque não foi no dropdown nem no ícone do sino, fecha
+        if (!dropdown.contains(event.target) && (!bellIcon || !bellIcon.contains(event.target))) {
+            dropdown.classList.remove('show');
+        }
+    }
+};
+
+document.addEventListener('click', fecharNotifDropdownOutside);
+document.addEventListener('touchstart', fecharNotifDropdownOutside, { passive: true });
+
+// Sincronizar com o menu hambúrguer para fechar a notificação se o menu fechar/abrir
+const menuToggle = document.getElementById('menu-toggle');
+if (menuToggle) {
+    menuToggle.addEventListener('change', () => {
+        const dropdown = document.getElementById('navNotifDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+    });
+}
 
 // Fechar modal ao pressionar ESC
 document.addEventListener('keydown', (e) => {
