@@ -178,3 +178,10 @@ function setupGeolocation() {
         }
     });
 }
+
+// Invalida o tamanho do mapa ao redimensionar a tela para corrigir renderizações no mobile
+window.addEventListener('resize', () => {
+    if (map) {
+        map.invalidateSize();
+    }
+});
