@@ -113,6 +113,37 @@ def vacinas():
             ORDER BY va.criado_em DESC
         """, (usuario_id,))
         rows = cur.fetchall()
+
+        # Se não houver NENHUMA vacina cadastrada no banco para este paciente, semeamos as vacinas do TCC
+        if len(rows) == 0:
+            vacinas_simuladas = [
+                {"nome": "VIP (Poliomielite Inativada)", "dose": "1ª Dose", "data": "1996-07-15", "local": "UBS Centro"},
+                {"nome": "Pneumocócica 10 Valente", "dose": "1ª Dose", "data": "1996-07-15", "local": "UBS Centro"},
+                {"nome": "Rotavírus Humano", "dose": "1ª Dose", "data": "1996-07-15", "local": "UBS Centro"},
+                {"nome": "Febre Amarela", "dose": "Dose Inicial", "data": "1997-02-10", "local": "UBS Periolo"},
+                {"nome": "Tríplice Viral", "dose": "1ª Dose", "data": "1997-05-12", "local": "UBS Centro"},
+                {"nome": "Dupla Adulto (dT)", "dose": "Reforço a cada 10 anos", "data": "2016-05-20", "local": "UBS Coqueiral"},
+                {"nome": "Influenza (Gripe)", "dose": "Anual", "data": "2025-04-15", "local": "Campanha 2025"},
+                {"nome": "Covid-19", "dose": "Periódica", "data": "2025-01-20", "local": "Campanha Bivalente"}
+            ]
+            for v in vacinas_simuladas:
+                cur.execute("""
+                    INSERT INTO vacinas_aplicadas (paciente_id, enfermeiro_id, vacina_nome, dose, lote, local_aplicacao, criado_em)
+                    VALUES (?, NULL, ?, ?, 'SIM-999', ?, ?)
+                """, (usuario_id, v["nome"], v["dose"], v["local"], v["data"]))
+            db.commit()
+            
+            # Consultar novamente
+            cur.execute("""
+                SELECT va.id, va.vacina_nome, va.dose, va.lote, va.local_aplicacao,
+                       va.criado_em, u.nome AS enfermeiro_nome
+                FROM vacinas_aplicadas va
+                LEFT JOIN usuarios u ON va.enfermeiro_id = u.id
+                WHERE va.paciente_id = ?
+                ORDER BY va.criado_em DESC
+            """, (usuario_id,))
+            rows = cur.fetchall()
+
         db.close()
 
         resultado = []
