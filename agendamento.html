@@ -721,6 +721,19 @@ Obrigado por utilizar o Portal Saúde Digital!`;
                 return;
             }
 
+            // Validar profissional se o campo estiver visível
+            const medicoGroup = document.getElementById('form-group-medico');
+            const isMedicoGroupVisible = medicoGroup && medicoGroup.style.display !== 'none';
+            if (isMedicoGroupVisible && !medicoId) {
+                const labelProfissional = tipo === 'vacina' ? 'enfermeiro(a)' : 'profissional de saúde';
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Selecione o Profissional',
+                    text: `Por favor, selecione um(a) ${labelProfissional} para prosseguir com o agendamento.`
+                });
+                return;
+            }
+
             // Validar data futura
             const dataSelecionada = new Date(data + 'T' + horario);
             const agora = new Date();
@@ -887,6 +900,17 @@ Obrigado por utilizar o Portal Saúde Digital!`;
             const ano = dataAtualCalendario.getFullYear();
             const mes = dataAtualCalendario.getMonth(); // 0-indexed
 
+            // Desabilitar o botão de voltar mês se estivermos no mês atual ou anterior
+            const btnPrev = document.querySelector('.btn-cal-nav[onclick="navegarMes(-1)"]');
+            if (btnPrev) {
+                const hoje = new Date();
+                const primeiroDiaMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                const primeiroDiaMesCalendario = new Date(ano, mes, 1);
+                btnPrev.disabled = primeiroDiaMesCalendario <= primeiroDiaMesAtual;
+                btnPrev.style.opacity = btnPrev.disabled ? '0.3' : '1';
+                btnPrev.style.cursor = btnPrev.disabled ? 'not-allowed' : 'pointer';
+            }
+
             const nomesMeses = [
                 "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
                 "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
@@ -972,7 +996,18 @@ Obrigado por utilizar o Portal Saúde Digital!`;
         }
 
         function navegarMes(direcao) {
-            dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() + direcao);
+            const hoje = new Date();
+            const primeiroDiaMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            
+            // Propor a nova data com dia 1 para evitar transbordamento de mês
+            const novaData = new Date(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth() + direcao, 1);
+            
+            if (novaData < primeiroDiaMesAtual) {
+                // Bloqueia navegação para meses anteriores ao mês atual
+                return;
+            }
+            
+            dataAtualCalendario = novaData;
             renderizarCalendario();
         }
 
