@@ -6408,3 +6408,145 @@ i[class^='fi'] {
     top: -5px;
     right: -5px;
 }
+
+/* ==========================================================================
+   MODERNIZAÇÃO VISUAL E EFEITOS ESPECIAIS (2026)
+   ========================================================================== */
+
+/* Fundo Interativo Canvas */
+#health-bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -100;
+    pointer-events: none;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f9ff 55%, #e6fffb 100%);
+}
+
+/* Transições e Animações de Scroll (Reveal on Scroll) */
+.reveal-on-scroll {
+    opacity: 0 !important;
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                filter 1.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    will-change: transform, opacity, filter;
+}
+
+.reveal-fade-up { transform: translateY(50px) !important; }
+.reveal-fade-down { transform: translateY(-50px) !important; }
+.reveal-fade-left { transform: translateX(50px) !important; }
+.reveal-fade-right { transform: translateX(-50px) !important; }
+.reveal-zoom-in { transform: scale(0.92) !important; }
+.reveal-zoom-out { transform: scale(1.08) !important; }
+.reveal-slide-up { transform: translateY(100px) !important; }
+.reveal-slide-left { transform: translateX(100px) !important; }
+.reveal-blur-reveal { filter: blur(12px) !important; }
+
+.reveal-on-scroll.revealed {
+    opacity: 1 !important;
+    transform: translate(0) scale(1) !important;
+    filter: blur(0) !important;
+}
+
+/* Formulários Modernos - Input Focus & Glow */
+.form-group input,
+.form-group select,
+.form-group textarea,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+    border: 2px solid rgba(0, 75, 130, 0.12) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(5px) !important;
+    font-weight: 500 !important;
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover,
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="date"]:hover,
+input[type="time"]:hover,
+select:hover,
+textarea:hover {
+    border-color: rgba(0, 210, 255, 0.5) !important;
+    background: #ffffff !important;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+    outline: none !important;
+    border-color: #0073e6 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(0, 115, 230, 0.18) !important;
+}
+
+/* Indicador de Status Pulsante (Ponto Verde) */
+.status-pulse-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #00e676;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7);
+    animation: statusPulse 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes statusPulse {
+    to {
+        box-shadow: 0 0 0 10px rgba(0, 230, 118, 0);
+    }
+}
+
+/* Custom Scrollbars para Contêineres Modernos */
+.custom-scrollbar::-webkit-scrollbar,
+.nav-notif-list::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track,
+.nav-notif-list::-webkit-scrollbar-track {
+    background: rgba(0, 75, 130, 0.03);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.nav-notif-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 75, 130, 0.15);
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.nav-notif-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 75, 130, 0.3);
+}
+
+/* Glassmorphism Classes Adicionais */
+.glass-card-premium {
+    background: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 12px 40px rgba(0, 75, 130, 0.06) !important;
+}

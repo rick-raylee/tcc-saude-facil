@@ -93,14 +93,14 @@
     <!-- WIZARD / PAINEL CONTAINER -->
     <div class="wizard-container" id="telemed-root">
 
-        <div class="page-header" style="text-align: center; margin-bottom: 40px;">
+        <div class="page-header reveal-on-scroll reveal-fade-up" style="text-align: center; margin-bottom: 40px;">
             <h1><i class="fi fi-rr-laptop"></i>  Telemedicina Cascavel</h1>
             <p id="page-subtitle">Atendimento médico especializado sem sair de casa.</p>
         </div>
 
         <!-- SEÇÃO: NÃO AUTENTICADO -->
         <div id="section-unauth" class="telemed-section active">
-            <div class="glass-neon-card" style="text-align: center; padding: 40px;">
+            <div class="glass-neon-card reveal-on-scroll reveal-zoom-in" style="text-align: center; padding: 40px;">
                 <div class="neon-icon"><i class="fi fi-rr-lock"></i> </div>
                 <h2>Acesso Restrito</h2>
                 <p>Para agendar ou participar de uma teleconsulta, você precisa estar logado no portal.</p>
@@ -115,7 +115,7 @@
         <!-- SEÇÃO: PACIENTE (AGENDAMENTO & LISTA) -->
         <div id="section-paciente" class="telemed-section">
             <!-- Alternar entre Agendamento e Minhas Consultas -->
-            <div class="tab-nav">
+            <div class="tab-nav reveal-on-scroll reveal-fade-up">
                 <button class="tab-btn active" onclick="switchTab('paciente', 'agendar')">Novo Agendamento</button>
                 <button class="tab-btn" onclick="switchTab('paciente', 'minhas')">Minhas Teleconsultas</button>
             </div>
@@ -251,7 +251,7 @@
 
         <!-- SEÇÃO: MÉDICO (PAINEL & CONFIG) -->
         <div id="section-medico" class="telemed-section">
-            <div class="tab-nav">
+            <div class="tab-nav reveal-on-scroll reveal-fade-up">
                 <button class="tab-btn active" onclick="switchTab('medico', 'agenda')">Agenda de Teleconsultas</button>
                 <button class="tab-btn" onclick="switchTab('medico', 'config')">Configurar Perfil Tele</button>
             </div>
@@ -273,7 +273,7 @@
             </div>
 
             <div id="medico-config" class="tab-content">
-                <div class="glass-neon-card" style="padding: 30px;">
+                <div class="glass-neon-card reveal-on-scroll reveal-fade-up" style="padding: 30px;">
                     <h3><i class="fi fi-rr-settings"></i>  Configurações de Telemedicina</h3>
                     <form id="form-tele-config" class="form-grid-tele" onsubmit="salvarConfigTele(event)">
                         <div class="form-group-tele">

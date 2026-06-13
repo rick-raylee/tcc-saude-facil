@@ -2856,3 +2856,50 @@ footer {
     color: rgb(8, 42, 123) !important;
 }
 
+/* ==========================================================================
+   MELHORIAS DE DESIGN CARROSSEL 3D & VERTICAL
+   ========================================================================== */
+
+/* Efeito de Reflexo de Glare nos Cards do Carrossel 3D */
+.card-3d::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -150% !important;
+    width: 60% !important;
+    height: 100% !important;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%) !important;
+    transform: skewX(-25deg) !important;
+    transition: none !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+}
+
+.card-3d:hover::after {
+    left: 150% !important;
+    transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+/* Animação de Entrada do Carrossel 3D */
+@keyframes carouselEntrance {
+    from { opacity: 0; transform: scale(0.88) translateY(30px) rotateX(8deg); }
+    to { opacity: 1; transform: scale(1) translateY(0) rotateX(0); }
+}
+
+.carousel-3d-container {
+    animation: carouselEntrance 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
+}
+
+/* Suavização Springy no Carrossel Vertical */
+.vertical-card {
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity   0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.6s ease,
+                filter 0.6s ease !important;
+}
+
+.vertical-card.center:hover {
+    transform: perspective(1000px) translate(-50%, -54%) scale(1.08) rotateX(4deg) !important;
+    box-shadow: 0 30px 70px rgba(0,75,130,0.55), 0 0 40px rgba(0,190,255,0.4) !important;
+}
+

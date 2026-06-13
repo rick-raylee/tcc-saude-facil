@@ -88,7 +88,7 @@
     <div class="container dashboard-container">
 
         <!-- CABEÇALHO DO PERFIL -->
-        <section class="profile-header">
+        <section class="profile-header reveal-on-scroll reveal-fade-up">
             <div class="profile-avatar-large">
                 <img id="user-avatar-display"
                     src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' fill='%23ccc'/></svg>"
@@ -123,7 +123,7 @@
         <div class="dashboard-grid">
 
             <!-- MINHAS CONSULTAS AGENDADAS -->
-            <div id="card-minhas-consultas" class="dashboard-card tele-highlight"
+            <div id="card-minhas-consultas" class="dashboard-card tele-highlight reveal-on-scroll reveal-fade-up"
                 style="display: none; border-left: 5px solid #6c5ce7; background: #f8f9fa;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                     <div>
@@ -137,7 +137,7 @@
             </div>
 
             <!-- ACESSO RÁPIDO (PRIMEIRO) -->
-            <div class="dashboard-card quick-access">
+            <div class="dashboard-card quick-access reveal-on-scroll reveal-fade-up">
                 <h3>  Acesso Rápido</h3>
                 <div class="quick-buttons">
                     <button class="btn-quick" onclick="window.location.href='telemedicina.html'">
@@ -156,7 +156,7 @@
             </div>
 
             <!-- CARTEIRINHA DIGITAL (SEGUNDO) -->
-            <div class="dashboard-card digital-id-preview" onclick="abrirCarteirinha()">
+            <div class="dashboard-card digital-id-preview reveal-on-scroll reveal-zoom-in" onclick="abrirCarteirinha()">
                 <div class="preview-content">
                     <img src="logo-saude-facil.png" alt="Logo Saúde Fácil" class="preview-logo"
                         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2260%22><text x=%2210%22 y=%2240%22 font-size=%2230%22 fill=%22white%22>SUS</text></svg>'">
@@ -166,7 +166,7 @@
             </div>
 
             <!-- OBSERVAÇÕES E EXAMES (NO ARQUIVO PERFIL.HTML) -->
-            <section class="dashboard-card messages-card">
+            <section class="dashboard-card messages-card reveal-on-scroll reveal-fade-up">
                 <h2><i class="fi fi-rr-document"></i>  Prontuário & Observações</h2>
 
                 <div class="tabs-paciente"
@@ -205,7 +205,7 @@
             </section>
 
             <!-- HISTÓRICO DE CONSULTAS (TERCEIRO) -->
-            <section class="dashboard-card history-card">
+            <section class="dashboard-card history-card reveal-on-scroll reveal-fade-up">
                 <h2><i class="fi fi-rr-folder"></i> Histórico de Atendimentos</h2>
                 <div class="timeline" id="history-list">
                     <!-- Itens do histórico serão inseridos via JS -->
@@ -214,7 +214,7 @@
             </section>
 
             <!-- MEU RESUMO DE SAÚDE (QUARTO) -->
-            <div class="dashboard-card health-summary">
+            <div class="dashboard-card health-summary reveal-on-scroll reveal-fade-up">
                 <h3><i class="fi fi-rr-heart"></i>  Meu Resumo de Saúde</h3>
                 <ul class="health-stats">
                     <li>

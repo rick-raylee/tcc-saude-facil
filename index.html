@@ -56,9 +56,12 @@
                 <div class="nav-notif-dropdown glass-card" id="navNotifDropdown">
                     <div class="nav-notif-header">
                         <span>Avisos e Campanhas</span>
-                        <button onclick="limparNotificacoes()">Limpar</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="marcarTodasLidas(event)" style="background: transparent; border: none; color: #004b82; font-size: 0.8rem; cursor: pointer; font-weight: 600;">Lidas</button>
+                            <button onclick="limparNotificacoes(event)" style="background: transparent; border: none; color: #888; font-size: 0.8rem; cursor: pointer;">Limpar</button>
+                        </div>
                     </div>
-                    <div id="nav-notif-list" class="nav-notif-list">
+                    <div id="nav-notif-list" class="nav-notif-list custom-scrollbar">
                         <p class="nav-notif-empty">Nenhuma nova campanha.</p>
                     </div>
                 </div>
@@ -120,7 +123,7 @@
         </section>
 
         <!-- NOVO: SEÇÃO DE DESTAQUES EM 3D (NOTÍCIAS) -->
-        <section class="highlights-3d-section" style="margin-top: 30px; text-align: center;">
+        <section class="highlights-3d-section reveal-on-scroll reveal-fade-up" style="margin-top: 30px; text-align: center;">
             <div class="carousel-3d-container">
                 <div id="carousel3dSpinner" class="carousel-3d-spinner">
                     <!-- Slides dinâmicos injetados via JS -->
@@ -131,7 +134,7 @@
         </section>
 
         <!-- SEÇÃO DE SERVIÇOS ESPECIALIZADOS -->
-        <section class="servicos-especializados-section glass-card" style="margin-top: 30px;">
+        <section class="servicos-especializados-section glass-card reveal-on-scroll reveal-fade-up" style="margin-top: 30px;">
             <h2><i class="fi fi-rr-briefcase-medical"></i> Serviços Especializados</h2>
             <p style="text-align: center; color: #555; margin-bottom: 30px;">
                 Selecione uma especialidade médica abaixo para iniciar seu agendamento inteligente.
@@ -207,7 +210,7 @@
 
 
     <!-- ESTATÍSTICAS - DASHBOARD DE ELITE -->
-    <section class="estatisticas-section glass-card">
+    <section class="estatisticas-section glass-card reveal-on-scroll reveal-fade-up">
         <h2><i class="fi fi-rr-chart-histogram"></i>  Estatísticas de Saúde no Brasil</h2>
 
         <div class="estatisticas-layout">
@@ -217,7 +220,7 @@
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card azul">
+                <div class="stat-card azul reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-syringe"></i> </div>
                     </div>
@@ -228,7 +231,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card verde">
+                <div class="stat-card verde reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-heart"></i> </div>
                     </div>
@@ -239,7 +242,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card laranja">
+                <div class="stat-card laranja reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-bug"></i> </div>
                     </div>
@@ -250,7 +253,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card roxo">
+                <div class="stat-card roxo reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-brain"></i> </div>
                     </div>
@@ -261,7 +264,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card vermelho">
+                <div class="stat-card vermelho reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-lungs"></i> </div>
                     </div>
@@ -272,7 +275,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card teal">
+                <div class="stat-card teal reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-medicine"></i> </div>
                     </div>
@@ -283,7 +286,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card verde">
+                <div class="stat-card verde reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-apple-whole"></i> </div>
                     </div>
@@ -294,7 +297,7 @@
                     </div>
                 </div>
 
-                <div class="stat-card azul">
+                <div class="stat-card azul reveal-on-scroll reveal-zoom-in">
                     <div class="stat-icon-wrapper">
                         <div class="stat-icon"><i class="fi fi-rr-virus"></i> </div>
                     </div>
@@ -309,7 +312,7 @@
     </section>
 
         <!-- NOTÍCIAS DO GOVERNO -->
-        <section class="noticias-section">
+        <section class="noticias-section reveal-on-scroll reveal-fade-up">
             <h2><i class="fi fi-rr-newspaper"></i>  Notícias de Saúde - Ministério da Saúde</h2>
 
             <div class="news-slider-wrapper">
@@ -326,7 +329,7 @@
         </section>
 
         <!-- CARROSSEL VERTICAL 3D DE DOENÇAS -->
-        <section class="vertical-carousel-section">
+        <section class="vertical-carousel-section reveal-on-scroll reveal-fade-up">
             <h2><i class="fi fi-rr-map"></i>  Mapa Dinâmico de Doenças</h2>
             <p style="text-align: center; color: #555; margin-bottom: 30px;">Gire o carrossel para descobrir mais sobre
                 as condições comuns e os especialistas recomendados.</p>
@@ -422,7 +425,7 @@
         </div>
     </div>
 
-    <section class="comentarios-page-section">
+    <section class="comentarios-page-section reveal-on-scroll reveal-fade-up">
         <div class="comentarios-section">
             <h2><i class="fi fi-rr-messages"></i>  Comentários do Portal</h2>
             <p>Deixe sua opinião sobre as notícias e iniciativas de saúde.</p>

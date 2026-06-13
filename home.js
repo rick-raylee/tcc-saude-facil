@@ -1346,7 +1346,7 @@ async function carregarCampanhasPublicas() {
         // Adiciona Notificações Pessoais Primeiro
         if (notificacoesPessoais.length > 0) {
             htmlContent += notificacoesPessoais.map(n => `
-                <div class="nav-notif-item ${n.lida ? 'read' : 'unread'}" onclick="marcarNotifLida(${n.id}, event)">
+                <div class="nav-notif-item ${n.lida ? 'read' : 'unread'}" data-id="${n.id}" onclick="marcarNotifLida(${n.id}, event)">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
                         <h4><i class='fi fi-rr-bullseye'></i>  Aviso Para Você</h4>
                         ${!n.lida ? '<span class="unread-dot"></span>' : ''}
@@ -1586,8 +1586,15 @@ function fecharModalCadastro() {
 
 function abrirModalAuth(pagina) {
     pagina = pagina || 'login';
-    // index.html usa modalAuth com flip, index.html usa overlays separados
     var modalAuth = document.getElementById('modalAuth');
+    var modalLogin = document.getElementById('modalLogin');
+    var modalCadastro = document.getElementById('modalCadastro');
+    
+    if (!modalAuth && !modalLogin && !modalCadastro) {
+        window.location.href = `index.html?${pagina === 'cadastro' ? 'cadastro=true' : 'login=true'}`;
+        return;
+    }
+    
     if (modalAuth) {
         modalAuth.classList.add('show');
         document.body.style.overflow = 'hidden';
@@ -3842,3 +3849,257 @@ function popularEspecialidadesWizard(config) {
 
 window.popularDropdownsEspecialidades = popularDropdownsEspecialidades;
 window.popularEspecialidadesWizard = popularEspecialidadesWizard;
+
+// --- DYNAMIC BACKGROUND CANVAS ---
+class HealthBackground {
+    constructor() {
+        this.canvas = document.getElementById('health-bg-canvas');
+        if (!this.canvas) {
+            this.canvas = document.createElement('canvas');
+            this.canvas.id = 'health-bg-canvas';
+            document.body.insertBefore(this.canvas, document.body.firstChild);
+        }
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.hexagons = [];
+        
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        
+        this.initParticles();
+        this.initHexagons();
+        
+        this.animate = this.animate.bind(this);
+        requestAnimationFrame(this.animate);
+    }
+    
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+    }
+    
+    initParticles() {
+        const count = Math.min(25, Math.floor((this.width * this.height) / 80000));
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.width,
+                y: Math.random() * this.height,
+                radius: Math.random() * 4 + 2,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4 - 0.2, // slowly drift up
+                alpha: Math.random() * 0.3 + 0.1
+            });
+        }
+    }
+    
+    initHexagons() {
+        const count = 6;
+        for (let i = 0; i < count; i++) {
+            this.hexagons.push({
+                x: Math.random() * this.width,
+                y: Math.random() * this.height,
+                size: Math.random() * 60 + 30,
+                angle: Math.random() * Math.PI * 2,
+                speed: (Math.random() - 0.5) * 0.002,
+                alpha: Math.random() * 0.05 + 0.02
+            });
+        }
+    }
+    
+    drawECG(time) {
+        this.ctx.strokeStyle = 'rgba(0, 210, 255, 0.06)';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.beginPath();
+        
+        const startY = this.height * 0.82;
+        const speed = 0.15;
+        const waveX = (time * speed) % (this.width + 400) - 200;
+        
+        for (let x = 0; x < this.width; x += 3) {
+            let y = startY;
+            const dist = Math.abs(x - waveX);
+            
+            if (dist < 120) {
+                const norm = dist / 120;
+                if (norm < 0.2) {
+                    y -= Math.sin(norm * Math.PI * 5) * 8; // P wave
+                } else if (norm >= 0.25 && norm < 0.45) {
+                    const qrsNorm = (norm - 0.25) / 0.2;
+                    if (qrsNorm < 0.3) {
+                        y += qrsNorm * 20; // Q dip
+                    } else if (qrsNorm < 0.7) {
+                        y -= (qrsNorm - 0.3) * 120; // R peak
+                    } else {
+                        y += (qrsNorm - 0.7) * 100 - 15; // S dip
+                    }
+                } else if (norm >= 0.55 && norm < 0.8) {
+                    const tNorm = (norm - 0.55) / 0.25;
+                    y -= Math.sin(tNorm * Math.PI) * 15; // T wave
+                }
+            }
+            
+            if (x === 0) this.ctx.moveTo(x, y);
+            else this.ctx.lineTo(x, y);
+        }
+        this.ctx.stroke();
+    }
+    
+    drawHexagon(x, y, size, angle, alpha) {
+        this.ctx.save();
+        this.ctx.translate(x, y);
+        this.ctx.rotate(angle);
+        this.ctx.strokeStyle = `rgba(0, 191, 165, ${alpha})`;
+        this.ctx.lineWidth = 1.5;
+        this.ctx.beginPath();
+        for (let side = 0; side < 6; side++) {
+            this.ctx.lineTo(
+                size * Math.cos(side * Math.PI / 3),
+                size * Math.sin(side * Math.PI / 3)
+            );
+        }
+        this.ctx.closePath();
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+    
+    animate(time) {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        
+        // Draw Hexagons
+        this.hexagons.forEach(hex => {
+            hex.angle += hex.speed;
+            this.drawHexagon(hex.x, hex.y, hex.size, hex.angle, hex.alpha);
+        });
+        
+        // Draw Particles
+        this.particles.forEach(p => {
+            p.y += p.vy;
+            p.x += p.vx;
+            
+            if (p.y < -10) p.y = this.height + 10;
+            if (p.x < -10 || p.x > this.width + 10) p.x = Math.random() * this.width;
+            
+            this.ctx.fillStyle = `rgba(0, 115, 230, ${p.alpha})`;
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+        
+        // Draw ECG line sweep
+        this.drawECG(time);
+        
+        requestAnimationFrame(this.animate);
+    }
+}
+
+// --- SCROLL REVEAL E CONTADORES ANIMADOS ---
+function initScrollAnimations() {
+    const revealItems = document.querySelectorAll('.reveal-on-scroll');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                
+                // Se for um card de estatística, ativa a animação de contagem
+                if (entry.target.classList.contains('stat-card')) {
+                    const numberEl = entry.target.querySelector('.stat-numero');
+                    if (numberEl) animateCounter(numberEl);
+                }
+                
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    revealItems.forEach(el => observer.observe(el));
+}
+
+function animateCounter(counter) {
+    const text = counter.innerText.trim();
+    const matches = text.match(/^([\d,.]+)\s*(mi|%)?$/i);
+    if (!matches) return;
+    
+    const targetVal = parseFloat(matches[1].replace(',', '.'));
+    const suffix = matches[2] || '';
+    const duration = 1500;
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const currentVal = ease * targetVal;
+        
+        let displayVal = currentVal.toFixed(1);
+        if (displayVal.endsWith('.0') && !text.includes(',')) {
+            displayVal = Math.round(currentVal).toString();
+        } else if (text.includes(',')) {
+            displayVal = displayVal.replace('.', ',');
+        }
+        
+        counter.innerText = displayVal + (suffix ? ' ' + suffix : '');
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            counter.innerText = text;
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+// --- MARCAR TODAS AS NOTIFICAÇÕES COMO LIDAS ---
+window.marcarTodasLidas = async function(event) {
+    if (event) event.stopPropagation();
+    if (typeof API !== 'undefined') {
+        const unreadItems = document.querySelectorAll('.nav-notif-item.unread');
+        if (unreadItems.length === 0) return;
+        
+        const promises = Array.from(unreadItems).map(async (item) => {
+            const id = item.getAttribute('data-id');
+            if (id) {
+                try {
+                    await API.lerNotificacao(id);
+                    item.classList.add('read');
+                    item.classList.remove('unread');
+                    const dot = item.querySelector('.unread-dot');
+                    if (dot) dot.remove();
+                } catch (e) {
+                    console.error('Erro ao ler notificação:', id, e);
+                }
+            }
+        });
+        await Promise.all(promises);
+        
+        const badge = document.getElementById('nav-notif-count');
+        if (badge) {
+            badge.style.display = 'none';
+            badge.innerText = '0';
+        }
+    }
+};
+
+// Fechar notificações clicando fora do sino
+document.addEventListener('click', (event) => {
+    const bellContainer = document.getElementById('navBellContainer');
+    const dropdown = document.getElementById('navNotifDropdown');
+    if (dropdown && bellContainer && !bellContainer.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Inicialização Geral
+document.addEventListener('DOMContentLoaded', () => {
+    new HealthBackground();
+    initScrollAnimations();
+    
+    // Check parameters for login / register modal auto-trigger
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'true') {
+        abrirModalAuth('login');
+    } else if (urlParams.get('cadastro') === 'true') {
+        abrirModalAuth('cadastro');
+    }
+});

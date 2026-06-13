@@ -82,19 +82,19 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="container">
 
-        <div class="page-header">
+        <div class="page-header reveal-on-scroll reveal-fade-up">
             <h1><i class="fi fi-rr-interrogation"></i>  Perguntas Frequentes</h1>
             <p>Encontre respostas rápidas para as dúvidas mais comuns</p>
         </div>
 
         <!-- BARRA DE PESQUISA -->
-        <div class="search-box" style="position: relative; max-width: 600px; margin: 0 auto 30px auto;">
+        <div class="search-box reveal-on-scroll reveal-zoom-in" style="position: relative; max-width: 600px; margin: 0 auto 30px auto;">
             <i class="fi fi-rr-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; font-size: 1.2rem;"></i>
             <input type="text" id="search-faq" placeholder="Buscar dúvida..." onkeyup="buscarDuvida()" style="width: 100%; padding: 15px 15px 15px 45px; border-radius: 30px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 1.1rem; outline: none;">
         </div>
 
         <!-- CATEGORIAS DE FAQ -->
-        <div class="categorias-faq">
+        <div class="categorias-faq reveal-on-scroll reveal-fade-up">
             <button class="cat-btn active" onclick="filtrarCategoria('todas')">Todas</button>
             <button class="cat-btn" onclick="filtrarCategoria('agendamento')">Agendamento</button>
             <button class="cat-btn" onclick="filtrarCategoria('telemedicina')">Telemedicina</button>
@@ -103,7 +103,7 @@
         </div>
 
         <!-- FAQ ACCORDION -->
-        <section class="faq-section">
+        <section class="faq-section reveal-on-scroll reveal-fade-up">
 
             <details class="faq-item" data-categoria="telemedicina">
                 <summary>Como recebo o link da consulta de telemedicina?</summary>
