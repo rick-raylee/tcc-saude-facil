@@ -533,6 +533,11 @@
 
         /* Patient Profile Panel inside Active Workspace */
         #tele-patient-profile {
+            flex: 1.1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: calc(100vh - 110px);
             background: rgba(15, 23, 42, 0.7) !important;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -540,7 +545,91 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
             border-radius: 16px !important;
             padding: 24px !important;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #tele-clinical-panel {
+            flex: 1.1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: calc(100vh - 110px);
+            background: rgba(15, 23, 42, 0.7) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Collapsible side panels */
+        .tele-side-panel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tele-side-panel.collapsed {
+            flex: 0 0 50px !important;
+            min-width: 50px !important;
+            max-width: 50px !important;
+            padding: 20px 8px !important;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.9) !important;
+            cursor: pointer;
+        }
+
+        .tele-side-panel.collapsed * {
+            display: none !important;
+        }
+
+        .tele-side-panel.collapsed .panel-collapsed-indicator {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            height: 100%;
+            width: 100%;
+            color: var(--primary-blue);
+        }
+
+        .panel-collapsed-indicator {
+            display: none;
+            cursor: pointer;
+            width: 100%;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .panel-collapsed-title {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            transform: rotate(180deg);
+            white-space: nowrap;
+            margin-top: 10px;
+        }
+
+        .btn-toggle-panel {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+            padding: 4px;
+            border-radius: 6px;
+        }
+        .btn-toggle-panel:hover {
+            color: var(--primary-blue);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .vital-card-mini {
@@ -668,9 +757,18 @@
                 </div>
                 
                 <!-- PERFIL DE SAÚDE DO PACIENTE -->
-                <div id="tele-patient-profile" style="flex: 1.1; display: flex; flex-direction: column; overflow-y: auto; max-height: calc(100vh - 110px);">
-                    <h3 style="color:var(--primary-blue); margin-top:0; border-bottom:1px solid rgba(255, 255, 255, 0.06); padding-bottom:12px; display:flex; align-items:center; gap:8px; font-family:'Outfit', sans-serif; font-weight:800; font-size:1.2rem;">
-                        <i class="fi fi-rr-heart" style="display:flex; color: var(--rose-red);"></i> Perfil de Saúde
+                <div id="tele-patient-profile" class="tele-side-panel">
+                    <!-- INDICADOR DE PAINEL MINIMIZADO -->
+                    <div class="panel-collapsed-indicator" onclick="togglePanel('tele-patient-profile')" title="Expandir Perfil de Saúde">
+                        <i class="fi fi-rr-angle-double-left" style="font-size: 1.25rem;"></i>
+                        <span class="panel-collapsed-title">Perfil de Saúde</span>
+                    </div>
+
+                    <h3 style="color:var(--primary-blue); margin-top:0; border-bottom:1px solid rgba(255, 255, 255, 0.06); padding-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:8px; font-family:'Outfit', sans-serif; font-weight:800; font-size:1.2rem;">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            <i class="fi fi-rr-heart" style="display:flex; color: var(--rose-red);"></i> Perfil de Saúde
+                        </span>
+                        <button type="button" class="btn-toggle-panel" onclick="togglePanel('tele-patient-profile')" title="Minimizar Perfil"><i class="fi fi-rr-angle-double-right"></i></button>
                     </h3>
                     
                     <!-- IDENTIFICAÇÃO DO PACIENTE -->
@@ -764,8 +862,19 @@
                 </div>
                 
                 <!-- PAINEL CLÍNICO (PRONTUÁRIO/RECEITA/ATESTADO/ENCAMINHAMENTO) -->
-                <div id="tele-clinical-panel" style="flex: 1.1; display: flex; flex-direction: column; overflow-y: auto; max-height: calc(100vh - 110px);">
-                    <h3 style="color:var(--primary-blue); margin-top:0; border-bottom:1px solid rgba(255, 255, 255, 0.06); padding-bottom:12px; display:flex; align-items:center; gap:8px; font-family:'Outfit', sans-serif; font-weight:800; font-size:1.2rem;"><i class="fi fi-rr-document" style="display:flex;"></i> Ficha da Teleconsulta</h3>
+                <div id="tele-clinical-panel" class="tele-side-panel">
+                    <!-- INDICADOR DE PAINEL MINIMIZADO -->
+                    <div class="panel-collapsed-indicator" onclick="togglePanel('tele-clinical-panel')" title="Expandir Ficha da Teleconsulta">
+                        <i class="fi fi-rr-angle-double-left" style="font-size: 1.25rem;"></i>
+                        <span class="panel-collapsed-title">Ficha Clínica</span>
+                    </div>
+
+                    <h3 style="color:var(--primary-blue); margin-top:0; border-bottom:1px solid rgba(255, 255, 255, 0.06); padding-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:8px; font-family:'Outfit', sans-serif; font-weight:800; font-size:1.2rem;">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            <i class="fi fi-rr-document" style="display:flex;"></i> Ficha da Teleconsulta
+                        </span>
+                        <button type="button" class="btn-toggle-panel" onclick="togglePanel('tele-clinical-panel')" title="Minimizar Ficha"><i class="fi fi-rr-angle-double-right"></i></button>
+                    </h3>
                     
                     <form id="form-tele-clinico" onsubmit="salvarAtendimentoTele(event)" style="display:flex; flex-direction:column; gap:16px;">
                         <!-- DIAGNÓSTICO -->

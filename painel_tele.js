@@ -476,3 +476,11 @@ window.removerDoencaTele = async function(id) {
         console.error("Erro ao remover doença:", err);
     }
 }
+
+window.togglePanel = function(id) {
+    const panel = document.getElementById(id);
+    if (!panel) return;
+    
+    panel.classList.toggle('collapsed');
+}
+
