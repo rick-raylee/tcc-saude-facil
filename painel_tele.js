@@ -65,16 +65,17 @@ async function carregarFilaOnlineAPI() {
     consultasOnline.forEach(c => {
         const div = document.createElement('div');
         div.className = 'card-paciente-fila';
+        const statusClass = c.status ? c.status.toLowerCase() : 'agendada';
         div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <strong style="color:white; font-size:1.1rem;">${c.paciente_nome}</strong>
-                <span style="background:#eab308; color:#713f12; font-size:0.7rem; font-weight:bold; padding:2px 6px; border-radius:4px;">${c.status}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color:white; font-size:1.15rem; font-family:'Outfit', sans-serif;">${c.paciente_nome}</strong>
+                <span class="status-badge status-${statusClass}">${c.status.toUpperCase()}</span>
             </div>
-            <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px;">
-                🕒 Agendado para as ${c.hora || 'Hoje'}
+            <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                <i class="fi fi-rr-clock-three" style="color:#38bdf8;"></i> Agendado para as ${c.hora || 'Hoje'}
             </div>
             <button class="btn-iniciar-chamada" onclick="iniciarChamada('${c.id}', '${c.paciente_nome}', '${c.paciente_id}', '${c.paciente_cpf || ''}')">
-                📹 INICIAR CHAMADA
+                <i class="fi fi-rr-video-camera-alt"></i> INICIAR ATENDIMENTO
             </button>
         `;
         lista.appendChild(div);
@@ -99,6 +100,11 @@ window.iniciarChamada = async function(id_consulta, nome_paciente, paciente_id, 
     window.activeConsultaId = id_consulta;
     currentPacienteId = paciente_id;
     currentPacienteCpf = paciente_cpf;
+
+    // Carregar perfil de saúde do paciente no painel do meio
+    if (paciente_cpf) {
+        carregarPerfilSaudePaciente(paciente_cpf);
+    }
 
     // Resetar o formulário clínico para este novo atendimento
     const form = document.getElementById('form-tele-clinico');
@@ -343,4 +349,130 @@ window.logoutTele = async function() {
     }
     localStorage.clear();
     window.location.href = 'index.html';
+}
+
+let currentPacienteDbId = null;
+
+window.carregarPerfilSaudePaciente = async function(cpf) {
+    if (!cpf) return;
+    
+    try {
+        if (typeof API !== 'undefined') {
+            const pac = await API.buscarPacienteMed(cpf);
+            if (pac && !pac.erro) {
+                // Preencher nome, idade, SUS
+                document.getElementById('pac-nome-val').textContent = pac.nome;
+                
+                // Calcular idade se data_nascimento estiver disponível
+                let idadeStr = pac.idade || '--';
+                if (pac.data_nascimento && (!pac.idade || pac.idade === '--')) {
+                    const dob = new Date(pac.data_nascimento);
+                    const diffMs = Date.now() - dob.getTime();
+                    const ageDt = new Date(diffMs);
+                    idadeStr = Math.abs(ageDt.getUTCFullYear() - 1970);
+                }
+                
+                document.getElementById('pac-meta-val').textContent = `${idadeStr} anos • SUS: ${pac.sus || 'N/D'}`;
+                
+                // Configurar avatar
+                const iniciais = pac.nome ? pac.nome.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() : 'P';
+                document.getElementById('pac-avatar-inits').textContent = iniciais;
+                
+                // Vinais/Triagem
+                if (pac.triagem) {
+                    const t = pac.triagem;
+                    document.getElementById('pac-pressao-val').textContent = t.pressao || '--';
+                    document.getElementById('pac-fc-val').textContent = t.fc ? `${t.fc} bpm` : '--';
+                    document.getElementById('pac-peso-altura-val').textContent = `${t.peso ? t.peso+' kg' : '--'} / ${t.altura ? t.altura+' m' : '--'}`;
+                    document.getElementById('pac-imc-val').textContent = t.imc || '--';
+                    document.getElementById('pac-temp-val').textContent = t.temperatura ? `${t.temperatura} °C` : '--';
+                    document.getElementById('pac-sat-val').textContent = t.saturacao ? `${t.saturacao}%` : '--';
+                    document.getElementById('pac-queixa-val').textContent = t.queixa || 'Nenhuma queixa registrada na triagem.';
+                } else {
+                    // Limpar valores se não houver triagem
+                    document.getElementById('pac-pressao-val').textContent = '--';
+                    document.getElementById('pac-fc-val').textContent = '--';
+                    document.getElementById('pac-peso-altura-val').textContent = '-- / --';
+                    document.getElementById('pac-imc-val').textContent = '--';
+                    document.getElementById('pac-temp-val').textContent = '--';
+                    document.getElementById('pac-sat-val').textContent = '--';
+                    document.getElementById('pac-queixa-val').textContent = 'Nenhuma queixa triada para este paciente.';
+                }
+                
+                // Renderizar doenças
+                renderizarDoencasTele(pac.doencas || [], pac.id);
+            }
+        }
+    } catch(err) {
+        console.error("Erro ao carregar perfil de saúde do paciente:", err);
+    }
+}
+
+function renderizarDoencasTele(doencas, pacienteId) {
+    currentPacienteDbId = pacienteId;
+    const container = document.getElementById('pac-doencas-list');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    if (!doencas || doencas.length === 0) {
+        container.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-muted);">Nenhuma condição crônica ativa.</span>';
+        return;
+    }
+    
+    doencas.forEach(d => {
+        const tag = document.createElement('span');
+        tag.className = 'patient-badge-condicao';
+        tag.innerHTML = `${d.nome} <span onclick="removerDoencaTele('${d.id}')" style="cursor:pointer; font-weight:bold; opacity:0.6;">✕</span>`;
+        container.appendChild(tag);
+    });
+}
+
+window.adicionarCondicaoTele = async function() {
+    const input = document.getElementById('pac-nova-doenca-input');
+    if (!input) return;
+    
+    const nome = input.value.trim();
+    if (!nome) return;
+    
+    if (!currentPacienteDbId) {
+        alert("⚠️ Nenhum paciente selecionado ou carregado.");
+        return;
+    }
+    
+    try {
+        if (typeof API !== 'undefined') {
+            const resp = await API.adicionarDoenca(currentPacienteDbId, nome);
+            if (resp && !resp.erro) {
+                input.value = '';
+                // Recarregar perfil
+                if (currentPacienteCpf) {
+                    await carregarPerfilSaudePaciente(currentPacienteCpf);
+                }
+            } else {
+                alert("Erro ao adicionar condição: " + (resp ? resp.erro : "desconhecido"));
+            }
+        }
+    } catch(err) {
+        console.error("Erro ao adicionar doença:", err);
+    }
+}
+
+window.removerDoencaTele = async function(id) {
+    if (!confirm("Deseja realmente remover esta condição de saúde do paciente?")) return;
+    
+    try {
+        if (typeof API !== 'undefined') {
+            const resp = await API.removerDoenca(id);
+            if (resp && !resp.erro) {
+                // Recarregar perfil
+                if (currentPacienteCpf) {
+                    await carregarPerfilSaudePaciente(currentPacienteCpf);
+                }
+            } else {
+                alert("Erro ao remover condição: " + (resp ? resp.erro : "desconhecido"));
+            }
+        }
+    } catch(err) {
+        console.error("Erro ao remover doença:", err);
+    }
 }

@@ -4,274 +4,455 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Saúde Digital | Painel de Telemedicina</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="main.css?v=20260609-2015">
     <link rel="stylesheet" href="medico.css"> <!-- Reutilizando estilos de cartão médico -->
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <style>
+        :root {
+            --bg-dark: #070b13;
+            --sidebar-bg: rgba(11, 15, 26, 0.75);
+            --card-bg: rgba(22, 30, 49, 0.45);
+            --card-hover: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary-blue: #38bdf8;
+            --primary-blue-glow: rgba(56, 189, 248, 0.2);
+            --emerald-green: #10b981;
+            --emerald-green-glow: rgba(16, 185, 129, 0.25);
+            --rose-red: #f43f5e;
+            --rose-red-glow: rgba(244, 63, 94, 0.25);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
         /* Custom Scrollbars */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0b0f19;
+            background: #070b13;
         }
         ::-webkit-scrollbar-thumb {
             background: #1f2937;
-            border-radius: 4px;
+            border-radius: 6px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #374151;
         }
 
         body {
-            background: #0b0f19;
-            color: #f8fafc;
+            background: var(--bg-dark);
+            color: var(--text-main);
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
             overflow: hidden;
+            position: relative;
         }
+
+        /* Background Glow Blobs */
+        .bg-blobs-container {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden;
+            z-index: -2;
+            pointer-events: none;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.1;
+            animation: float 22s infinite alternate ease-in-out;
+        }
+        .blob-1 {
+            top: -50px; left: 15%;
+            width: 380px; height: 380px;
+            background: var(--primary-blue);
+        }
+        .blob-2 {
+            bottom: -80px; right: 15%;
+            width: 420px; height: 420px;
+            background: var(--emerald-green);
+            animation-delay: -6s;
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 30px) scale(1.08); }
+        }
+
+        /* Navbar Glassmorphism */
         .navbar-tele {
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 14px 30px;
+            background: rgba(11, 17, 30, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 15px 35px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-            color: white;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid var(--border-color);
             z-index: 10;
             position: relative;
         }
+
+        .navbar-logo-title {
+            margin: 0;
+            font-size: 1.45rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-exclusive {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse-emerald 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-emerald {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
         .container-tele {
             display: flex;
-            height: calc(100vh - 69px);
+            height: calc(100vh - 76px);
         }
+
+        /* Sidebar Design */
         .sidebar-tele {
             width: 320px;
-            background: #0f172a;
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 24px 20px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border-color);
+            padding: 26px 22px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
-        .main-tele {
-            flex: 1;
-            padding: 24px;
-            background: #0b0f19;
-            position: relative;
-            overflow-y: auto;
+
+        .sidebar-title {
+            color: var(--primary-blue);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.25rem;
+            margin-top: 0;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
+        /* Patient Cards */
         .card-paciente-fila {
-            background: rgba(30, 41, 59, 0.45);
-            padding: 18px;
-            border-radius: 14px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-left: 4px solid #00d2ff;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-blue);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .card-paciente-fila:hover {
-            transform: translateY(-2px);
-            background: rgba(30, 41, 59, 0.65);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+            background: var(--card-hover);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.15);
+            border-left-color: #58cfff;
         }
+
+        /* Status Badges */
+        .status-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+        .status-confirmada, .status-agendada {
+            background: rgba(245, 158, 11, 0.12) !important;
+            color: #f59e0b !important;
+            border-color: rgba(245, 158, 11, 0.25) !important;
+        }
+        .status-cancelada, .status-falta {
+            background: rgba(239, 68, 68, 0.12) !important;
+            color: #ef4444 !important;
+            border-color: rgba(239, 68, 68, 0.25) !important;
+        }
+        .status-finalizada, .status-concluido {
+            background: rgba(16, 185, 129, 0.12) !important;
+            color: #10b981 !important;
+            border-color: rgba(16, 185, 129, 0.25) !important;
+        }
+        .status-aguardando {
+            background: rgba(56, 189, 248, 0.12) !important;
+            color: #38bdf8 !important;
+            border-color: rgba(56, 189, 248, 0.25) !important;
+        }
+
+        /* Call button */
         .btn-iniciar-chamada {
             width: 100%;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
             padding: 12px;
-            border-radius: 8px;
-            font-weight: 750;
+            border-radius: 10px;
+            font-weight: 800;
             font-size: 0.85rem;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
             cursor: pointer;
-            margin-top: 12px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 14px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
         }
         .btn-iniciar-chamada:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-            filter: brightness(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45);
+            filter: brightness(1.08);
         }
         .btn-iniciar-chamada:active {
             transform: translateY(0);
         }
-        #jitsi-container {
-            width: 100%;
-            height: 100%;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            display: none;
+
+        /* Main Workspace */
+        .main-tele {
+            flex: 1;
+            padding: 28px;
+            background: transparent;
+            position: relative;
+            overflow-y: auto;
         }
+
+        /* Center Dashboard Empty State */
         .empty-dash {
             text-align: center;
-            padding: 120px 20px;
-            color: #94a3b8;
+            padding: 100px 20px;
+            color: var(--text-muted);
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
         }
+
+        .pulse-icon-container {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px auto;
+            position: relative;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.1);
+        }
+        .pulse-icon-container::before {
+            content: '';
+            position: absolute;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
+            border-radius: 50%;
+            border: 1px dashed rgba(56, 189, 248, 0.2);
+            animation: rotate-dashed 24s linear infinite;
+        }
+        @keyframes rotate-dashed {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .empty-dash h2 {
             color: white;
+            font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            font-size: 2rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .empty-dash p {
             font-size: 0.95rem;
             line-height: 1.6;
-            color: #94a3b8;
-        }
-        .btn-config {
-            background: transparent;
-            border: 1px solid rgba(56, 189, 248, 0.4);
-            color: #38bdf8;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-config:hover {
-            background: rgba(56, 189, 248, 0.08);
-            border-color: #38bdf8;
-            transform: translateY(-1px);
-        }
-        .btn-config:active {
-            transform: translateY(0);
+            color: var(--text-muted);
+            margin-bottom: 30px;
         }
 
-        /* OUTROS ESTILOS TELEMEDICINA */
-        .btn-logout-tele {
-            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
-            color: white !important;
-            border: none !important;
-            padding: 8px 20px !important;
-            border-radius: 8px !important;
-            font-weight: 700 !important;
-            cursor: pointer !important;
-            font-size: 0.85rem !important;
-            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25) !important;
-            transition: all 0.25s ease !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-        }
-        .btn-logout-tele:hover {
-            transform: translateY(-1px) !important;
-            box-shadow: 0 6px 16px rgba(244, 63, 94, 0.4) !important;
-            filter: brightness(1.05) !important;
-        }
-        .btn-logout-tele:active {
-            transform: translateY(0) !important;
-        }
-
-        .badge-exclusive {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .link-edit-perfil {
-            font-size: 0.75rem;
-            color: #38bdf8;
-            text-decoration: none;
-            margin-top: 4px;
-            font-weight: 600;
-            transition: color 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .link-edit-perfil:hover {
-            color: #0ea5e9;
-            text-decoration: underline;
-        }
-
+        /* Monthly Stats Card */
         .stats-card-premium {
-            margin-top: 40px;
-            background: linear-gradient(135deg, #1e293b 0%, #111827 100%);
-            padding: 24px;
-            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 24px 28px;
+            border-radius: 20px;
             display: inline-block;
             text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            min-width: 280px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+            min-width: 320px;
         }
         .stats-card-title {
-            color: #38bdf8;
+            color: var(--primary-blue);
             margin-top: 0;
-            margin-bottom: 16px;
-            font-size: 1rem;
-            font-weight: 700;
+            margin-bottom: 18px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
             gap: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            padding-bottom: 8px;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .stats-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 10px 0;
-            font-size: 0.9rem;
+            margin: 12px 0;
+            font-size: 0.95rem;
         }
         .stats-label {
-            color: #94a3b8;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stats-label i {
+            font-size: 1rem;
         }
         .stats-val-green {
-            color: #10b981;
-            font-weight: 700;
+            color: var(--emerald-green);
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
         }
         .stats-val-white {
             color: white;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        /* Standard buttons */
+        .btn-config {
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: var(--primary-blue);
+            padding: 9px 20px;
+            border-radius: 10px;
             font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-config:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        .btn-config:active {
+            transform: translateY(0);
+        }
+
+        .btn-logout-tele {
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 9px 22px !important;
+            border-radius: 10px !important;
+            font-weight: 800 !important;
+            cursor: pointer !important;
+            font-size: 0.85rem !important;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3) !important;
+            transition: all 0.25s ease !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+        .btn-logout-tele:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(244, 63, 94, 0.45) !important;
+            filter: brightness(1.08) !important;
+        }
+        .btn-logout-tele:active {
+            transform: translateY(0) !important;
+        }
+
+        .link-edit-perfil {
+            font-size: 0.75rem;
+            color: var(--primary-blue);
+            text-decoration: none;
+            margin-top: 4px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .link-edit-perfil:hover {
+            color: #58cfff;
+            text-decoration: none;
+            transform: translateX(1px);
+        }
+
+        /* Active Consultation workspace styling */
+        #tele-workspace {
+            animation: fade-in-workspace 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fade-in-workspace {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .btn-encerrar-chamada {
             background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 10px;
-            font-weight: 700;
+            padding: 14px 35px;
+            border-radius: 12px;
+            font-weight: 800;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.25);
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .btn-encerrar-chamada:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
-            filter: brightness(1.05);
+            box-shadow: 0 8px 22px rgba(244, 63, 94, 0.45);
+            filter: brightness(1.08);
         }
         .btn-encerrar-chamada:active {
             transform: translateY(0);
@@ -281,37 +462,49 @@
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-weight: 700;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
             cursor: pointer;
             font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .btn-salvar-atendimento:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-            filter: brightness(1.05);
+            box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45);
+            filter: brightness(1.08);
         }
         .btn-salvar-atendimento:active {
             transform: translateY(0);
+        }
+
+        #tele-clinical-panel {
+            background: rgba(15, 23, 42, 0.7) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
         }
 
         #tele-clinical-panel input[type="text"],
         #tele-clinical-panel input[type="number"],
         #tele-clinical-panel select,
         #tele-clinical-panel textarea {
-            background: #0f172a !important;
+            background: rgba(7, 10, 19, 0.6) !important;
             color: white !important;
-            border: 1px solid #334155 !important;
-            padding: 10px 12px !important;
-            border-radius: 8px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 12px 14px !important;
+            border-radius: 10px !important;
             font-size: 0.9rem !important;
             transition: all 0.25s ease !important;
             width: 100% !important;
@@ -322,16 +515,85 @@
         #tele-clinical-panel input[type="number"]:focus,
         #tele-clinical-panel select:focus,
         #tele-clinical-panel textarea:focus {
-            border-color: #38bdf8 !important;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+            border-color: var(--primary-blue) !important;
+            box-shadow: 0 0 0 3px var(--primary-blue-glow) !important;
+            background: rgba(7, 10, 19, 0.8) !important;
             outline: none !important;
         }
 
         #tele-clinical-panel label {
-            font-weight: 600;
-            color: #94a3b8;
+            font-weight: 700;
+            color: #cbd5e1;
             font-size: 0.85rem;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Patient Profile Panel inside Active Workspace */
+        #tele-patient-profile {
+            background: rgba(15, 23, 42, 0.7) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            transition: all 0.3s ease;
+        }
+
+        .vital-card-mini {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .vital-card-mini:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .patient-badge-condicao {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .patient-badge-condicao:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 1200px) {
+            #tele-workspace {
+                flex-direction: column !important;
+                overflow-y: auto !important;
+                padding-bottom: 40px;
+            }
+            #tele-workspace > div {
+                flex: none !important;
+                width: 100% !important;
+                max-height: none !important;
+            }
+            #jitsi-container {
+                height: 450px !important;
+                min-height: 450px !important;
+            }
         }
     </style>
 
@@ -339,19 +601,25 @@
 </head>
 <body>
 
+    <!-- Decorative Background Blobs -->
+    <div class="bg-blobs-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
     <header class="navbar-tele">
         <div style="display:flex; align-items:center; gap: 15px;">
-            <h1 style="margin:0; font-size: 1.4rem;"><i class="fi fi-rr-laptop"></i>  Portal Telemedicina</h1>
+            <h1 class="navbar-logo-title"><i class="fi fi-rr-laptop" style="color:var(--primary-blue); font-size: 1.6rem; display:flex;"></i>  Portal Telemedicina</h1>
             <span class="badge-exclusive">Modo Exclusivo</span>
         </div>
-        <div style="display:flex; align-items:center; gap: 15px;">
+        <div style="display:flex; align-items:center; gap: 20px;">
             <div style="text-align: right; display: flex; flex-direction: column;">
-                <div id="nome-medico-tele" style="font-weight:bold;">Dr. Carregando...</div>
-                <small id="crm-medico-tele" style="color:#cbd5e1;">CRM: ...</small>
-                <a href="#" onclick="abrirModalEditarPerfil(event)" class="link-edit-perfil"><i class="fi fi-rr-edit"></i> Editar Dados Pessoais</a>
+                <div id="nome-medico-tele" style="font-weight:bold; font-size: 0.95rem; font-family:'Outfit', sans-serif;">Dr. Carregando...</div>
+                <small id="crm-medico-tele" style="color:var(--text-muted); font-size: 0.8rem;">CRM: ...</small>
+                <a href="#" onclick="abrirModalEditarPerfil(event)" class="link-edit-perfil"><i class="fi fi-rr-edit" style="font-size:0.75rem;"></i> Editar Dados Pessoais</a>
             </div>
-            <button class="btn-config" onclick="editarSalaPadrao()"><i class="fi fi-rr-settings"></i>  Sala Padrão</button>
-            <button onclick="logoutTele()" class="btn-logout-tele"><i class="fi fi-rr-exit"></i> Sair</button>
+            <button class="btn-config" onclick="editarSalaPadrao()"><i class="fi fi-rr-settings" style="display:flex;"></i> Sala Padrão</button>
+            <button onclick="logoutTele()" class="btn-logout-tele"><i class="fi fi-rr-exit" style="display:flex;"></i> Sair</button>
         </div>
     </header>
 
@@ -359,10 +627,10 @@
         
         <!-- SIDEBAR DE FILA E AGENDAMENTOS ONLINE -->
         <aside class="sidebar-tele">
-            <h3 style="color:#38bdf8; margin-bottom: 20px;"><i class="fi fi-rr-calendar"></i>  Pacientes de Hoje</h3>
+            <h3 class="sidebar-title"><i class="fi fi-rr-calendar" style="color:var(--primary-blue); display:flex;"></i> Pacientes de Hoje</h3>
             
             <div id="fila-online-lista">
-                <div style="text-align:center; color:#94a3b8;">Carregando agendamentos...</div>
+                <div style="text-align:center; color:var(--text-muted); font-size: 0.9rem; padding: 20px;">Carregando agendamentos...</div>
             </div>
         </aside>
 
@@ -370,18 +638,20 @@
         <main class="main-tele">
             <!-- TELA INICIAL ANTES DE ABRIR A SALA -->
             <div id="dash-vazio" class="empty-dash">
-                <div style="font-size: 4rem; margin-bottom:20px; filter: drop-shadow(0 10px 15px rgba(56, 189, 248, 0.25));">📹</div>
+                <div class="pulse-icon-container">
+                    <i class="fi fi-rr-video-camera-alt" style="font-size: 2.8rem; color: var(--primary-blue); display:flex;"></i>
+                </div>
                 <h2>Nenhuma chamada ativa</h2>
                 <p>Selecione um paciente na fila ao lado e clique em "Iniciar" para abrir a sala virtual privada segura (E2EE).</p>
                 
                 <div class="stats-card-premium">
-                    <h4 class="stats-card-title"><i class="fi fi-rr-stats"></i> Estatísticas do Mês</h4>
+                    <h4 class="stats-card-title"><i class="fi fi-rr-stats" style="display:flex;"></i> Estatísticas do Mês</h4>
                     <div class="stats-row">
-                        <span class="stats-label">Atendimentos Virtuais:</span>
+                        <span class="stats-label"><i class="fi fi-rr-users-alt" style="color:var(--emerald-green); display:flex;"></i> Atendimentos Virtuais:</span>
                         <span id="stat-atendimentos" class="stats-val-green">Carregando...</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Tempo Médio:</span>
+                        <span class="stats-label"><i class="fi fi-rr-clock-three" style="color:var(--primary-blue); display:flex;"></i> Tempo Médio:</span>
                         <span class="stats-val-white">14 min</span>
                     </div>
                 </div>
@@ -390,27 +660,123 @@
             <!-- WORKSPACE DE ATENDIMENTO ATIVO (SIDE BY SIDE) -->
             <div id="tele-workspace" style="display:none; width: 100%; height: 100%; gap: 20px;">
                 <!-- VÍDEO DA CHAMADA -->
-                <div style="flex: 2; display: flex; flex-direction: column; position: relative; height: 100%;">
-                    <div id="jitsi-container" style="flex: 1; min-height: 400px; background: #000; border-radius: 12px; overflow: hidden;"></div>
-                    <div id="controles-fim" style="margin-top: 15px; display:flex; justify-content: center; gap: 15px;">
-                        <button onclick="encerrarJitsi()" class="btn-encerrar-chamada"><i class="fi fi-rr-cross-circle"></i>  Encerrar Atendimento</button>
+                <div style="flex: 1.8; display: flex; flex-direction: column; position: relative; height: 100%;">
+                    <div id="jitsi-container" style="flex: 1; min-height: 400px; background: #000; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.35);"></div>
+                    <div id="controles-fim" style="margin-top: 18px; display:flex; justify-content: center; gap: 15px;">
+                        <button onclick="encerrarJitsi()" class="btn-encerrar-chamada"><i class="fi fi-rr-cross-circle" style="display:flex;"></i> Encerrar Atendimento</button>
+                    </div>
+                </div>
+                
+                <!-- PERFIL DE SAÚDE DO PACIENTE -->
+                <div id="tele-patient-profile" style="flex: 1.1; display: flex; flex-direction: column; overflow-y: auto; max-height: calc(100vh - 110px);">
+                    <h3 style="color:var(--primary-blue); margin-top:0; border-bottom:1px solid rgba(255, 255, 255, 0.06); padding-bottom:12px; display:flex; align-items:center; gap:8px; font-family:'Outfit', sans-serif; font-weight:800; font-size:1.2rem;">
+                        <i class="fi fi-rr-heart" style="display:flex; color: var(--rose-red);"></i> Perfil de Saúde
+                    </h3>
+                    
+                    <!-- IDENTIFICAÇÃO DO PACIENTE -->
+                    <div class="patient-profile-header" style="display:flex; align-items:center; gap:12px; background: rgba(255,255,255,0.03); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); margin-bottom:16px;">
+                        <div class="patient-avatar-mini" style="width:44px; height:44px; border-radius:50%; background:var(--primary-blue-glow); border:1px solid var(--primary-blue); display:flex; align-items:center; justify-content:center; color:var(--primary-blue); font-weight:bold; font-size:1.2rem;" id="pac-avatar-inits">
+                            P
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <strong id="pac-nome-val" style="color:white; font-size:1rem; font-family:'Outfit',sans-serif;">Paciente</strong>
+                            <span style="font-size:0.75rem; color:var(--text-muted);" id="pac-meta-val">-- anos • SUS: --</span>
+                        </div>
+                    </div>
+                    
+                    <!-- SINAIS VITAIS / TRIAGEM -->
+                    <h4 style="margin:0 0 10px 0; color:#cbd5e1; font-family:'Outfit', sans-serif; font-size:0.95rem; font-weight:700; display:flex; align-items:center; gap:6px;">
+                        <i class="fi fi-rr-stethoscope" style="color:var(--primary-blue);"></i> Sinais Vitais & Triagem
+                    </h4>
+                    
+                    <div class="vitals-grid" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:16px;">
+                        <!-- Pressão -->
+                        <div class="vital-card-mini">
+                            <i class="fi fi-rr-heart" style="color:var(--rose-red); font-size:1.2rem; display:flex;"></i>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:0.7rem; color:var(--text-muted);">Pressão (PA)</span>
+                                <strong id="pac-pressao-val" style="font-size:0.9rem; color:white;">--</strong>
+                            </div>
+                        </div>
+                        <!-- FC -->
+                        <div class="vital-card-mini">
+                            <i class="fi fi-rr-activity" style="color:var(--primary-blue); font-size:1.2rem; display:flex;"></i>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:0.7rem; color:var(--text-muted);">F. Cardíaca</span>
+                                <strong id="pac-fc-val" style="font-size:0.9rem; color:white;">--</strong>
+                            </div>
+                        </div>
+                        <!-- Peso/Altura -->
+                        <div class="vital-card-mini">
+                            <i class="fi fi-rr-dashboard" style="color:var(--emerald-green); font-size:1.2rem; display:flex;"></i>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:0.7rem; color:var(--text-muted);">Peso / Altura</span>
+                                <strong id="pac-peso-altura-val" style="font-size:0.85rem; color:white;">-- / --</strong>
+                            </div>
+                        </div>
+                        <!-- IMC -->
+                        <div class="vital-card-mini">
+                            <i class="fi fi-rr-calculator" style="color:#a855f7; font-size:1.2rem; display:flex;"></i>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:0.7rem; color:var(--text-muted);">IMC</span>
+                                <strong id="pac-imc-val" style="font-size:0.9rem; color:white;">--</strong>
+                            </div>
+                        </div>
+                        <!-- Temperatura -->
+                        <div class="vital-card-mini">
+                            <i class="fi fi-rr-thermometer" style="color:#f97316; font-size:1.2rem; display:flex;"></i>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:0.7rem; color:var(--text-muted);">Temperatura</span>
+                                <strong id="pac-temp-val" style="font-size:0.9rem; color:white;">--</strong>
+                            </div>
+                        </div>
+                        <!-- Oxigênio -->
+                        <div class="vital-card-mini">
+                            <i class="fi fi-rr-info" style="color:#06b6d4; font-size:1.2rem; display:flex;"></i>
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-size:0.7rem; color:var(--text-muted);">Saturação O2</span>
+                                <strong id="pac-sat-val" style="font-size:0.9rem; color:white;">--</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Queixa Principal -->
+                    <div style="background: rgba(56, 189, 248, 0.04); border: 1px solid rgba(56, 189, 248, 0.1); padding: 12px; border-radius: 12px; margin-bottom: 16px;">
+                        <span style="font-size:0.75rem; color:var(--primary-blue); font-weight:700; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">Queixa Principal (Triagem)</span>
+                        <p id="pac-queixa-val" style="margin:0; font-size:0.85rem; line-height:1.4; color:#cbd5e1;">Nenhuma queixa registrada na triagem.</p>
+                    </div>
+                    
+                    <!-- DOENÇAS CRÔNICAS E CONDIÇÕES -->
+                    <h4 style="margin:0 0 10px 0; color:#cbd5e1; font-family:'Outfit', sans-serif; font-size:0.95rem; font-weight:700; display:flex; align-items:center; gap:6px; border-top: 1px solid rgba(255,255,255,0.06); padding-top:16px;">
+                        <i class="fi fi-rr-bullet" style="color:var(--emerald-green); display:flex;"></i> Histórico & Doenças Crônicas
+                    </h4>
+                    
+                    <div id="pac-doencas-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                        <!-- Ex: Hipertensão, Diabetes -->
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Nenhuma condição cadastrada.</span>
+                    </div>
+                    
+                    <!-- Formulário de adicionar condição rápida -->
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="pac-nova-doenca-input" placeholder="Nova doença/condição..." style="flex:1; background: rgba(7, 10, 19, 0.6) !important; color: white !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; padding: 8px 12px !important; border-radius: 8px !important; font-size: 0.85rem !important;">
+                        <button type="button" onclick="adicionarCondicaoTele()" style="background: var(--primary-blue); border:none; color:black; font-weight:bold; padding:0 12px; border-radius:8px; cursor:pointer; font-size:0.85rem; display:flex; align-items:center; justify-content:center;">+</button>
                     </div>
                 </div>
                 
                 <!-- PAINEL CLÍNICO (PRONTUÁRIO/RECEITA/ATESTADO/ENCAMINHAMENTO) -->
-                <div id="tele-clinical-panel" style="flex: 1.2; background: #1e293b; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow-y: auto; max-height: calc(100vh - 110px); border: 1px solid #334155;">
-                    <h3 style="color:#38bdf8; margin-top:0; border-bottom:1px solid #334155; padding-bottom:10px; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-document"></i> Ficha da Teleconsulta</h3>
+                <div id="tele-clinical-panel" style="flex: 1.1; display: flex; flex-direction: column; overflow-y: auto; max-height: calc(100vh - 110px);">
+                    <h3 style="color:var(--primary-blue); margin-top:0; border-bottom:1px solid rgba(255, 255, 255, 0.06); padding-bottom:12px; display:flex; align-items:center; gap:8px; font-family:'Outfit', sans-serif; font-weight:800; font-size:1.2rem;"><i class="fi fi-rr-document" style="display:flex;"></i> Ficha da Teleconsulta</h3>
                     
-                    <form id="form-tele-clinico" onsubmit="salvarAtendimentoTele(event)" style="display:flex; flex-direction:column; gap:15px;">
+                    <form id="form-tele-clinico" onsubmit="salvarAtendimentoTele(event)" style="display:flex; flex-direction:column; gap:16px;">
                         <!-- DIAGNÓSTICO -->
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label>Diagnóstico (CID-10 / Doença)</label>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <label><i class="fi fi-rr-edit-alt" style="color:var(--primary-blue); font-size:0.95rem;"></i> Diagnóstico (CID-10 / Doença)</label>
                             <input type="text" id="clin-diagnostico" placeholder="Ex: Hipertensão, Gripe..." required>
                         </div>
                         
                         <!-- ENCAMINHAMENTO -->
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label>Próxima Etapa / Encaminhamento</label>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <label><i class="fi fi-rr-shuffle" style="color:var(--primary-blue); font-size:0.95rem;"></i> Próxima Etapa / Encaminhamento</label>
                             <select id="clin-proxima-etapa" onchange="toggleEncaminhamentoDropdown(this.value)">
                                 <option value="alta">Alta Médica</option>
                                 <option value="retorno">Agendar Retorno</option>
@@ -419,46 +785,46 @@
                         </div>
                         
                         <!-- SELEÇÃO DE OUTRO MÉDICO (ENCAMINHAMENTO) -->
-                        <div id="clin-wrapper-encaminhamento" style="display:none; flex-direction:column; gap:5px;">
-                            <label style="color:#38bdf8;"><i class="fi fi-rr-stethoscope"></i> Selecione o Médico para Encaminhar</label>
+                        <div id="clin-wrapper-encaminhamento" style="display:none; flex-direction:column; gap:6px;">
+                            <label style="color:var(--primary-blue);"><i class="fi fi-rr-stethoscope" style="color:var(--primary-blue); display:flex;"></i> Selecione o Médico para Encaminhar</label>
                             <select id="clin-encaminhar-medico">
                                 <option value="">Carregando médicos...</option>
                             </select>
                         </div>
 
                         <!-- SEÇÃO EXCLUSIVA DE DOCUMENTOS -->
-                        <div style="border-top: 1px solid #334155; padding-top:15px; display:flex; flex-direction:column; gap:10px;">
-                            <h4 style="margin:0 0 5px 0; color:#cbd5e1; display:flex; align-items:center; gap:6px;"><i class="fi fi-rr-clip"></i> Emissão de Documentos Digitais</h4>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top:18px; display:flex; flex-direction:column; gap:12px;">
+                            <h4 style="margin:0 0 6px 0; color:#cbd5e1; display:flex; align-items:center; gap:8px; font-family:'Outfit', sans-serif; font-weight:700; font-size:0.95rem;"><i class="fi fi-rr-clip" style="color:var(--primary-blue); display:flex;"></i> Emissão de Documentos Digitais</h4>
                             
                             <!-- CHECKBOX DE RECEITA -->
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.9rem; color:#cbd5e1;">
-                                <input type="checkbox" id="emitir-receita-chk" onchange="toggleReceitaForm(this.checked)" checked style="width:16px; height:16px;">
-                                <i class="fi fi-rr-medicine" style="color:#22c55e; font-size:1.1rem;"></i> Emitir Receita Médica Digital
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:0.9rem; color:#cbd5e1;">
+                                <input type="checkbox" id="emitir-receita-chk" onchange="toggleReceitaForm(this.checked)" checked style="width:16px; height:16px; accent-color:var(--emerald-green);">
+                                <i class="fi fi-rr-medicine" style="color:var(--emerald-green); font-size:1.1rem; display:flex;"></i> Emitir Receita Médica Digital
                             </label>
                             
                             <!-- FORMULÁRIO DE RECEITA -->
-                            <div id="clin-receita-form" style="display:flex; flex-direction:column; gap:8px; background:#0f172a; padding:12px; border-radius:6px; border:1px solid #334155;">
+                            <div id="clin-receita-form" style="display:flex; flex-direction:column; gap:10px; background:rgba(7, 10, 19, 0.4); padding:16px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
                                 <input type="text" id="clin-med" placeholder="Medicamento (Ex: Paracetamol)" required>
-                                <div style="display:flex; gap:8px;">
+                                <div style="display:flex; gap:10px;">
                                     <input type="text" id="clin-dose" placeholder="Dosagem (Ex: 500mg)" required style="flex:1;">
                                     <input type="text" id="clin-freq" placeholder="Frequência (Ex: 8/8h)" required style="flex:1;">
                                 </div>
-                                <div style="display:flex; gap:8px;">
+                                <div style="display:flex; gap:10px;">
                                     <input type="text" id="clin-via" placeholder="Via (Ex: Oral)" value="Oral" style="flex:1;">
                                     <input type="text" id="clin-duracao" placeholder="Duração (Ex: 5 dias)" style="flex:1;">
                                 </div>
                             </div>
                             
                             <!-- CHECKBOX DE ATESTADO -->
-                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.9rem; color:#cbd5e1; margin-top:10px;">
-                                <input type="checkbox" id="emitir-atestado-chk" onchange="toggleAtestadoForm(this.checked)" style="width:16px; height:16px;">
-                                <i class="fi fi-rr-document-signed" style="color:#ef4444; font-size:1.1rem;"></i> Emitir Atestado Médico Digital
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:0.9rem; color:#cbd5e1; margin-top:8px;">
+                                <input type="checkbox" id="emitir-atestado-chk" onchange="toggleAtestadoForm(this.checked)" style="width:16px; height:16px; accent-color:var(--rose-red);">
+                                <i class="fi fi-rr-document-signed" style="color:var(--rose-red); font-size:1.1rem; display:flex;"></i> Emitir Atestado Médico Digital
                             </label>
                             
                             <!-- FORMULÁRIO DE ATESTADO -->
-                            <div id="clin-atestado-form" style="display:none; flex-direction:column; gap:8px; background:#0f172a; padding:12px; border-radius:6px; border:1px solid #334155;">
-                                <div style="display:flex; gap:8px;">
-                                    <input type="number" id="clin-dias" placeholder="Dias" min="1" value="1" style="width:70px;">
+                            <div id="clin-atestado-form" style="display:none; flex-direction:column; gap:10px; background:rgba(7, 10, 19, 0.4); padding:16px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="display:flex; gap:10px;">
+                                    <input type="number" id="clin-dias" placeholder="Dias" min="1" value="1" style="width:80px;">
                                     <input type="text" id="clin-cid" placeholder="CID (Ex: M54.5)" style="flex:1;">
                                 </div>
                                 <input type="text" id="clin-motivo" placeholder="Motivo (Ex: Necessidade de repouso por lombalgia aguda)">
@@ -466,7 +832,7 @@
                         </div>
                         
                         <!-- BOTÃO SALVAR ATENDIMENTO -->
-                        <button type="submit" class="btn-salvar-atendimento"><i class="fi fi-rr-disk"></i> Salvar & Finalizar Atendimento</button>
+                        <button type="submit" class="btn-salvar-atendimento"><i class="fi fi-rr-disk" style="display:flex; font-size: 1.1rem;"></i> Salvar & Finalizar Atendimento</button>
                     </form>
                 </div>
             </div>
