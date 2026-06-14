@@ -2,7 +2,7 @@
 Rotas de Consultas — Agendamento, Chat
 """
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 
 consultas_bp = Blueprint('consultas', __name__)
 
@@ -122,7 +122,7 @@ END:VCALENDAR"""
 
         # Escrever log de e-mail enviado simulado em backend/uploads/emails_enviados.txt
         import os
-        uploads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
+        uploads_dir = current_app.config.get('UPLOADS_FOLDER', os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads'))
         os.makedirs(uploads_dir, exist_ok=True)
         log_email_path = os.path.join(uploads_dir, 'emails_enviados.txt')
         

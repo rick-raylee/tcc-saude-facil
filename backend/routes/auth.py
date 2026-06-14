@@ -2,7 +2,7 @@
 Rotas de Autenticação — Login, Cadastro, Sessão
 """
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
@@ -60,7 +60,9 @@ def cadastro():
             ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else 'png'
             # Gerar nome único
             filename = f"avatar_{uuid.uuid4().hex}.{ext}"
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            upload_folder = current_app.config.get('UPLOADS_FOLDER', UPLOAD_FOLDER)
+            os.makedirs(upload_folder, exist_ok=True)
+            filepath = os.path.join(upload_folder, filename)
             file.save(filepath)
             # Salvar o caminho relativo para ser servido pelo Flask
             imagem_path = f"/uploads/{filename}"

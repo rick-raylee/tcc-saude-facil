@@ -222,6 +222,27 @@
                             <i class="fas fa-broom"></i> Corrigir Erros de CPF
                         </button>
                     </div>
+                    <div class="maintenance-card" style="background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155;">
+                        <h4 style="color: #a855f7; margin-bottom: 10px;">Backup de Dados</h4>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Gera um backup completo do banco de dados na área segura.</p>
+                        <button class="btn-primary" onclick="executeSystemAction('db-backup')" style="width: 100%; padding: 10px; border-radius: 4px; background: #a855f7; color: white; border: none; cursor: pointer;">
+                            <i class="fas fa-save"></i> Criar Backup
+                        </button>
+                    </div>
+                    <div class="maintenance-card" style="background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155;">
+                        <h4 style="color: #ec4899; margin-bottom: 10px;">Restaurar Banco</h4>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Restaura o banco a partir do backup mais recente.</p>
+                        <button class="btn-primary" onclick="executeSystemAction('db-restore')" style="width: 100%; padding: 10px; border-radius: 4px; background: #ec4899; color: white; border: none; cursor: pointer;">
+                            <i class="fas fa-history"></i> Restaurar Backup
+                        </button>
+                    </div>
+                    <div class="maintenance-card" style="background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #334155;">
+                        <h4 style="color: #14b8a6; margin-bottom: 10px;">Validação</h4>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Valida a integridade física e lógica do banco SQLite.</p>
+                        <button class="btn-primary" onclick="executeSystemAction('db-integrity')" style="width: 100%; padding: 10px; border-radius: 4px; background: #14b8a6; color: white; border: none; cursor: pointer;">
+                            <i class="fas fa-check-double"></i> Validar Integridade
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>

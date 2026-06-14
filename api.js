@@ -338,7 +338,10 @@ const API = {
     tiCreateTicket: (dados) => apiCall('/api/ti/tickets', 'POST', dados),
     tiSystemInitDb: () => apiCall('/api/ti/system/init-db', 'POST'),
     tiSystemSeedUsers: () => apiCall('/api/ti/system/seed-users', 'POST'),
-    tiSystemCleanupCpfs: () => apiCall('/api/ti/system/cleanup-cpfs', 'POST')
+    tiSystemCleanupCpfs: () => apiCall('/api/ti/system/cleanup-cpfs', 'POST'),
+    tiSystemDbBackup: () => apiCall('/api/ti/db/backup', 'POST'),
+    tiSystemDbRestore: () => apiCall('/api/ti/db/restore', 'POST'),
+    tiSystemDbIntegrity: () => apiCall('/api/ti/db/integrity', 'GET')
 };
 
 // ==========================================================================

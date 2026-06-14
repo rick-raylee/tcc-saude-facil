@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 import sqlite3
 import os
 try:
@@ -263,3 +263,64 @@ def ti_cleanup_cpfs():
         return jsonify({'sucesso': True, 'msg': 'CPFs normalizados com sucesso.'})
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+@ti_bp.route('/api/ti/db/backup', methods=['POST'])
+@ti_required
+def ti_db_backup():
+    try:
+        db_path = current_app.config['DATABASE_PATH']
+        uploads_dir = current_app.config.get('UPLOADS_FOLDER')
+        os.makedirs(uploads_dir, exist_ok=True)
+        backup_path = os.path.join(uploads_dir, 'database.db.bak')
+        
+        src_conn = sqlite3.connect(db_path)
+        dst_conn = sqlite3.connect(backup_path)
+        with dst_conn:
+            src_conn.backup(dst_conn)
+        dst_conn.close()
+        src_conn.close()
+        
+        return jsonify({'sucesso': True, 'msg': f'Backup criado com sucesso em: {os.path.basename(backup_path)}'})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@ti_bp.route('/api/ti/db/restore', methods=['POST'])
+@ti_required
+def ti_db_restore():
+    try:
+        db_path = current_app.config['DATABASE_PATH']
+        uploads_dir = current_app.config.get('UPLOADS_FOLDER')
+        backup_path = os.path.join(uploads_dir, 'database.db.bak')
+        
+        if not os.path.exists(backup_path):
+            return jsonify({'erro': 'Nenhum backup encontrado para restaurar.'}), 404
+            
+        src_conn = sqlite3.connect(backup_path)
+        dst_conn = sqlite3.connect(db_path)
+        with dst_conn:
+            src_conn.backup(dst_conn)
+        dst_conn.close()
+        src_conn.close()
+        
+        return jsonify({'sucesso': True, 'msg': 'Banco de dados restaurado com sucesso a partir do backup.'})
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@ti_bp.route('/api/ti/db/integrity', methods=['GET'])
+@ti_required
+def ti_db_integrity():
+    try:
+        db_path = current_app.config['DATABASE_PATH']
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("PRAGMA integrity_check")
+        rows = cur.fetchall()
+        conn.close()
+        
+        status = [r[0] for r in rows]
+        if status == ['ok']:
+            return jsonify({'sucesso': True, 'integridade': 'ok'})
+        else:
+            return jsonify({'sucesso': False, 'integridade': str(status)})
+    except Exception as e:
+        return jsonify({'erro': str(e), 'integridade': 'erro'}), 500

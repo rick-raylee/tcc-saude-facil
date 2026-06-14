@@ -541,12 +541,12 @@ async function carregarCarouselDinamico() {
     slides3D = slides.filter(s => parseInt(s.ativo) === 1 || parseInt(s.status) === 1 || String(s.status) === 'publicado' || s.ativo === undefined);
 
 
-    // Fallback: seed embutido quando API e localStorage estão vazios
-    if (slides3D.length === 0) {
+    // Fallback apenas se a API estiver offline e não houver dados locais salvos
+    if (!apiOnline && slides3D.length === 0) {
         slides3D = [
             { id: 'seed1', imagem: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1200", titulo: "Saúde Digital 2.0", subtitulo: "A inovação que cuida de você", texto: "O SUS agora conectado à palma da sua mão.", ativo: 1 },
             { id: 'seed2', imagem: "https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?auto=format&fit=crop&q=80&w=1200", titulo: "Campanha de Vacinação", subtitulo: "Proteja quem você ama", texto: "O Ministério amplia vacinação contra HPV e gripe.", ativo: 1 },
-            { id: 'seed3', imagem: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=1200", titulo: "Novos Profissionais", subtitulo: "Mais rapidez no atendimento", texto: "Novos médicos contratados para zerar as filas.", ativo: 1 }
+            { id: 'seed3', imagem: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=1200", titulo: "Novos Profissionais", subtitulo: "Mais rapidez no atendimento", texto: "Novos profissionais reforçando a rede pública.", ativo: 1 }
         ];
     }
 

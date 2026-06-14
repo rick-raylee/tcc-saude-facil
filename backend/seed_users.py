@@ -29,8 +29,9 @@ users = [
     {"nome": "MÉDICO OTORRINO TESTE", "cpf": "77777777777", "tipo": "medico", "senha": "123", "crm": "CRM/PR-77777", "especialidade": "Otorrino Teste", "tipo_atendimento": "presencial", "atende_telemedicina": 0}
 ]
 
-def seed():
-    conn = sqlite3.connect(db_path)
+def seed(custom_db_path=None):
+    target_path = custom_db_path or db_path
+    conn = sqlite3.connect(target_path)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     

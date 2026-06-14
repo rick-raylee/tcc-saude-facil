@@ -375,6 +375,40 @@ def migrar_schema_admin():
     except Exception as seed_err:
         print(f"--> [Erro] Falha ao semear campanhas: {seed_err}")
 
+    # Seed do carrossel se a tabela estiver vazia
+    try:
+        cur.execute("SELECT COUNT(*) FROM carrossel")
+        if cur.fetchone()[0] == 0:
+            carrossel_semente = [
+                ("Saúde Digital 2.0", "A inovação que cuida de você", "O SUS agora conectado à palma da sua mão.", "health_campaign_art_branded.png", "", 1, 1, 1),
+                ("Campanha Nacional de Vacinação", "Proteja quem você ama", "Mais proteção para crianças, idosos e grupos prioritários.", "https://media.licdn.com/dms/image/v2/C5612AQHuzpSDP0ujyA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520153235039?e=2147483647&v=beta&t=iWtuggIW-bsSV8MimXKwBnii2Head5TiAnUKa0fg7dI", "", 1, 1, 2),
+                ("Novos Profissionais", "Mais rapidez no atendimento", "Novos profissionais reforçando a rede pública.", "https://img.magnific.com/fotos-premium/equipe-de-medicos-trabalhando-durante-a-cirurgia_746318-2756.jpg?w=1480", "", 1, 1, 3)
+            ]
+            cur.executemany("""
+                INSERT INTO carrossel (titulo, subtitulo, texto, imagem, link, ativo, status, ordem)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, carrossel_semente)
+            print("--> Seed de carrossel executado no SQLite.")
+    except Exception as e:
+        print(f"--> [Erro] Falha ao semear carrossel: {e}")
+
+    # Seed de notícias se a tabela estiver vazia
+    try:
+        cur.execute("SELECT COUNT(*) FROM noticias")
+        if cur.fetchone()[0] == 0:
+            noticias_semente = [
+                ("Vacinação contra Gripe começa esta semana", "Campanha nacional foi ampliada.", "O Ministério da Saúde ampliou a campanha de vacinação para grupos prioritários.", "health_campaign_art_branded.png", "Campanha Nacional", "publicado", 1, 0),
+                ("Novo Centro de Telemedicina inaugurado", "Mais acesso e rapidez no atendimento.", "A nova estrutura vai ampliar o atendimento remoto em várias regiões.", "health_campaign_art_branded.png", "Tecnologia", "publicado", 1, 0),
+                ("Campanha de Saúde Mental nas escolas", "Atenção à saúde emocional.", "Ações educativas serão levadas para unidades de ensino de todo o país.", "health_campaign_art_branded.png", "Prevenção", "publicado", 0, 0)
+            ]
+            cur.executemany("""
+                INSERT INTO noticias (titulo, resumo, conteudo, imagem, categoria, status, destaque_carrossel, prioridade)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, noticias_semente)
+            print("--> Seed de notícias executado no SQLite.")
+    except Exception as e:
+        print(f"--> [Erro] Falha ao semear notícias: {e}")
+
     db.commit()
     db.close()
 
@@ -421,7 +455,8 @@ def add_no_cache_headers(response):
 # ── Servir arquivos estáticos do frontend ────────────────────────
 @app.route('/uploads/<path:filename>')
 def uploaded_files(filename):
-    return send_from_directory('uploads', filename)
+    uploads_dir = os.path.abspath(app.config.get('UPLOADS_FOLDER', 'uploads'))
+    return send_from_directory(uploads_dir, filename)
 
 def registrar_acesso_visita():
     try:
@@ -556,7 +591,8 @@ def static_files(filename):
         # Caso especial para caminhos que começam com uploads/ mas o arquivo está em backend/uploads
         if clean_filename.startswith('uploads/'):
             upload_file = clean_filename[8:]
-            return send_from_directory(os.path.join(base_dir, 'uploads'), upload_file)
+            uploads_dir = os.path.abspath(app.config.get('UPLOADS_FOLDER', os.path.join(base_dir, 'uploads')))
+            return send_from_directory(uploads_dir, upload_file)
 
         return f"Arquivo {clean_filename} não encontrado no servidor backend", 404
     except Exception as e:
@@ -643,22 +679,40 @@ def public_doencas():
     data = [dict(r) for r in rows]
     return jsonify(data if data else _fallback_public_doencas())
 
+# ── Inicialização e Migração do Banco ─────────────────────────────
+try:
+    db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
+    db_dir = os.path.dirname(db_path_verif)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+        
+    uploads_dir = os.path.abspath(app.config.get('UPLOADS_FOLDER'))
+    os.makedirs(uploads_dir, exist_ok=True)
+    
+    if not os.path.exists(db_path_verif) or os.path.getsize(db_path_verif) == 0:
+        print(f"--> [Banco] Inicializando banco de dados em: {db_path_verif}")
+        from init_db import init_db
+        init_db(db_path_verif)
+        from seed_users import seed
+        seed(db_path_verif)
+    migrar_schema_admin()
+    normalizar_cpfs_legados()
+    try:
+        auto_bak_path = os.path.join(uploads_dir, 'database.db.auto.bak')
+        src_conn = sqlite3.connect(db_path_verif)
+        dst_conn = sqlite3.connect(auto_bak_path)
+        with dst_conn:
+            src_conn.backup(dst_conn)
+        dst_conn.close()
+        src_conn.close()
+        print(f"--> [Banco] Backup automático criado em: {auto_bak_path}")
+    except Exception as backup_err:
+        print(f"--> [Aviso] Falha ao gerar backup automático na inicialização: {backup_err}")
+except Exception as e:
+    print(f"--> [Aviso/Erro] Falha ao inicializar/migrar banco de dados: {e}")
+
 # ── Iniciar servidor ─────────────────────────────────────────────
 if __name__ == '__main__':
-    # Em desenvolvimento local, verifica e inicializa se necessario de forma isolada
-    try:
-        db_path_verif = os.path.abspath(app.config['DATABASE_PATH'])
-        if not os.path.exists(db_path_verif) or os.path.getsize(db_path_verif) == 0:
-            print("--> [Local] Inicializando banco de dados local...")
-            from init_db import init_db
-            init_db(db_path_verif)
-            from seed_users import seed
-            seed()
-        
-        migrar_schema_admin()
-        normalizar_cpfs_legados()
-    except Exception as e:
-        print(f"--> [Aviso] Falha na inicializacao local: {e}")
     print("=" * 60)
     print("  Portal Saude Digital - Backend Flask (SQLite)")
     print(f"  Diretorio base: {os.path.abspath(os.curdir)}")

@@ -4,6 +4,10 @@ services:
     env: python
     buildCommand: pip install -r backend/requirements.txt && python backend/init_db.py && python backend/seed_users.py
     startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT --chdir backend app:app
+    disk:
+      name: tcc-saude-facil-data
+      mountPath: /data
+      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0

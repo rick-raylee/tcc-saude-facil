@@ -442,7 +442,10 @@ async function executeSystemAction(action) {
     const titles = {
         'init-db': 'Reinicializar Banco',
         'seed-users': 'Gerar Massa de Teste',
-        'cleanup-cpfs': 'Corrigir Erros de CPF'
+        'cleanup-cpfs': 'Corrigir Erros de CPF',
+        'db-backup': 'Criar Backup de Dados',
+        'db-restore': 'Restaurar Banco de Dados',
+        'db-integrity': 'Validar Integridade do Banco'
     };
 
     const result = await Swal.fire({
@@ -471,12 +474,19 @@ async function executeSystemAction(action) {
             if (action === 'init-db') resp = await API.tiSystemInitDb();
             if (action === 'seed-users') resp = await API.tiSystemSeedUsers();
             if (action === 'cleanup-cpfs') resp = await API.tiSystemCleanupCpfs();
+            if (action === 'db-backup') resp = await API.tiSystemDbBackup();
+            if (action === 'db-restore') resp = await API.tiSystemDbRestore();
+            if (action === 'db-integrity') resp = await API.tiSystemDbIntegrity();
 
             if (resp && resp.sucesso) {
+                let msgExibicao = resp.msg || 'Ação concluída com êxito.';
+                if (action === 'db-integrity') {
+                    msgExibicao = `Status da Integridade: ${resp.integridade}`;
+                }
                 Swal.fire({
                     icon: 'success',
                     title: 'Sucesso!',
-                    text: resp.msg || 'Ação concluída com êxito.',
+                    text: msgExibicao,
                     timer: 3000
                 });
                 loadFlaskLogs();
