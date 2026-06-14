@@ -112,16 +112,23 @@ function configurarFiltros() {
 
 async function carregarCampanhasPaginaCampanhas() {
     let dados = [];
+    let apiOnline = false;
     if (typeof API !== 'undefined') {
         try {
-            dados = await API.campanhasPublic();
+            const resp = await API.campanhasPublic();
+            if (resp && !resp.erro) {
+                dados = resp;
+                apiOnline = true;
+            }
         } catch (e) {
             console.error("Erro ao buscar campanhas via API:", e);
         }
     }
 
-    // Fallback para LocalStorage se a API falhar
-    if (!dados || dados.length === 0 || dados.erro) {
+    if (apiOnline) {
+        localStorage.setItem('admin_campanhas', JSON.stringify(dados));
+    } else {
+        // Fallback para LocalStorage se a API falhar
         const localData = localStorage.getItem('admin_campanhas');
         if (localData) {
             try {

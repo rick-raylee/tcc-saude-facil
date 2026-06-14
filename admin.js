@@ -1491,9 +1491,24 @@ async function carregarCampanhas() {
     const lista = document.getElementById('lista-campanhas');
     if (!lista) return;
 
-    let campanhas = [];
+    let campanhasAPI = [];
+    let apiOnline = false;
     if (typeof API !== 'undefined') {
-        campanhas = await API.campanhas();
+        try {
+            const resp = await API.campanhas();
+            if (resp && !resp.erro) {
+                campanhasAPI = resp;
+                apiOnline = true;
+            }
+        } catch (e) {
+            console.error("Erro ao buscar campanhas da API:", e);
+        }
+    }
+
+    let campanhas = [];
+    if (apiOnline) {
+        campanhas = campanhasAPI;
+        localStorage.setItem('admin_campanhas', JSON.stringify(campanhas));
     }
 
     const sementeCampanhas = [
