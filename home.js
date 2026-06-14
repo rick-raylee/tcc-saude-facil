@@ -487,27 +487,39 @@ async function carregarCarouselDinamico() {
 
     let slidesAPI = [];
     let noticiasAPI = [];
+    let apiOnline = false;
     try {
         if (typeof API !== 'undefined' && typeof API.carrosselPublic === 'function') {
             const respC = await API.carrosselPublic();
-
-            slidesAPI = normalizeApiArray(respC);
+            if (respC && !respC.erro) {
+                slidesAPI = normalizeApiArray(respC);
+                apiOnline = true;
+            }
             
             if (typeof API.noticiasPublic === 'function') {
                 const respN = await API.noticiasPublic();
-                noticiasAPI = normalizeApiArray(respN);
+                if (respN && !respN.erro) {
+                    noticiasAPI = normalizeApiArray(respN);
+                }
             }
         }
     } catch (e) {
         console.warn('API carrossel indisponível:', e);
     }
 
+    let todasNoticias = [];
+    let todosSlides = [];
 
-    let slidesLocal = safeParseArray(localStorage.getItem('admin_carrossel'));
-    let noticiasLocal = safeParseArray(localStorage.getItem('admin_noticias'));
-    
-    let todasNoticias = [...noticiasAPI];
-    noticiasLocal.forEach(nl => { if(!todasNoticias.find(n => n.id === nl.id)) todasNoticias.push(nl); });
+    if (apiOnline) {
+        todasNoticias = noticiasAPI;
+        todosSlides = slidesAPI;
+    } else {
+        let slidesLocal = safeParseArray(localStorage.getItem('admin_carrossel'));
+        let noticiasLocal = safeParseArray(localStorage.getItem('admin_noticias'));
+        
+        todasNoticias = noticiasLocal.filter(n => n.status === 'publicado');
+        todosSlides = slidesLocal.filter(s => parseInt(s.ativo) === 1 || parseInt(s.status) === 1 || String(s.status) === 'publicado');
+    }
 
     let destaquesNoticias = todasNoticias.filter(n => 
         parseInt(n.destaque_carrossel) === 1 || 
@@ -523,9 +535,6 @@ async function carregarCarouselDinamico() {
         ativo: 1,
         link: '#'
     }));
-
-    let todosSlides = [...slidesAPI];
-    slidesLocal.forEach(sl => { if(!todosSlides.find(s => s.id === sl.id)) todosSlides.push(sl); });
 
     let slides = [...todosSlides, ...destaquesNoticias];
 
@@ -684,23 +693,26 @@ let noticiaAtual = 0;
 
 async function carregarNoticiasDinamicas() {
     let noticiasAPI = [];
+    let apiOnline = false;
     try {
         if (typeof API !== 'undefined') {
             const resp = await API.noticiasPublic();
-            noticiasAPI = normalizeApiArray(resp);
+            if (resp && !resp.erro) {
+                noticiasAPI = normalizeApiArray(resp);
+                apiOnline = true;
+            }
         }
     } catch (e) {
         console.warn('API notícias indisponível:', e);
     }
 
-    let noticiasLocal = safeParseArray(localStorage.getItem('admin_noticias'));
-
-    let todasNoticias = [...noticiasAPI];
-    noticiasLocal.forEach(nl => {
-        if (!todasNoticias.find(n => n.id === nl.id || n.titulo === nl.titulo)) {
-            todasNoticias.push(nl);
-        }
-    });
+    let todasNoticias = [];
+    if (apiOnline) {
+        todasNoticias = noticiasAPI;
+    } else {
+        let noticiasLocal = safeParseArray(localStorage.getItem('admin_noticias'));
+        todasNoticias = noticiasLocal.filter(n => n.status === 'publicado');
+    }
 
     if (todasNoticias.length > 0) {
         noticias = todasNoticias;

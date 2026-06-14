@@ -405,30 +405,32 @@ window.salvarSettingsAnalytics = salvarSettingsAnalytics;
 window.carregarSettings = carregarSettings;
 
 
-// --- NOT�?CIAS ---
+// --- NOTÍCIAS ---
 async function carregarNoticias() {
     const lista = document.getElementById('lista-noticias');
     if (!lista) return;
 
     let noticiasAPI = [];
-    if (typeof API !== 'undefined') {
-        try {
+    let apiOnline = false;
+    try {
+        if (typeof API !== 'undefined') {
             const resp = await API.noticias();
-            if (resp && !resp.erro) noticiasAPI = resp;
-        } catch (e) {
-            console.error("Erro ao carregar notícias da API:", e);
+            if (resp && !resp.erro) {
+                noticiasAPI = resp;
+                apiOnline = true;
+            }
         }
+    } catch (e) {
+        console.error('Erro ao carregar notícias da API:', e);
     }
 
-    let noticiasLocal = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
-
-    // Mesclar dados do servidor e locais para total sincronia
-    let noticias = [...noticiasAPI];
-    noticiasLocal.forEach(nl => {
-        if (!noticias.find(n => String(n.id) === String(nl.id))) {
-            noticias.push(nl);
-        }
-    });
+    let noticias = [];
+    if (apiOnline) {
+        noticias = noticiasAPI;
+        localStorage.setItem('admin_noticias', JSON.stringify(noticias));
+    } else {
+        noticias = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
+    }
 
     if (noticias.length === 0) {
         noticias = [
@@ -469,20 +471,24 @@ window.abrirModalNoticiaIndex = function(index) {
 async function deletarNoticia(id) {
     if (!confirm('Excluir notícia permanentemente?')) return;
 
-    if (typeof API !== 'undefined') {
-        const resp = await API.deletarNoticia(id);
-        if (resp && resp.sucesso) {
-            Swal.fire({ icon: 'success', title: 'Excluída', text: 'Notícia excluída permanentemente!' });
-            await carregarNoticias();
-            return;
+    try {
+        if (typeof API !== 'undefined') {
+            const resp = await API.deletarNoticia(id);
+            if (resp && resp.sucesso) {
+                console.log('Notícia removida do servidor');
+            }
         }
+    } catch (e) {
+        console.error('Erro ao deletar notícia na API:', e);
     }
 
-    // Local
+    // Sempre atualizar local storage para manter sincronia
     let noticias = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
     noticias = noticias.filter(n => n.id !== id);
     localStorage.setItem('admin_noticias', JSON.stringify(noticias));
-    carregarNoticias();
+    
+    await carregarNoticias();
+    Swal.fire({ icon: 'success', title: 'Excluída', text: 'Notícia excluída permanentemente!' });
 }
 
 window.abrirModalNoticia = function (noticia = null) {
@@ -942,23 +948,24 @@ async function carregarCarrosselEditor() {
         }
     }
 
-    let slidesLocal = JSON.parse(localStorage.getItem('admin_carrossel') || '[]');
-    let noticiasLocal = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
+    let slides = [];
+    let noticias = [];
+    
+    if (typeof API !== 'undefined' && slidesAPI.length > 0) {
+        slides = slidesAPI;
+        localStorage.setItem('admin_carrossel', JSON.stringify(slides));
+    } else {
+        let slidesLocal = JSON.parse(localStorage.getItem('admin_carrossel') || '[]');
+        slides = slidesLocal;
+    }
 
-    // Mesclar dados do servidor e locais para total sincronia
-    let slides = [...slidesAPI];
-    slidesLocal.forEach(sl => {
-        if (!slides.find(s => String(s.id) === String(sl.id))) {
-            slides.push(sl);
-        }
-    });
-
-    let noticias = [...noticiasAPI];
-    noticiasLocal.forEach(nl => {
-        if (!noticias.find(n => String(n.id) === String(nl.id))) {
-            noticias.push(nl);
-        }
-    });
+    if (typeof API !== 'undefined' && noticiasAPI.length > 0) {
+        noticias = noticiasAPI;
+        localStorage.setItem('admin_noticias', JSON.stringify(noticias));
+    } else {
+        let noticiasLocal = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
+        noticias = noticiasLocal;
+    }
 
     // Salva no cache global
     window._adminCarouselCache.slides = slides;
