@@ -430,15 +430,14 @@ async function carregarNoticias() {
         localStorage.setItem('admin_noticias', JSON.stringify(noticias));
     } else {
         noticias = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
-    }
-
-    if (noticias.length === 0) {
-        noticias = [
-            { id: 1, categoria: "Campanha Nacional", titulo: "Ministério amplia vacinação contra HPV para meninos de até 15 anos", conteudo: "Medida visa reduzir casos de câncer de colo de útero e outras doenças relacionadas ao vírus. O SUS agora disponibiliza...", data: "10 de Fevereiro, 2026", status: "publicado", destaque_carrossel: true, imagem: "https://www.gov.br/saude/pt-br/assuntos/noticias/2022/abril/campanha-de-vacinacao-contra-gripe-e-sarampo-comeca-nesta-segunda-4/vacinacao-gripe-sarampo.jpg/@@images/image.jpeg" },
-            { id: 2, categoria: "Tecnologia", titulo: "SUS lança novo aplicativo para agendamento de consultas", conteudo: "Disponível para todo o país, a ferramenta promete zerar as filas em postos de saúde da Atenção Básica.", data: "08 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://img.freepik.com/fotos-gratis/equipe-medica-de-sucesso_329181-4235.jpg" },
-            { id: 3, categoria: "Saúde Pública", titulo: "Casos de dengue diminuem 40% após campanhas de conscientização", conteudo: "Ações conjuntas entre agentes de saúde e população mostram resultados positivos contra o Aedes aegypti no verão.", data: "05 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://blog.ipog.edu.br/wp-content/uploads/2018/10/m%C3%A9dico-com-tablet.jpg" }
-        ];
-        localStorage.setItem('admin_noticias', JSON.stringify(noticias));
+        if (noticias.length === 0) {
+            noticias = [
+                { id: 1, categoria: "Campanha Nacional", titulo: "Ministério amplia vacinação contra HPV para meninos de até 15 anos", conteudo: "Medida visa reduzir casos de câncer de colo de útero e outras doenças relacionadas ao vírus. O SUS agora disponibiliza...", data: "10 de Fevereiro, 2026", status: "publicado", destaque_carrossel: true, imagem: "https://www.gov.br/saude/pt-br/assuntos/noticias/2022/abril/campanha-de-vacinacao-contra-gripe-e-sarampo-comeca-nesta-segunda-4/vacinacao-gripe-sarampo.jpg/@@images/image.jpeg" },
+                { id: 2, categoria: "Tecnologia", titulo: "SUS lança novo aplicativo para agendamento de consultas", conteudo: "Disponível para todo o país, a ferramenta promete zerar as filas em postos de saúde da Atenção Básica.", data: "08 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://img.freepik.com/fotos-gratis/equipe-medica-de-sucesso_329181-4235.jpg" },
+                { id: 3, categoria: "Saúde Pública", titulo: "Casos de dengue diminuem 40% após campanhas de conscientização", conteudo: "Ações conjuntas entre agentes de saúde e população mostram resultados positivos contra o Aedes aegypti no verão.", data: "05 de Fevereiro, 2026", status: "publicado", destaque_carrossel: false, imagem: "https://blog.ipog.edu.br/wp-content/uploads/2018/10/m%C3%A9dico-com-tablet.jpg" }
+            ];
+            localStorage.setItem('admin_noticias', JSON.stringify(noticias));
+        }
     }
 
     window._adminNoticiasCache = noticias;
@@ -936,13 +935,21 @@ async function carregarCarrosselEditor() {
 
     let slidesAPI = [];
     let noticiasAPI = [];
+    let apiOnlineC = false;
+    let apiOnlineN = false;
     
     if (typeof API !== 'undefined') {
         try {
             const respC = await API.carrossel();
-            if (respC && !respC.erro) slidesAPI = respC;
+            if (respC && !respC.erro) {
+                slidesAPI = respC;
+                apiOnlineC = true;
+            }
             const respN = await API.noticias();
-            if (respN && !respN.erro) noticiasAPI = respN;
+            if (respN && !respN.erro) {
+                noticiasAPI = respN;
+                apiOnlineN = true;
+            }
         } catch (e) {
             console.error("Erro ao carregar dados da API:", e);
         }
@@ -951,20 +958,26 @@ async function carregarCarrosselEditor() {
     let slides = [];
     let noticias = [];
     
-    if (typeof API !== 'undefined' && slidesAPI.length > 0) {
+    if (apiOnlineC) {
         slides = slidesAPI;
         localStorage.setItem('admin_carrossel', JSON.stringify(slides));
     } else {
-        let slidesLocal = JSON.parse(localStorage.getItem('admin_carrossel') || '[]');
-        slides = slidesLocal;
+        slides = JSON.parse(localStorage.getItem('admin_carrossel') || '[]');
+        if (slides.length === 0) {
+            slides = [
+                { id: 'seed1', titulo: "Saúde Digital 2.0", subtitulo: "A inovação que cuida de você", texto: "O SUS agora conectado à palma da sua mão.", imagem: "health_campaign_art_branded.png", ativo: 1, status: 1, ordem: 1 },
+                { id: 'seed2', titulo: "Campanha Nacional de Vacinação", subtitulo: "Proteja quem você ama", texto: "Mais proteção para crianças, idosos e grupos prioritários.", imagem: "https://media.licdn.com/dms/image/v2/C5612AQHuzpSDP0ujyA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520153235039?e=2147483647&v=beta&t=iWtuggIW-bsSV8MimXKwBnii2Head5TiAnUKa0fg7dI", ativo: 1, status: 1, ordem: 2 },
+                { id: 'seed3', titulo: "Novos Profissionais", subtitulo: "Mais rapidez no atendimento", texto: "Novos profissionais reforçando a rede pública.", imagem: "https://img.magnific.com/fotos-premium/equipe-de-medicos-trabalhando-durante-a-cirurgia_746318-2756.jpg?w=1480", ativo: 1, status: 1, ordem: 3 }
+            ];
+            localStorage.setItem('admin_carrossel', JSON.stringify(slides));
+        }
     }
 
-    if (typeof API !== 'undefined' && noticiasAPI.length > 0) {
+    if (apiOnlineN) {
         noticias = noticiasAPI;
         localStorage.setItem('admin_noticias', JSON.stringify(noticias));
     } else {
-        let noticiasLocal = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
-        noticias = noticiasLocal;
+        noticias = JSON.parse(localStorage.getItem('admin_noticias') || '[]');
     }
 
     // Salva no cache global
