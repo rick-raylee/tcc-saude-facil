@@ -1513,7 +1513,7 @@ async function carregarCampanhas() {
 
     const sementeCampanhas = [
         {
-            id: 10,
+            id: 1,
             titulo: "Vacinação Febre Amarela 2026",
             categoria: "destaque",
             status: "ativo",
@@ -1528,7 +1528,7 @@ async function carregarCampanhas() {
             documentos: "Cartão SUS, RG e CPF"
         },
         {
-            id: 1,
+            id: 2,
             titulo: "Outubro Rosa",
             categoria: "prevencao",
             status: "ativo",
@@ -1543,7 +1543,7 @@ async function carregarCampanhas() {
             documentos: "Cartão SUS, RG e CPF"
         },
         {
-            id: 2,
+            id: 3,
             titulo: "Novembro Azul",
             categoria: "prevencao",
             status: "aguardando",
@@ -1558,7 +1558,7 @@ async function carregarCampanhas() {
             documentos: "Documento com foto e Cartão SUS"
         },
         {
-            id: 3,
+            id: 4,
             titulo: "Saúde Bucal nas Escolas",
             categoria: "infantil",
             status: "ativo",
@@ -1573,7 +1573,7 @@ async function carregarCampanhas() {
             documentos: "Autorização dos pais"
         },
         {
-            id: 4,
+            id: 5,
             titulo: "Hipertensão e Diabetes",
             categoria: "cronicos",
             status: "ativo",
@@ -1588,7 +1588,7 @@ async function carregarCampanhas() {
             documentos: "Receita médica atualizada e Cartão SUS"
         },
         {
-            id: 5,
+            id: 6,
             titulo: "Vacinação Infantil",
             categoria: "vacinacao",
             status: "ativo",
@@ -1603,7 +1603,7 @@ async function carregarCampanhas() {
             documentos: "Caderneta de Vacinação"
         },
         {
-            id: 6,
+            id: 7,
             titulo: "Janeiro Branco",
             categoria: "mental",
             status: "encerrado",
@@ -1620,7 +1620,7 @@ async function carregarCampanhas() {
     ];
 
     // Tratamento Fallback Local para evitar Tela em Branco Offline
-    if (!campanhas || campanhas.length === 0 || campanhas.erro) {
+    if (!apiOnline && (!campanhas || campanhas.length === 0 || campanhas.erro)) {
         if (!localStorage.getItem('admin_campanhas_v4_fix')) {
             localStorage.setItem('admin_campanhas', JSON.stringify(sementeCampanhas));
             localStorage.setItem('admin_campanhas_v4_fix', 'true');

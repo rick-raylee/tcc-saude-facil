@@ -6,85 +6,106 @@
 const campanhasData = [
     {
         id: 1,
-        titulo: "Outubro Rosa",
-        categoria: "prevencao",
+        titulo: "Vacinação Febre Amarela 2026",
+        categoria: "destaque",
         status: "ativo",
-        dataInicio: "01/10/2026",
-        dataFim: "31/10/2026",
-        icone: "<i class='fi fi-rr-stethoscope'></i> ",
-        resumo: "Campanha de prevenção ao câncer de mama.",
-        descricao: "O Outubro Rosa é um movimento internacional de conscientização para o controle do câncer de mama. O objetivo é compartilhar informações e promover a conscientização sobre a doença; proporcionar maior acesso aos serviços de diagnóstico e de tratamento e contribuir para a redução da mortalidade.",
-        publicoAlvo: "Mulheres a partir de 40 anos",
-        local: "Todas as Unidades Básicas de Saúde (UBS)",
+        data_inicio: "2026-01-01",
+        data_fim: "2026-12-31",
+        icone: "<i class='fi fi-rr-syringe'></i>",
+        imagem: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&q=80&w=600",
+        resumo: "Proteja-se e proteja sua família contra a febre amarela.",
+        descricao: "Proteja-se e proteja sua família! A vacina contra febre amarela está disponível em todas as UBS de Cascavel.",
+        publico_alvo: "População em geral a partir de 9 meses",
+        local: "Todas as Unidades Básicas de Saúde (UBS) de Cascavel",
         documentos: "Cartão SUS, RG e CPF"
     },
     {
         id: 2,
+        titulo: "Outubro Rosa",
+        categoria: "prevencao",
+        status: "ativo",
+        data_inicio: "2026-10-01",
+        data_fim: "2026-10-31",
+        icone: "<i class='fi fi-rr-stethoscope'></i>",
+        imagem: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=600",
+        resumo: "Campanha de prevenção ao câncer de mama.",
+        descricao: "O Outubro Rosa é um movimento internacional de conscientização para o controle do câncer de mama. O objetivo é compartilhar informações e promover a conscientização sobre a doença; proporcionar maior acesso aos serviços de diagnóstico e de tratamento e contribuir para a redução da moralidade.",
+        publico_alvo: "Mulheres a partir de 40 anos",
+        local: "Todas as Unidades Básicas de Saúde (UBS)",
+        documentos: "Cartão SUS, RG e CPF"
+    },
+    {
+        id: 3,
         titulo: "Novembro Azul",
         categoria: "prevencao",
         status: "aguardando",
-        dataInicio: "01/11/2026",
-        dataFim: "30/11/2026",
+        data_inicio: "2026-11-01",
+        data_fim: "2026-11-30",
         icone: "💙",
+        imagem: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600",
         resumo: "Prevenção ao câncer de próstata.",
         descricao: "O Novembro Azul reforça a importância da prevenção e do diagnóstico precoce do câncer de próstata. A doença é o segundo tipo de câncer mais comum entre os homens brasileiros. As maiores vítimas são homens a partir de 50 anos.",
-        publicoAlvo: "Homens a partir de 45 anos",
+        publico_alvo: "Homens a partir de 45 anos",
         local: "Clínicas da Família e UBS",
         documentos: "Documento com foto e Cartão SUS"
     },
     {
-        id: 3,
+        id: 4,
         titulo: "Saúde Bucal nas Escolas",
         categoria: "infantil",
         status: "ativo",
-        dataInicio: "15/02/2026",
-        dataFim: "15/12/2026",
+        data_inicio: "2026-02-15",
+        data_fim: "2026-12-15",
         icone: "🦷",
+        imagem: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=600",
         resumo: "Atendimento odontológico preventivo para estudantes.",
         descricao: "Programa que visa promover a saúde bucal no ambiente escolar, com palestras educativas, escovação supervisionada e aplicação tópica de flúor.",
-        publicoAlvo: "Crianças e adolescentes da rede pública",
+        publico_alvo: "Crianças e adolescentes da rede pública",
         local: "Escolas Municipais e Estaduais",
         documentos: "Autorização dos pais"
     },
     {
-        id: 4,
+        id: 5,
         titulo: "Hipertensão e Diabetes",
         categoria: "cronicos",
         status: "ativo",
-        dataInicio: "01/01/2026",
-        dataFim: "31/12/2026",
-        icone: "<i class='fi fi-rr-heart'></i> ",
+        data_inicio: "2026-01-01",
+        data_fim: "2026-12-31",
+        icone: "<i class='fi fi-rr-heart'></i>",
+        imagem: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=600",
         resumo: "Triagem e acompanhamento contínuo.",
         descricao: "Acompanhamento mensal para portadores de hipertensão e diabetes, com entrega de medicação gratuita e verificação de pressão arterial e glicemia.",
-        publicoAlvo: "Portadores de doenças crônicas",
+        publico_alvo: "Portadores de doenças crônicas",
         local: "Farmácias Popular e UBS",
         documentos: "Receita médica atualizada e Cartão SUS"
     },
     {
-        id: 5,
+        id: 6,
         titulo: "Vacinação Infantil",
         categoria: "vacinacao",
         status: "ativo",
-        dataInicio: "Permanente",
-        dataFim: "Permanente",
+        data_inicio: "2026-01-01",
+        data_fim: "2026-12-31",
         icone: "🧒",
+        imagem: "https://images.unsplash.com/photo-1609188076864-c35269136b99?auto=format&fit=crop&q=80&w=600",
         resumo: "Atualização da caderneta de vacinação.",
         descricao: "Manter a vacinação em dia é fundamental para proteger as crianças contra diversas doenças graves. Traga a caderneta de vacinação para conferência.",
-        publicoAlvo: "Crianças de 0 a 5 anos",
+        publico_alvo: "Crianças de 0 a 5 anos",
         local: "Salas de Vacinação das UBS",
         documentos: "Caderneta de Vacinação"
     },
     {
-        id: 6,
+        id: 7,
         titulo: "Janeiro Branco",
         categoria: "mental",
         status: "encerrado",
-        dataInicio: "01/01/2026",
-        dataFim: "31/01/2026",
-        icone: "<i class='fi fi-rr-brain'></i> ",
+        data_inicio: "2026-01-01",
+        data_fim: "2026-01-31",
+        icone: "<i class='fi fi-rr-brain'></i>",
+        imagem: "https://images.unsplash.com/photo-1518072718539-7c4c917f8d5b?auto=format&fit=crop&q=80&w=600",
         resumo: "Conscientização sobre saúde mental.",
         descricao: "O Janeiro Branco é uma campanha dedicada a convidar as pessoas a pensarem sobre suas vidas, o sentido e o propósito das suas existências, a qualidade dos seus relacionamentos e o quanto elas conhecem sobre si mesmas, suas emoções, seus pensamentos e seus comportamentos.",
-        publicoAlvo: "População em geral",
+        publico_alvo: "População em geral",
         local: "CAPS e Centros de Convivência",
         documentos: "Nenhum documento necessário"
     }
@@ -139,8 +160,8 @@ async function carregarCampanhasPaginaCampanhas() {
         }
     }
 
-    // Fallback secundário para array estático
-    if (!dados || dados.length === 0 || dados.erro) {
+    // Fallback secundário para array estático apenas se offline e sem dados
+    if (!apiOnline && (!dados || dados.length === 0 || dados.erro)) {
         dados = campanhasData;
     }
 
@@ -173,7 +194,7 @@ async function carregarCampanhasPaginaCampanhas() {
 
     renderizarDestaque();
     renderizarCampanhas('todas');
-    renderizarCalendarioDinamico();
+    renderizarCalendarioDinamico(apiOnline);
 }
 
 function renderizarDestaque() {
@@ -272,7 +293,7 @@ function formatarStatus(status) {
 
 // --- MODAL DE DETALHES ---
 function abrirDetalhes(id) {
-    const campanha = activeCampanhasList.find(c => c.id === id);
+    const campanha = activeCampanhasList.find(c => String(c.id) === String(id));
     if (!campanha) return;
 
     const modal = document.getElementById('modalDetalhes');
@@ -333,7 +354,7 @@ window.addEventListener('click', (e) => {
     if (e.target === modal) fecharDetalhes();
 });
 
-function renderizarCalendarioDinamico() {
+function renderizarCalendarioDinamico(apiOnline = false) {
     const grid = document.querySelector('.calendario-grid');
     if (!grid) return;
 
@@ -413,7 +434,7 @@ function renderizarCalendarioDinamico() {
         if (campanhasDoMes.length > 0) {
             textoExibicao = [...new Set(campanhasDoMes)].join("<br>");
         } else {
-            textoExibicao = fallbacksClassicos[idx] || "Sem campanhas";
+            textoExibicao = apiOnline ? "Sem campanhas" : (fallbacksClassicos[idx] || "Sem campanhas");
         }
 
         return `
