@@ -375,6 +375,26 @@ def migrar_schema_admin():
     except Exception as seed_err:
         print(f"--> [Erro] Falha ao semear campanhas: {seed_err}")
 
+    # Garantir criação da tabela de carrossel se não existir
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS carrossel (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titulo TEXT,
+                subtitulo TEXT,
+                texto TEXT,
+                descricao TEXT,
+                imagem TEXT,
+                link TEXT,
+                ativo INTEGER DEFAULT 1,
+                status INTEGER DEFAULT 1,
+                ordem INTEGER DEFAULT 0
+            )
+        """)
+        db.commit()
+    except Exception as e:
+        print(f"--> [Erro] Falha ao criar tabela carrossel: {e}")
+
     # Seed do carrossel se a tabela estiver vazia
     try:
         cur.execute("SELECT COUNT(*) FROM carrossel")
@@ -389,8 +409,29 @@ def migrar_schema_admin():
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, carrossel_semente)
             print("--> Seed de carrossel executado no SQLite.")
+            db.commit()
     except Exception as e:
         print(f"--> [Erro] Falha ao semear carrossel: {e}")
+
+    # Garantir criação da tabela de notícias se não existir
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS noticias (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titulo TEXT NOT NULL,
+                resumo TEXT,
+                conteudo TEXT,
+                imagem TEXT,
+                categoria TEXT,
+                status TEXT DEFAULT 'rascunho',
+                destaque_carrossel INTEGER DEFAULT 0,
+                prioridade INTEGER DEFAULT 0,
+                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        db.commit()
+    except Exception as e:
+        print(f"--> [Erro] Falha ao criar tabela noticias: {e}")
 
     # Seed de notícias se a tabela estiver vazia
     try:
@@ -406,8 +447,9 @@ def migrar_schema_admin():
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, noticias_semente)
             print("--> Seed de notícias executado no SQLite.")
+            db.commit()
     except Exception as e:
-        print(f"--> [Erro] Falha ao semear notícias: {e}")
+        print(f"--> [Erro] Falha ao semear noticias: {e}")
 
     db.commit()
     db.close()
