@@ -2335,7 +2335,7 @@ async function finalizarCadastro(event) {
             if (tipoCadastro === 'medico' || tipoCadastro === 'medico_tele') {
                 formData.set('tipo', 'medico'); // O backend recebe como base 'medico'
                 const crmEl = document.getElementById('crm');
-                const especEl = document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
+                const especEl = document.getElementById('cadastro-especialidade') || document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
                 if (crmEl) formData.append('crm', crmEl.value || '');
                 if (especEl) formData.append('especialidade', especEl.value || '');
                 
@@ -2430,7 +2430,7 @@ async function finalizarCadastro(event) {
         if (tipoCadastro === 'medico') {
             const crmEl = document.getElementById('crm');
             const crm = crmEl ? crmEl.value : '';
-            const especialidadeEl = document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
+            const especialidadeEl = document.getElementById('cadastro-especialidade') || document.querySelector('#campos-medico #especialidade') || document.getElementById('especialidade');
             const especialidade = especialidadeEl ? especialidadeEl.value : '';
             const tipoAtendimentoEl = document.querySelector('input[name="tipo_atendimento"]:checked');
             const tipo_atendimento = tipoAtendimentoEl ? tipoAtendimentoEl.value : 'presencial';
@@ -3807,7 +3807,7 @@ function popularDropdownsEspecialidades(config) {
     });
 
     // 2. Popular o select do formulário de cadastro de médicos:
-    const signupSelects = Array.from(document.querySelectorAll('select#especialidade')).filter(s => {
+    const signupSelects = Array.from(document.querySelectorAll('select#cadastro-especialidade, select#especialidade')).filter(s => {
         return s.closest('#campos-medico') || s.closest('#formCadastro');
     });
 

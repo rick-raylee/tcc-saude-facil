@@ -25,6 +25,11 @@ function resolveApiBase() {
         return 'http://127.0.0.1:5001';
     }
 
+    // Se estiver no GitHub Pages, aponta para o Render
+    if (hostname.includes('github.io')) {
+        return 'https://tcc-saude-facil.onrender.com';
+    }
+
     // Produção/ambientes com proxy reverso podem manter same-origin.
     return origin;
 }
