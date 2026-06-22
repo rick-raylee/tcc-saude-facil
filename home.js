@@ -2773,19 +2773,7 @@ async function verificarSessao() {
     const existingLink = document.getElementById('nav-meu-sus');
     if (existingLink) existingLink.remove();
 
-    // REDIRECIONAMENTO DE ADMIN
-    const isAdmin = localStorage.getItem('adminLogado') === 'true';
-    if (isAdmin && !window.location.pathname.includes('admin.html') && window.self === window.top) {
-        window.location.href = 'admin.html';
-        return;
-    }
-
-    // REDIRECIONAMENTO DE TI
-    const isTI = localStorage.getItem('tiLogado') === 'true';
-    if (isTI && !window.location.pathname.includes('ti.html') && window.self === window.top) {
-        window.location.href = 'ti.html';
-        return;
-    }
+    // REMOVIDO: Redirecionamento automático desativado para permitir navegação do admin/TI em abas separadas
 
     if (logado) {
         // 1. Injetar Link "Meu Portal Saúde" na Navbar (Ao lado de Agendamento)
