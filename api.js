@@ -190,6 +190,11 @@ const API = {
     logs: () => apiCall('/api/admin/logs'),
     criarLog: (acao) => apiCall('/api/admin/logs', 'POST', { acao }),
     limparLogs: () => apiCall('/api/admin/logs', 'DELETE'),
+    uploadArquivo: (file) => {
+        const formData = new FormData();
+        formData.append('imagem_arquivo', file);
+        return apiCall('/api/admin/upload', 'POST', formData);
+    },
     dashboard: () => apiCall('/api/admin/resumo'),
     
     // Configurações do Sistema e Acessos Google Analytics

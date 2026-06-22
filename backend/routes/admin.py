@@ -30,6 +30,39 @@ def registrar_log(acao):
     except Exception as e:
         print(f"Erro ao salvar log: {e}")
 
+import os
+import uuid
+
+UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'uploads'))
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@admin_bp.route('/api/admin/upload', methods=['POST'])
+@login_required
+def admin_upload_file():
+    if 'imagem_arquivo' not in request.files:
+        return jsonify({'erro': 'Nenhum arquivo enviado'}), 400
+    
+    file = request.files['imagem_arquivo']
+    if file.filename == '':
+        return jsonify({'erro': 'Nome de arquivo inválido'}), 400
+        
+    try:
+        ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else 'png'
+        # Gerar nome único para evitar sobreposição
+        filename = f"upload_{uuid.uuid4().hex}.{ext}"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        # URL relativa para acessar a imagem pelo Flask
+        imagem_url = f"/uploads/{filename}"
+        
+        return jsonify({
+            'sucesso': True,
+            'url': imagem_url
+        })
+    except Exception as e:
+        return jsonify({'erro': f'Erro ao salvar arquivo: {str(e)}'}), 500
+
 # ══════════════════════════════════════════════════════════════════
 #  NOTÍCIAS
 # ══════════════════════════════════════════════════════════════════

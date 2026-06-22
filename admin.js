@@ -3,6 +3,15 @@
 let idxEstatisticaSelecionada = null;
 let adminStatsMapInstance = null;
 
+function resolverImagemUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('/uploads/')) {
+        const apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+        return apiBase + url;
+    }
+    return url;
+}
+
 async function initAdmin() {
     let logado = false;
 
@@ -998,7 +1007,7 @@ async function carregarCarrosselEditor() {
         item.className = 'admin-item';
         item.innerHTML = `
             <div class="item-info" style="display: flex; align-items: center; gap: 15px;">
-                <img src="${slide.imagem || slide.img || 'https://via.placeholder.com/80x50'}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                <img src="${resolverImagemUrl(slide.imagem || slide.img || 'https://via.placeholder.com/80x50')}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
                 <div>
                     <h4 style="margin: 0;">${slide.titulo || 'Slide'}</h4>
                     <p style="margin: 0; font-size: 0.8rem; color: #555;">${slide.subtitulo || ''}</p>
@@ -1020,7 +1029,7 @@ async function carregarCarrosselEditor() {
         item.className = 'admin-item';
         item.innerHTML = `
             <div class="item-info" style="display: flex; align-items: center; gap: 15px;">
-                <img src="${noticia.imagem || 'https://via.placeholder.com/80x50'}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                <img src="${resolverImagemUrl(noticia.imagem || 'https://via.placeholder.com/80x50')}" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
                 <div>
                     <h4 style="margin: 0;">${noticia.titulo || 'Notícia'}</h4>
                     <p style="margin: 0; font-size: 0.8rem; color: #555;">${noticia.categoria || 'Notícia'}</p>
@@ -1174,10 +1183,21 @@ window.salvarDadosAdmin = async function (e) {
         const fileInput = document.getElementById('form-img-file');
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            if (typeof showHealthLoader === 'function') showHealthLoader('Processando imagem');
+            if (typeof showHealthLoader === 'function') showHealthLoader('Fazendo upload da imagem...');
             try {
-                imagem = await converteParaBase64(fileInput.files[0]);
-            } catch (e) { console.error('Erro ao ler imagem', e); }
+                const uploadResp = await API.uploadArquivo(fileInput.files[0]);
+                if (uploadResp && uploadResp.sucesso && uploadResp.url) {
+                    imagem = uploadResp.url;
+                } else {
+                    console.warn('Falha no upload do arquivo, usando base64 como fallback...');
+                    imagem = await converteParaBase64(fileInput.files[0]);
+                }
+            } catch (e) {
+                console.error('Erro ao fazer upload da imagem, usando base64 como fallback...', e);
+                try {
+                    imagem = await converteParaBase64(fileInput.files[0]);
+                } catch (err) { console.error('Erro ao converter para base64', err); }
+            }
             if (typeof hideHealthLoader === 'function') hideHealthLoader();
         }
 
@@ -1253,10 +1273,21 @@ window.salvarDadosAdmin = async function (e) {
         let imagem = document.getElementById('form-img-url') ? document.getElementById('form-img-url').value.trim() : '';
         const fileInput = document.getElementById('form-slide-file');
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            if (typeof showHealthLoader === 'function') showHealthLoader('Processando imagem');
+            if (typeof showHealthLoader === 'function') showHealthLoader('Fazendo upload da imagem...');
             try {
-                imagem = await converteParaBase64(fileInput.files[0]);
-            } catch (e) { console.error('Erro ao ler imagem', e); }
+                const uploadResp = await API.uploadArquivo(fileInput.files[0]);
+                if (uploadResp && uploadResp.sucesso && uploadResp.url) {
+                    imagem = uploadResp.url;
+                } else {
+                    console.warn('Falha no upload do slide, usando base64...');
+                    imagem = await converteParaBase64(fileInput.files[0]);
+                }
+            } catch (e) {
+                console.error('Erro no upload, usando base64...', e);
+                try {
+                    imagem = await converteParaBase64(fileInput.files[0]);
+                } catch (err) { console.error(err); }
+            }
             if (typeof hideHealthLoader === 'function') hideHealthLoader();
         }
 
@@ -1332,10 +1363,21 @@ window.salvarDadosAdmin = async function (e) {
 
         const fileInput = document.getElementById('form-camp-file');
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            if (typeof showHealthLoader === 'function') showHealthLoader('Processando imagem');
+            if (typeof showHealthLoader === 'function') showHealthLoader('Fazendo upload da imagem...');
             try {
-                imagem = await converteParaBase64(fileInput.files[0]);
-            } catch (e) { console.error('Erro ao ler imagem', e); }
+                const uploadResp = await API.uploadArquivo(fileInput.files[0]);
+                if (uploadResp && uploadResp.sucesso && uploadResp.url) {
+                    imagem = uploadResp.url;
+                } else {
+                    console.warn('Falha no upload da campanha, usando base64...');
+                    imagem = await converteParaBase64(fileInput.files[0]);
+                }
+            } catch (e) {
+                console.error('Erro no upload de campanha, usando base64...', e);
+                try {
+                    imagem = await converteParaBase64(fileInput.files[0]);
+                } catch (err) { console.error(err); }
+            }
             if (typeof hideHealthLoader === 'function') hideHealthLoader();
         }
 
@@ -1660,7 +1702,7 @@ async function carregarCampanhas() {
             return `
                 <div class="admin-item">
                     <div style="display:flex; gap:15px; flex:1; align-items:center;">
-                        <img src="${c.imagem || 'https://via.placeholder.com/80x50?text=Campanha'}" style="width:80px; height:50px; object-fit:cover; border-radius:4px;" />
+                        <img src="${resolverImagemUrl(c.imagem || 'https://via.placeholder.com/80x50?text=Campanha')}" style="width:80px; height:50px; object-fit:cover; border-radius:4px;" />
                         <div>
                             <h4 style="margin:0;">${c.titulo}</h4>
                             <p style="margin:0; font-size:0.85rem; color:#666;">Início: ${c.data_inicio || c.dataInicio || '---'} | Término: ${c.data_fim || c.dataFim || '---'}</p>

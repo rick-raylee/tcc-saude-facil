@@ -424,6 +424,15 @@ function normalizeApiArray(resp) {
     return [];
 }
 
+function resolverImagemUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('/uploads/')) {
+        const apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+        return apiBase + url;
+    }
+    return url;
+}
+
 async function carregarConfiguracoesPortal() {
     try {
         if (typeof API !== 'undefined' && typeof API.settingsPublic === 'function') {
@@ -611,7 +620,7 @@ async function carregarCarouselDinamico() {
             }
         };
 
-        const imagemUrl = slide.imagem || slide.img || 'https://via.placeholder.com/500x280/004b82/ffffff?text=Destaque';
+        const imagemUrl = resolverImagemUrl(slide.imagem || slide.img || 'https://via.placeholder.com/500x280/004b82/ffffff?text=Destaque');
 
         let pContent = '';
         // Apenas exibir subtítulo se for curto (banners/campanhas) para não entulhar o card com o corpo da notícia
@@ -752,6 +761,8 @@ async function carregarNoticiasDinamicas() {
             else if (n.imagemUrl) imagemUrl = n.imagemUrl;
             else if (n.img) imagemUrl = n.img;
             else if (n.imagem_path) imagemUrl = n.imagem_path;
+
+            imagemUrl = resolverImagemUrl(imagemUrl);
 
             slide.innerHTML = `
                 <div class="news-slide-img-container">
@@ -1055,6 +1066,8 @@ function exibirNoticia() {
     else if (noticia.imagemUrl) imagemUrl = noticia.imagemUrl;
     else if (noticia.img) imagemUrl = noticia.img;
     else if (noticia.imagem_path) imagemUrl = noticia.imagem_path;
+
+    imagemUrl = resolverImagemUrl(imagemUrl);
 
     // ✅ FIX: Data robusta com múltiplos fallbacks
     const dataExibicao = noticia.data || noticia.criada_em || noticia.data_criacao || 'Data não disponível';

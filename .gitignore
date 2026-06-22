@@ -2,5 +2,10 @@ __pycache__/
 *.pyc
 scratch/
 backend/_arquivos_antigos/
-backend/uploads/
+backend/uploads/*
+!backend/uploads/*.png
+!backend/uploads/*.jpg
+!backend/uploads/*.jpeg
+!backend/uploads/*.gif
+!backend/uploads/*.webp
 .vscode/
