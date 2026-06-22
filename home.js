@@ -525,6 +525,8 @@ async function carregarCarouselDinamico() {
     if (apiOnline) {
         todasNoticias = noticiasAPI;
         todosSlides = slidesAPI;
+        localStorage.setItem('admin_carrossel', JSON.stringify(todosSlides));
+        localStorage.setItem('admin_noticias', JSON.stringify(todasNoticias));
     } else {
         let slidesLocal = safeParseArray(localStorage.getItem('admin_carrossel'));
         let noticiasLocal = safeParseArray(localStorage.getItem('admin_noticias'));

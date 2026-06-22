@@ -680,7 +680,7 @@ def public_noticias():
     rows = cur.fetchall()
     db.close()
     data = [dict(r) for r in rows]
-    return jsonify(data if data else _fallback_public_noticias())
+    return jsonify(data)
 
 @app.route('/api/public/carrossel', methods=['GET'])
 def public_carrossel():
@@ -690,7 +690,7 @@ def public_carrossel():
     rows = cur.fetchall()
     db.close()
     data = [dict(r) for r in rows]
-    return jsonify(data if data else _fallback_public_carrossel())
+    return jsonify(data)
 
 @app.route('/api/public/estatisticas', methods=['GET'])
 def public_estatisticas():
@@ -700,7 +700,7 @@ def public_estatisticas():
     rows = cur.fetchall()
     db.close()
     data = [dict(r) for r in rows]
-    return jsonify(data if data else _fallback_public_stats())
+    return jsonify(data)
 
 @app.route('/api/public/campanhas', methods=['GET'])
 def public_campanhas():
@@ -719,7 +719,7 @@ def public_doencas():
     rows = cur.fetchall()
     db.close()
     data = [dict(r) for r in rows]
-    return jsonify(data if data else _fallback_public_doencas())
+    return jsonify(data)
 
 # ── Inicialização e Migração do Banco ─────────────────────────────
 try:
