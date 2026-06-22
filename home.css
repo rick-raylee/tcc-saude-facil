@@ -379,10 +379,12 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
+    width: 100% !important;
+    height: 100% !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-color: #0b1a30 !important;
     z-index: 1;
 }
 
@@ -583,9 +585,11 @@
 
 .news-slide-img {
     width: 100% !important;
-    height: auto !important;
-    object-fit: cover !important;
+    height: 100% !important;
+    max-height: 240px !important;
+    object-fit: contain !important;
     border-radius: 12px !important;
+    background-color: rgba(0, 75, 130, 0.04) !important;
 }
 
 .news-slide-info {

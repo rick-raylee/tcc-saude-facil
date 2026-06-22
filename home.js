@@ -1086,8 +1086,8 @@ function exibirNoticia() {
             </div>
         </div>
         ${imagemUrl ? `
-        <div class="noticia-imagem-modal-container" style="width: 100%; max-height: 400px; overflow: hidden; border-radius: 12px; margin: 20px 0; box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
-            <img src="${imagemUrl}" alt="${noticia.titulo || 'Notícia'}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+        <div class="noticia-imagem-modal-container" style="width: 100%; max-height: 400px; overflow: hidden; border-radius: 12px; margin: 20px 0; box-shadow: 0 8px 30px rgba(0,0,0,0.08); background-color: rgba(0, 75, 130, 0.03); display: flex; align-items: center; justify-content: center;">
+            <img src="${imagemUrl}" alt="${noticia.titulo || 'Notícia'}" style="max-width: 100%; max-height: 400px; object-fit: contain;" onerror="this.style.display='none';">
         </div>
         ` : ''}
         <div class="noticia-texto-completo" style="line-height: 1.8; color: #444; font-size: 1.05rem; margin-top: 20px; white-space: pre-wrap; text-align: justify;">
