@@ -426,11 +426,14 @@ function normalizeApiArray(resp) {
 
 function resolverImagemUrl(url) {
     if (!url) return '';
-    if (url.startsWith('/uploads/')) {
-        const apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return url;
+    }
+    const apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    if (url.startsWith('/')) {
         return apiBase + url;
     }
-    return url;
+    return apiBase + '/' + url;
 }
 
 async function carregarConfiguracoesPortal() {

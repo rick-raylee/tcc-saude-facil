@@ -5,11 +5,14 @@ let adminStatsMapInstance = null;
 
 function resolverImagemUrl(url) {
     if (!url) return '';
-    if (url.startsWith('/uploads/')) {
-        const apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return url;
+    }
+    const apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    if (url.startsWith('/')) {
         return apiBase + url;
     }
-    return url;
+    return apiBase + '/' + url;
 }
 
 async function initAdmin() {
@@ -1650,7 +1653,7 @@ async function carregarCampanhas() {
             data_inicio: "2026-01-01",
             data_fim: "2026-12-31",
             icone: "🧒",
-            imagem: "https://images.unsplash.com/photo-1609188076864-c35269136b99?auto=format&fit=crop&q=80&w=600",
+            imagem: "vacina.png",
             resumo: "Atualização da caderneta de vacinação.",
             descricao: "Manter a vacinação em dia é fundamental para proteger as crianças contra diversas doenças graves. Traga a caderneta de vacinação para conferência.",
             publico_alvo: "Crianças de 0 a 5 anos",
@@ -1665,7 +1668,7 @@ async function carregarCampanhas() {
             data_inicio: "2026-01-01",
             data_fim: "2026-01-31",
             icone: "<i class='fi fi-rr-brain'></i>",
-            imagem: "https://images.unsplash.com/photo-1518072718539-7c4c917f8d5b?auto=format&fit=crop&q=80&w=600",
+            imagem: "mental_health.png",
             resumo: "Conscientização sobre saúde mental.",
             descricao: "O Janeiro Branco é uma campanha dedicada a convidar as pessoas a pensarem sobre suas vidas, o sentido e o propósito das suas existências, a qualidade dos seus relacionamentos e o quanto elas conhecem sobre si mesmas, suas emoções, seus pensamentos e seus comportamentos.",
             publico_alvo: "População em geral",
