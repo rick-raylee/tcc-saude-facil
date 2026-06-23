@@ -557,11 +557,7 @@ async function carregarCarouselDinamico() {
 
     // Fallback apenas se a API estiver offline e não houver dados locais salvos
     if (!apiOnline && slides3D.length === 0) {
-        slides3D = [
-            { id: 'seed1', imagem: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1200", titulo: "Saúde Digital 2.0", subtitulo: "A inovação que cuida de você", texto: "O SUS agora conectado à palma da sua mão.", ativo: 1 },
-            { id: 'seed2', imagem: "https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?auto=format&fit=crop&q=80&w=1200", titulo: "Campanha de Vacinação", subtitulo: "Proteja quem você ama", texto: "O Ministério amplia vacinação contra HPV e gripe.", ativo: 1 },
-            { id: 'seed3', imagem: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=1200", titulo: "Novos Profissionais", subtitulo: "Mais rapidez no atendimento", texto: "Novos profissionais reforçando a rede pública.", ativo: 1 }
-        ];
+        slides3D = [];
     }
 
     // Hash mais completo para detectar mudanças no conteúdo (Título, Imagem, etc)
@@ -735,11 +731,7 @@ async function carregarNoticiasDinamicas() {
     }
 
     if (!noticias || noticias.length === 0) {
-        noticias = [
-            { id: 1, categoria: "Campanha Nacional", titulo: "Ministério amplia vacinação contra HPV para meninos de até 15 anos", conteudo: "Medida visa reduzir casos de câncer de colo de útero e outras doenças relacionadas ao vírus.", data: "10/02/2026", imagem: "health_campaign_art_branded.png" },
-            { id: 2, categoria: "Investimento", titulo: "SUS investe R$ 2 bilhões em equipamentos hospitalares", conteudo: "Recursos destinados à modernização de UTIs e centros cirúrgicos em todo o país.", data: "08/02/2026", imagem: "health_campaign_art_branded.png" },
-            { id: 3, categoria: "Tecnologia", titulo: "Telemedicina atende 5 milhões de brasileiros em 2025", conteudo: "Modalidade cresceu 300% e reduziu filas de espera em consultórios de especialidades.", data: "05/02/2026", imagem: "health_campaign_art_branded.png" }
-        ];
+        noticias = [];
     }
 
     const novoHash = JSON.stringify(noticias);

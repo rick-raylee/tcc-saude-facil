@@ -395,23 +395,8 @@ def migrar_schema_admin():
     except Exception as e:
         print(f"--> [Erro] Falha ao criar tabela carrossel: {e}")
 
-    # Seed do carrossel se a tabela estiver vazia
-    try:
-        cur.execute("SELECT COUNT(*) FROM carrossel")
-        if cur.fetchone()[0] == 0:
-            carrossel_semente = [
-                ("Saúde Digital 2.0", "A inovação que cuida de você", "O SUS agora conectado à palma da sua mão.", "health_campaign_art_branded.png", "", 1, 1, 1),
-                ("Campanha Nacional de Vacinação", "Proteja quem você ama", "Mais proteção para crianças, idosos e grupos prioritários.", "https://media.licdn.com/dms/image/v2/C5612AQHuzpSDP0ujyA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520153235039?e=2147483647&v=beta&t=iWtuggIW-bsSV8MimXKwBnii2Head5TiAnUKa0fg7dI", "", 1, 1, 2),
-                ("Novos Profissionais", "Mais rapidez no atendimento", "Novos profissionais reforçando a rede pública.", "https://img.magnific.com/fotos-premium/equipe-de-medicos-trabalhando-durante-a-cirurgia_746318-2756.jpg?w=1480", "", 1, 1, 3)
-            ]
-            cur.executemany("""
-                INSERT INTO carrossel (titulo, subtitulo, texto, imagem, link, ativo, status, ordem)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, carrossel_semente)
-            print("--> Seed de carrossel executado no SQLite.")
-            db.commit()
-    except Exception as e:
-        print(f"--> [Erro] Falha ao semear carrossel: {e}")
+    # Sem seed para carrossel (tabela deve iniciar vazia)
+
 
     # Garantir criação da tabela de notícias se não existir
     try:
@@ -433,23 +418,8 @@ def migrar_schema_admin():
     except Exception as e:
         print(f"--> [Erro] Falha ao criar tabela noticias: {e}")
 
-    # Seed de notícias se a tabela estiver vazia
-    try:
-        cur.execute("SELECT COUNT(*) FROM noticias")
-        if cur.fetchone()[0] == 0:
-            noticias_semente = [
-                ("Vacinação contra Gripe começa esta semana", "Campanha nacional foi ampliada.", "O Ministério da Saúde ampliou a campanha de vacinação para grupos prioritários.", "health_campaign_art_branded.png", "Campanha Nacional", "publicado", 1, 0),
-                ("Novo Centro de Telemedicina inaugurado", "Mais acesso e rapidez no atendimento.", "A nova estrutura vai ampliar o atendimento remoto em várias regiões.", "health_campaign_art_branded.png", "Tecnologia", "publicado", 1, 0),
-                ("Campanha de Saúde Mental nas escolas", "Atenção à saúde emocional.", "Ações educativas serão levadas para unidades de ensino de todo o país.", "health_campaign_art_branded.png", "Prevenção", "publicado", 0, 0)
-            ]
-            cur.executemany("""
-                INSERT INTO noticias (titulo, resumo, conteudo, imagem, categoria, status, destaque_carrossel, prioridade)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, noticias_semente)
-            print("--> Seed de notícias executado no SQLite.")
-            db.commit()
-    except Exception as e:
-        print(f"--> [Erro] Falha ao semear noticias: {e}")
+    # Sem seed para noticias (tabela deve iniciar vazia)
+
 
     db.commit()
     db.close()
@@ -652,18 +622,10 @@ def _fallback_public_stats():
     ]
 
 def _fallback_public_noticias():
-    return [
-        {"id": 1, "titulo": "Vacinação contra Gripe começa esta semana", "conteudo": "O Ministério da Saúde ampliou a campanha de vacinação para grupos prioritários.", "resumo": "Campanha nacional foi ampliada.", "imagem": "health_campaign_art_branded.png", "categoria": "Campanha Nacional", "status": "publicado", "destaque_carrossel": 1, "criada_em": "2026-04-14"},
-        {"id": 2, "titulo": "Novo Centro de Telemedicina inaugurado", "conteudo": "A nova estrutura vai ampliar o atendimento remoto em várias regiões.", "resumo": "Mais acesso e rapidez no atendimento.", "imagem": "health_campaign_art_branded.png", "categoria": "Tecnologia", "status": "publicado", "destaque_carrossel": 1, "criada_em": "2026-04-14"},
-        {"id": 3, "titulo": "Campanha de Saúde Mental nas escolas", "conteudo": "Ações educativas serão levadas para unidades de ensino de todo o país.", "resumo": "Atenção à saúde emocional.", "imagem": "health_campaign_art_branded.png", "categoria": "Prevenção", "status": "publicado", "destaque_carrossel": 0, "criada_em": "2026-04-14"},
-    ]
+    return []
 
 def _fallback_public_carrossel():
-    return [
-        {"id": 1, "titulo": "Saúde Digital 2.0", "subtitulo": "A inovação que cuida de você", "texto": "O SUS agora conectado à palma da sua mão.", "imagem": "health_campaign_art_branded.png", "ativo": 1, "status": 1, "ordem": 1},
-        {"id": 2, "titulo": "Campanha Nacional de Vacinação", "subtitulo": "Proteja quem você ama", "texto": "Mais proteção para crianças, idosos e grupos prioritários.", "imagem": "health_campaign_art_branded.png", "ativo": 1, "status": 1, "ordem": 2},
-        {"id": 3, "titulo": "Novos Profissionais", "subtitulo": "Mais rapidez no atendimento", "texto": "Novos profissionais reforçando a rede pública.", "imagem": "health_campaign_art_branded.png", "ativo": 1, "status": 1, "ordem": 3},
-    ]
+    return []
 
 def _fallback_public_doencas():
     return [
