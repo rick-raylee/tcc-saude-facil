@@ -405,6 +405,20 @@ tr:hover td {
     .kpi-grid { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 600px) {
+    header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 15px !important;
+    }
+    .content {
+        padding: 1rem !important;
+    }
+    .modal-card {
+        width: 95% !important;
+    }
+}
+
 /* ==========================================================================
    DROPDOWN DE PERFIL PREMIUM E INTERATIVO (Glassmorphism & Tecnologia)
    ========================================================================== */

@@ -662,6 +662,8 @@ body {
     background: #f44336;
 }
 
+
+
 /* ========== RESPONSIVE ========== */
 @media (max-width: 1024px) {
     .enf-container {
@@ -681,6 +683,33 @@ body {
     }
 }
 
+@media (max-width: 768px) {
+    .enf-navbar {
+        padding: 10px 15px;
+    }
+    .enf-navbar-title {
+        font-size: 1.1rem;
+    }
+    .enf-navbar-actions {
+        gap: 8px;
+    }
+    .enf-badge {
+        display: none !important;
+    }
+    .enf-btn-logout {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+    }
+    .enf-container {
+        padding: 15px;
+        gap: 15px;
+    }
+    .enf-form-grid,
+    .triagem-sinais {
+        grid-template-columns: 1fr !important;
+    }
+}
+
 @media (max-width: 600px) {
     .enf-navbar {
         flex-direction: column;
@@ -691,15 +720,8 @@ body {
     .enf-tabs {
         flex-direction: column;
     }
-
-    .enf-form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .triagem-sinais {
-        grid-template-columns: 1fr;
-    }
 }
+
 
 /* ========== CENTRALIZAÇÃO E EXPANSÃO DOS PAINÉIS (SEM PACIENTE ATIVO) ========== */
 .enf-container.no-patient {

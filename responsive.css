@@ -1004,3 +1004,46 @@ a:focus {
     outline-offset: 2px !important;
 }
 
+
+/* ==========================================================================
+   OTIMIZAÇÃO DE ÍCONES DA HOME PARA MOBILE
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Estatísticas */
+    .stat-icon-wrapper {
+        width: 55px !important;
+        height: 55px !important;
+        font-size: 1.8rem !important;
+        margin-bottom: 12px !important;
+    }
+    .stat-icon {
+        font-size: 1.8rem !important;
+    }
+    .stat-numero {
+        font-size: 1.6rem !important;
+    }
+
+    /* Serviços Especializados */
+    .especialidade-icon-wrapper {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.3rem !important;
+        margin-bottom: 10px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Mapa Dinâmico de Doenças */
+    .disease-header-badge {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1.1rem !important;
+        margin-bottom: 12px !important;
+        border-radius: 8px !important;
+    }
+    .info-icon {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.9rem !important;
+    }
+}
+

@@ -1093,9 +1093,62 @@ body {
 .doc-card-input.encaminhamento .btn-doc-gerar { background: #8b5cf6; }
 .doc-card-input.encaminhamento .btn-doc-gerar:hover { background: #7c3aed; }
 
+@media (max-width: 992px) {
+    body {
+        height: auto !important;
+        overflow: auto !important;
+    }
+    .container-medico {
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    .sidebar-busca {
+        width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        overflow: visible !important;
+    }
+    .main-atendimento {
+        padding: 20px !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+}
+
 @media (max-width: 768px) {
+    .navbar-medica {
+        padding: 0 15px !important;
+        height: 65px !important;
+    }
+    .logo-medica span {
+        display: none !important;
+    }
+    .logo-medica img {
+        height: 32px !important;
+    }
+    .medico-info {
+        display: none !important;
+    }
+    .btn-logout-medico {
+        padding: 6px 12px !important;
+        font-size: 0.8rem !important;
+    }
+    .tabs-consultorio {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+    .tab-btn {
+        padding: 8px 12px !important;
+        font-size: 0.85rem !important;
+    }
     .docs-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 }
 

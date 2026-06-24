@@ -565,6 +565,55 @@ body {
     }
 }
 
+@media (max-width: 768px) {
+    .navbar-admin {
+        padding: 0 15px;
+        height: 65px;
+    }
+    .logo-admin {
+        padding: 6px 14px;
+        font-size: 0.9rem;
+    }
+    .logo-admin img {
+        height: 22px !important;
+    }
+    #admin-welcome-message {
+        display: none !important;
+    }
+    .user-admin {
+        gap: 10px;
+    }
+    .btn-logout-admin {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+    }
+    .container-admin {
+        margin-top: 65px;
+    }
+    .content-admin {
+        padding: 15px;
+    }
+    .admin-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    .item-info {
+        padding-right: 0;
+    }
+    .item-actions {
+        justify-content: flex-end;
+        width: 100%;
+    }
+}
+
+
 /* --- MODAIS DE ADMINISTRAÇÃO --- */
 .modal-wrapper {
     position: fixed;
